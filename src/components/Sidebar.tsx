@@ -103,10 +103,11 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     email: user?.email || "",
     iban: user?.iban || "",
     logo: user?.logo || "",
+    voorWaardedenUrl: user?.voorWaardedenUrl ?? "",
     id: "me",
   });
 
-  const handleInputChange = useCallback((field: string, value: string) => {
+  const handleInputChange = useCallback((field: keyof User, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -145,6 +146,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       email: formData.email,
       iban: formData.iban,
       logo: formData.logo || "",
+      voorWaardedenUrl: formData.voorWaardedenUrl,
       id: "me",
     });
     onClose();
@@ -153,7 +155,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit User Info">
       <ModalContent>
-        <div className="flex flex-col gap-4 p-6 bg-[#0A0A0A] text-white">
+        <div className="flex flex-col gap-4 p-8 bg-[#222] text-white">
           <Input
             label="Business Name"
             value={formData.name}
@@ -187,7 +189,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
           <Input
             label="BTW Number"
             value={formData.btw}
-            onChange={(e) => handleInputChange("btwNumber", e.target.value)}
+            onChange={(e) => handleInputChange("btw", e.target.value)}
             required
           />
           <Input
@@ -201,6 +203,14 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             label="IBAN"
             value={formData.iban}
             onChange={(e) => handleInputChange("iban", e.target.value)}
+            required
+          />
+          <Input
+            label="Url algemene voorwaarden"
+            value={formData.voorWaardedenUrl}
+            onChange={(e) =>
+              handleInputChange("voorWaardedenUrl", e.target.value)
+            }
             required
           />
           <div className="flex flex-col gap-2">

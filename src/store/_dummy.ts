@@ -49,6 +49,7 @@ export const dummy_user: User = {
   iban: "BE68539000703456",
   logo: "null",
   id: "-1",
+  voorWaardedenUrl: "www.f.com",
 };
 
 export const dummy_bills: Bill[] = [

@@ -19,6 +19,7 @@ declare global {
   interface User extends Contact {
     logo: string;
     iban: string;
+    voorWaardedenUrl: string;
   }
 
   export type BillStatus = "DRAFT" | "PENDING" | "PAYED";

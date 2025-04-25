@@ -1,4 +1,10 @@
-import { Route, Routes, HashRouter } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  HashRouter,
+  BrowserRouter,
+  Navigate,
+} from "react-router-dom";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -19,7 +25,7 @@ const darkTheme = createTheme({
 
 export const App = () => {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ThemeProvider theme={darkTheme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <HeroUIProvider>
@@ -33,6 +39,7 @@ export const App = () => {
                     <Route path="/bills" element={<BillsOverview />} />
                     <Route path="/contacts" element={<ContactsPage />} />
                     <Route path="/qr-only" element={<QROnlyPage />} />
+                    <Route path="/" element={<Navigate to="/create" />} />
                   </Routes>
                 </div>
               </div>
@@ -40,6 +47,6 @@ export const App = () => {
           </HeroUIProvider>
         </LocalizationProvider>
       </ThemeProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 };

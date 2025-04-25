@@ -159,21 +159,20 @@ export const CreateBill: React.FC = () => {
         <h2 className="text-2xl font-bold">
           {isEditMode ? "Edit bill" : "New bill"}
         </h2>
-        <Text>
+        <div className="text-grey italic">
           Fill in all details {">"} preview {">"} export
-        </Text>
+        </div>
         <div className="space-x-2">
           <Button
             color="primary"
             onPress={() => setIsPreviewOpen(true)}
-            disabled={!isValid}
-            size="lg"
+            disabled={!isValid || !formValues.assignments.length}
           >
             Preview
           </Button>
           <Button
-            variant="solid"
-            color="success"
+            variant="bordered"
+            color="primary"
             onPress={() => handleSubmit(onSave)()}
           >
             Save (draft)
@@ -264,7 +263,7 @@ export const CreateBill: React.FC = () => {
           />
         </div>
 
-        <div>
+        <div className="overflow-y-auto">
           <h3 className="font-semibold mb-2">Assignments</h3>
           {fields.map((assignment, index) => (
             <div key={assignment.id} className="border p-4 rounded-lg mb-4">
@@ -274,6 +273,7 @@ export const CreateBill: React.FC = () => {
                 rules={{ required: "Required" }}
                 render={({ field }) => (
                   <Input
+                    size="sm"
                     isRequired
                     label="Description"
                     value={field.value}
@@ -317,6 +317,7 @@ export const CreateBill: React.FC = () => {
                 render={({ field }) => (
                   <Input
                     isRequired
+                    size="sm"
                     label="Aantal"
                     type="number"
                     value={field.value.toString()}
@@ -336,6 +337,7 @@ export const CreateBill: React.FC = () => {
                 render={({ field }) => (
                   <Input
                     isRequired
+                    size="sm"
                     label="Eenheidsprijs"
                     type="number"
                     value={field.value.toString()}
@@ -354,6 +356,7 @@ export const CreateBill: React.FC = () => {
                 render={({ field }) => (
                   <Select
                     isRequired
+                    size="sm"
                     label="BTW"
                     // value={field.value.toString()}
                     // onChange={(e) =>
@@ -376,6 +379,7 @@ export const CreateBill: React.FC = () => {
                 <Button
                   variant="ghost"
                   onPress={() => insert(index + 1, assignment)}
+                  size="sm"
                 >
                   Copy
                 </Button>
@@ -384,6 +388,7 @@ export const CreateBill: React.FC = () => {
                   color="danger"
                   onPress={() => remove(index)}
                   startContent={<TrashIcon className="h-5 w-5" />}
+                  size="sm"
                 >
                   Delete
                 </Button>
@@ -446,7 +451,7 @@ export const CreateBill: React.FC = () => {
                     <TableishUser user={selectedContact} />
                   </div>
 
-                  <div className="w-fit">
+                  <div className="w-fit mb-10">
                     <Tableish
                       data={{
                         Datum: format(new Date(), "dd/MM/yyyy", {
@@ -460,7 +465,7 @@ export const CreateBill: React.FC = () => {
 
                   <table className="w-full border-collapse mb-6">
                     <thead>
-                      <tr className="border-b border-t border-black">
+                      <tr className="border-b border-t border-black text-sm">
                         <th className="text-left py-2">Omschrijving</th>
                         <th className="text-right py-2">Aantal</th>
                         <th className="text-right py-2">Eenheidsprijs</th>
@@ -469,12 +474,15 @@ export const CreateBill: React.FC = () => {
                     </thead>
                     <tbody>
                       {formValues.assignments.map((a, index) => (
-                        <tr key={index} className="border-b border-gray-200">
-                          <td className="py-2">{`${a.description} ${format(
-                            new Date(a.startDate),
-                            "dd/MM/yyyy",
-                            { locale: nl }
-                          )} - ${format(new Date(a.endDate), "dd/MM/yyyy", {
+                        <tr
+                          key={index}
+                          className="border-b border-gray-200 text-sm"
+                        >
+                          <td className="py-2 text-xs">{`${
+                            a.description
+                          } ${format(new Date(a.startDate), "dd/MM/yyyy", {
+                            locale: nl,
+                          })} - ${format(new Date(a.endDate), "dd/MM/yyyy", {
                             locale: nl,
                           })}`}</td>
                           <td className="text-right py-2">{a.quantity}</td>
@@ -521,9 +529,15 @@ export const CreateBill: React.FC = () => {
                       />
                     </div>
                   </div>
+                  <div className="text-grey text-sm w-full text-right">
+                    <p>Algemenege voorwaarden:</p>
+                    <a href={user.voorWaardedenUrl} className="text-primary">
+                      {user.voorWaardedenUrl}
+                    </a>
+                  </div>
                 </Card>
               ) : (
-                <Text>No user or selected contact found</Text>
+                <div>No user or selected contact found</div>
               )}
             </div>
           </div>
