@@ -408,11 +408,11 @@ export const CreateBill: React.FC = () => {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         size="full"
+        className="bg-black"
       >
         <ModalContent>
-          <ModalHeader>Preview PDF</ModalHeader>
           <div
-            className="flexs item-center justify-center bg-transparent"
+            className="flex item-center justify-center bg-black"
             style={{
               // transform: "scale(0.8)",
               transformOrigin: `${window.innerWidth / 2} ${
@@ -421,12 +421,12 @@ export const CreateBill: React.FC = () => {
             }}
           >
             <div
-              className="overflow-y-scroll w-full h-full"
-              style={{ maxHeight: "80vh" }}
+              className="overflow-y-scroll w-full h-full p-10"
+              style={{ maxHeight: "100vh" }}
             >
               {user && selectedContact ? (
                 <Card
-                  className="p-6 bg-white text-black shadow-2xl w-[210mm] h-[297mm] mx-auto"
+                  className="p-6 bg-white text-black shadow-2xl shadow-white w-[210mm] h-[297mm] mx-auto"
                   id="preview-content"
                 >
                   <div className="w-full flex justify-between items-end relative mb-5">
@@ -541,11 +541,8 @@ export const CreateBill: React.FC = () => {
               )}
             </div>
           </div>
-          {/* </ModalBody> */}
-          <ModalFooter className="absolute bottom-0 m-10">
-            <Button variant="flat" onPress={() => setIsPreviewOpen(false)}>
-              Close
-            </Button>
+          <ModalFooter className="absolute bottom-0 m-10 w-fit">
+            <Button onPress={() => setIsPreviewOpen(false)}>Close</Button>
             <Button
               color="primary"
               isLoading={isLoading}
@@ -739,62 +736,17 @@ const formatIban = (iban: string) => {
 };
 
 const onExport = async (billingNumber: string | number) => {
-  const elm = document.querySelector("#preview-content") as HTMLElement;
-
   const element = document.getElementById("preview-content");
 
   const opt = {
     margin: 0,
     filename: `factuur-${billingNumber}.pdf`,
-    image: { type: "jpeg", quality: 1 },
+    image: { type: "png", quality: 2 },
     html2canvas: { scale: 1, useCORS: true },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
   };
 
   await html2pdf().set(opt).from(element).save();
-
-  // const doc = new jsPDF({
-  //   orientation: "portrait",
-  //   unit: "mm",
-  //   format: "a4",
-  // });
-
-  // await doc.html(elm, {
-  //   callback: (pdf) => {
-  //     pdf.save(`factuur-${billingNumber}.pdf`);
-  //   },
-  //   x: 0,
-  //   y: 0,
-  //   width: 210, // A4 width in mm
-  //   windowWidth: elm.offsetWidth, // Match the element's width
-  //   html2canvas: {
-  //     scale: 2, // Increase resolution
-  //   },
-  // });
-
-  // const elm = document.querySelector("#preview-content") as HTMLElement;
-  // await html2canvas(elm)
-  //   .then(function (canvas) {
-  //     // const imgData = canvas.toDataURL("image/jpeg", 1.0);
-
-  //     let width = canvas.width;
-  //     let height = canvas.height;
-
-  //     console.log(canvas, width, height);
-
-  //     const pdf = new jsPDF({
-  //       orientation: "p",
-  //       unit: "pt",
-  //       format: "a4",
-  //       // format: [height, width]
-  //     });
-  //     //then we get the dimensions from the 'pdf' file itself
-  //     width = pdf.internal.pageSize.getWidth();
-  //     height = pdf.internal.pageSize.getHeight();
-  //     pdf.addImage(canvas, "PNG", 0, 0, width, height);
-  //     pdf.save(`factuur-${formValues.billingNumber}.pdf`);
-  //   })
-  //   .catch((e) => window.alert("uups" + e));
 };
 
 const formatDate = (d: string) =>
