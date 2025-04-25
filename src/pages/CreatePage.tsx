@@ -426,33 +426,26 @@ export const CreateBill: React.FC = () => {
                   className="p-6 bg-white text-black shadow-2xl w-[210mm] h-[297mm] mx-auto"
                   id="preview-content"
                 >
-                  <div className="mb-6">
-                    <div className="w-full flex relative mb-5">
-                      <Image
-                        src={user.logo}
-                        alt="Logo"
-                        className="h-24 w-auto mb-5"
-                      />
-                      <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full">
-                        <h1 className="text-3xl font-black uppercase">
-                          Factuur
-                        </h1>
+                  <div className="w-full flex justify-between items-center relative mb-5">
+                    <Image src={user.logo} alt="Logo" className="h-auto w-22" />
+                    <div className="flex items-center">
+                      <h1 className="text-3xl font-black uppercase">Factuur</h1>
+                      <div className="border-l-2 ml-5 pl-2 border-red">
+                        <Tableish
+                          data={{
+                            Datum: format(new Date(), "dd/MM/yyyy", {
+                              locale: nl,
+                            }),
+                            "Te betalen voor": formValues.expirationDate,
+                            Factuurnummer: formValues.billingNumber,
+                          }}
+                        />
                       </div>
                     </div>
-                    <div className="flex justify-between">
-                      <TableishUser user={user} />
-                      <TableishUser user={selectedContact} />
-                    </div>
                   </div>
-
-                  <div className="w-fit">
-                    <Tableish
-                      data={{
-                        Datum: format(new Date(), "dd/MM/yyyy", { locale: nl }),
-                        "Te betalen voor": formValues.expirationDate,
-                        Factuurnummer: formValues.billingNumber,
-                      }}
-                    />
+                  <div className="flex justify-between my-10">
+                    <TableishUser user={user} />
+                    <TableishUser user={selectedContact} />
                   </div>
 
                   <table className="w-full border-collapse mb-6">
@@ -485,19 +478,14 @@ export const CreateBill: React.FC = () => {
                       ))}
                     </tbody>
                   </table>
-                  <div className="mb-6 text-right">
-                    <Text>
-                      <strong>Totaal exlc. BTW:</strong> €
-                      {totalExclBtw.toFixed(2)}
-                    </Text>
-                    <Text>
-                      <strong>BTW ({formValues.assignments[0]?.btw}%):</strong>{" "}
-                      €{totalBtw.toFixed(2)}
-                    </Text>
-                    <Text>
-                      <strong>Totaal inclusief BTW:</strong> €
-                      {totalInclBtw.toFixed(2)}
-                    </Text>
+                  <div className="mb-6 flex justify-end w-full">
+                    <Totals
+                      rows={[
+                        ["Subtotaal", totalExclBtw],
+                        [`${formValues.assignments[0]?.btw}% BTW`, totalBtw],
+                        ["Totaal", totalInclBtw],
+                      ]}
+                    />
                   </div>
                   <div className="flex items-end h-full">
                     <div className="mt-4 flex h-fit">
@@ -564,7 +552,7 @@ const Tableish = ({
   data: Record<string, string | number>;
   title?: string;
 }) => (
-  <div className="w-fit">
+  <div className="min-w-[300px]">
     {title && <div className="font-black">{title}</div>}
     <div className="grid grid-cols-2 gap-0.5">
       {Object.entries(data).map(([key, value]) => (
@@ -576,6 +564,33 @@ const Tableish = ({
     </div>
   </div>
 );
+
+export const Totals = ({ rows }: { rows: [string, number][] }) => {
+  return (
+    <div className="w-[300px]">
+      {rows.map(([label, value], index) => {
+        const isLastRow = index === rows.length - 1;
+        return (
+          <div
+            key={index}
+            className={`flex justify-between py-2 px-4 ${
+              isLastRow ? "bg-gray-800 text-white" : ""
+            }`}
+          >
+            <div className="flex-1">
+              <p className={`${isLastRow ? "text-white" : ""}`}>{label}</p>
+            </div>
+            <div className="flex-1 text-right">
+              <p className={isLastRow ? "text-white" : ""}>
+                € {value.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const TableishUser = memo(({ user }: { user: User | Contact }) => {
   const details = [
@@ -595,9 +610,9 @@ const TableishUser = memo(({ user }: { user: User | Contact }) => {
         {details.map((i, index) => (
           <div
             key={user.name + (i || "-empty") + index}
-            className="font-medium pr-2 text-sm"
+            className="font-medium pr-2 text-sm block"
           >
-            {i ?? "-"}
+            {i || ""}
           </div>
         ))}
       </div>
