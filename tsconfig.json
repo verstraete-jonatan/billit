@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-     // Tells TypeScript to read JS files, as
+    // Tells TypeScript to read JS files, as
     // normally they are ignored as source files
     "allowJs": true,
     // Generate d.ts files
@@ -31,10 +31,7 @@
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
     "declarationMap": true,
-    "types": [
-      "@types/react",
-      "src"
-    ],
+    "types": ["@types/react"]
   },
-  "include": ["src"],
+  "include": ["src"]
 }
