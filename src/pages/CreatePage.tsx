@@ -751,6 +751,31 @@ const _onExport = async (billingNumber: string | number) => {
 
 const onExport = async (billingNumber: string | number) => {
   const element = document.getElementById("preview-content");
+  if (!element) {
+    return alert("Ops can't download :|");
+  }
+
+  // Use html2canvas to render the element with styles
+  const canvas = await html2canvas(element, {
+    scale: 2, // Higher scale for better quality
+    useCORS: true, // If there are external images (e.g., logo)
+    backgroundColor: "#ffffff", // Ensure the background is white
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
+
+  const imgWidth = 210; // A4 width in mm
+  const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+  pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+  pdf.save(`factuur-${billingNumber}.pdf`);
+};
+const __onExport = async (billingNumber: string | number) => {
+  const element = document.getElementById("preview-content");
 
   const opt = {
     filename: `factuur-${billingNumber}.pdf`,
