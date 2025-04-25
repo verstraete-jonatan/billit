@@ -1,10 +1,52 @@
 import { QRCode } from "react-qrcode-logo";
 import { useUserStore } from "src/store";
-import { generateQRCodeData } from "./CreatePage copy 2";
-import { Input } from "@heroui/react";
-import { ChangeEvent, Suspense, useCallback, useEffect, useState } from "react";
 
-type FormType = Parameters<typeof generateQRCodeData>[0];
+import { Input } from "@heroui/react";
+import { ChangeEvent, Suspense, useCallback, useState } from "react";
+
+type FormType = {
+  iban: string;
+  message: string;
+  amount: number;
+  name: string;
+};
+
+const generateQRCodeData = ({
+  iban,
+  message,
+  amount,
+  name,
+}: FormType): string => {
+  // if (!iban.match(/^\D{2}\d{14}$/) || !message.trim() || amount <= 0) {
+  //   throw new Error("Invalid input");
+  // }
+  // see https://github.com/smhg/sepa-qr-js/blob/master/test/index.js
+  const serviceTag = "BCD",
+    version = "002",
+    characterSet = 1,
+    identification = "SCT",
+    bic = "",
+    purpose = "",
+    remittance = message,
+    information = "";
+
+  return [
+    serviceTag,
+    version,
+    characterSet,
+    identification,
+    bic,
+    name,
+    iban,
+    `EUR${amount.toFixed(2)}`,
+    purpose,
+    remittance,
+    information,
+  ].join("\n");
+
+  // const formattedAmount = `EUR${amount.toFixed(2)}`;
+  // return `BCD\n001\n1\nSCT\n\n${name}\n${iban}\n${formattedAmount}\n\n\n${structuredMessage}`;
+};
 
 const field: (keyof FormType)[] = ["iban", "message", "amount", "name"];
 export const QROnlyPage = () => {
