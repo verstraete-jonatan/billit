@@ -735,7 +735,7 @@ const formatIban = (iban: string) => {
   return `${country} ${iban.replace(/\D/g, "")}`;
 };
 
-const onExport = async (billingNumber: string | number) => {
+const _onExport = async (billingNumber: string | number) => {
   const element = document.getElementById("preview-content");
 
   const opt = {
@@ -747,6 +747,46 @@ const onExport = async (billingNumber: string | number) => {
   };
 
   await html2pdf().set(opt).from(element).save();
+};
+
+const onExport = async (billingNumber: string | number) => {
+  const element = document.getElementById("preview-content");
+
+  const opt = {
+    filename: `factuur-${billingNumber}.pdf`,
+    image: { type: "png", quality: 1 },
+    html2canvas: {
+      scale: 2, // Higher resolution for better quality
+      useCORS: true,
+      windowWidth: 794, // A4 width in pixels at 96dpi
+      windowHeight: 1123, // A4 height in pixels at 96dpi
+    },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+    },
+    pagebreak: {
+      mode: "avoid-all", // Prevent page breaks
+      before: "#preview-content", // Ensure content starts on the first page
+    },
+  };
+
+  await html2pdf()
+    .set(opt)
+    .from(element)
+    .toPdf()
+    .get("pdf")
+    .then((pdf: any) => {
+      // Ensure only one page is generated
+      const totalPages = pdf.internal.getNumberOfPages();
+      if (totalPages > 1) {
+        for (let i = totalPages; i > 1; i--) {
+          pdf.deletePage(i);
+        }
+      }
+    })
+    .save();
 };
 
 const formatDate = (d: string) =>
