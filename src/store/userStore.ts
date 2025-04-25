@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { dummy_user } from "./_dummy";
+// import { dummy_user } from "./_dummy";
 
 interface UserStore {
   user: User | null;
@@ -11,7 +11,7 @@ interface UserStore {
 export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
-      user: dummy_user ?? null,
+      user: null,
       setUser: (user) => set({ user }),
       clearUser: () => set({ user: null }),
     }),

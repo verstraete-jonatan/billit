@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import html2canvas from "html2canvas-pro";
+
 // @ts-ignore
 import html2pdf from "html2pdf.js";
 
@@ -20,8 +20,6 @@ import {
   Button,
   Modal,
   ModalContent,
-  ModalHeader,
-  // ModalBody,
   ModalFooter,
   Input,
   Select,
@@ -37,8 +35,6 @@ import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { jsPDF } from "jspdf";
-import { dummy_bills } from "src/store/_dummy";
 
 type BillForm = {
   contactId: string;
@@ -67,8 +63,7 @@ export const CreateBill: React.FC = () => {
   const { user } = useUserStore();
 
   const isEditMode = !!bill_id && bills.some((bill) => bill.id === bill_id);
-  const existingBill =
-    bills.find((bill) => bill.id === bill_id) || dummy_bills[0];
+  const existingBill = bills.find((bill) => bill.id === bill_id);
 
   const {
     control,

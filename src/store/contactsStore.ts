@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { dummy_contacts } from "./_dummy";
 
 interface ContactsState {
   contacts: Contact[];
@@ -16,7 +15,7 @@ const sorted = (contacts: Contact[]) =>
 export const useContactsStore = create<ContactsState>()(
   persist(
     (set, get) => ({
-      contacts: dummy_contacts ?? [],
+      contacts: [],
       loading: false,
       addContact: (contact) => {
         set((state) => ({ contacts: [...state.contacts, contact] }));

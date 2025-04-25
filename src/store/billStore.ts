@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { dummy_bills } from "./_dummy";
 
 interface BillState {
   bills: Bill[];
@@ -13,7 +12,7 @@ interface BillState {
 export const useBillStore = create<BillState>()(
   persist(
     (set, get) => ({
-      bills: dummy_bills ?? [],
+      bills: [],
       addBill: (bill) => {
         set((state) => ({ bills: [...state.bills, bill] }));
       },
