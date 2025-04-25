@@ -5,9 +5,8 @@ export const dummy_contacts: Contact[] = [
     address: {
       street: "Avenue Louise",
       houseNumber: "123",
-      city: "Brussels",
+      city: "9000, Brussels",
       country: "Belgium",
-      postalCode: "900",
     },
     btw: "BE0123456789",
     email: "",
@@ -18,9 +17,8 @@ export const dummy_contacts: Contact[] = [
     address: {
       street: "Rue de la Loi",
       houseNumber: "45",
-      city: "Antwerp",
+      city: "9000, Antwerp",
       country: "Belgium",
-      postalCode: "900",
     },
     btw: "BE0987654321",
     email: "",
@@ -31,9 +29,8 @@ export const dummy_contacts: Contact[] = [
     address: {
       street: "Chaussée de Wavre",
       houseNumber: "78",
-      city: "Ghent",
+      city: "9000, Ghent",
       country: "Belgium",
-      postalCode: "900",
     },
     btw: "BE0567891234",
   },
@@ -44,9 +41,8 @@ export const dummy_user: User = {
   address: {
     street: "Boulevard Anspach",
     houseNumber: "10",
-    city: "Brussels",
+    city: "9000, Brussels",
     country: "Belgium",
-    postalCode: "900",
   },
   btw: "BE0456789123",
   email: "contact@freelancepro.be",

@@ -103,6 +103,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     email: user?.email || "",
     iban: user?.iban || "",
     logo: user?.logo || "",
+    id: "me",
   });
 
   const handleInputChange = useCallback((field: string, value: string) => {
@@ -144,6 +145,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       email: formData.email,
       iban: formData.iban,
       logo: formData.logo || "",
+      id: "me",
     });
     onClose();
   }, [formData, setUser, onClose]);
@@ -171,7 +173,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             required
           />
           <Input
-            label="City"
+            label="Postal code, City name (eg. 9000, Gent)"
             value={formData.address.city}
             onChange={(e) => handleAddressChange("city", e.target.value)}
             required

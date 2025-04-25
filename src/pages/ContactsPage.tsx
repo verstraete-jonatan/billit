@@ -173,13 +173,12 @@ const UpdateContactModal = ({
   const [city, setCity] = useState(contact?.address?.city || "");
   const [country, setCountry] = useState(contact?.address?.country || "");
   const [btw, setBtw] = useState(contact?.btw || "");
-  const [postal, setPostal] = useState(contact?.address.postalCode || "");
 
   const handleSave = useCallback(() => {
     const newContact: Contact = {
       id: contact?.id || Date.now().toString(),
       name,
-      address: { street, houseNumber, city, country, postalCode: postal },
+      address: { street, houseNumber, city, country },
       btw,
     };
     contact ? updateContact(newContact) : addContact(newContact);
@@ -218,7 +217,7 @@ const UpdateContactModal = ({
             onChange={(e) => setHouseNumber(e.target.value)}
           />
           <Input
-            label="City"
+            label="Postal code, City name (eg. 9000, Gent)"
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />

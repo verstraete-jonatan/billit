@@ -426,26 +426,36 @@ export const CreateBill: React.FC = () => {
                   className="p-6 bg-white text-black shadow-2xl w-[210mm] h-[297mm] mx-auto"
                   id="preview-content"
                 >
-                  <div className="w-full flex justify-between items-center relative mb-5">
-                    <Image src={user.logo} alt="Logo" className="h-auto w-22" />
-                    <div className="flex items-center">
-                      <h1 className="text-3xl font-black uppercase">Factuur</h1>
-                      <div className="border-l-2 ml-5 pl-2 border-red">
-                        <Tableish
-                          data={{
-                            Datum: format(new Date(), "dd/MM/yyyy", {
-                              locale: nl,
-                            }),
-                            "Te betalen voor": formValues.expirationDate,
-                            Factuurnummer: formValues.billingNumber,
-                          }}
-                        />
+                  <div className="w-full flex justify-between items-end relative mb-5">
+                    <Image
+                      src={user.logo}
+                      alt="Logo"
+                      className="h-24 w-auto mb-5"
+                    />
+                    <div className="flex">
+                      <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3 ">
+                        <h1 className="text-3xl font-black uppercase">
+                          Factuur
+                        </h1>
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between my-10">
+
+                  <div className="flex justify-between my-6">
                     <TableishUser user={user} />
                     <TableishUser user={selectedContact} />
+                  </div>
+
+                  <div className="w-fit">
+                    <Tableish
+                      data={{
+                        Datum: format(new Date(), "dd/MM/yyyy", {
+                          locale: nl,
+                        }),
+                        "Te betalen voor": formValues.expirationDate,
+                        Factuurnummer: formValues.billingNumber,
+                      }}
+                    />
                   </div>
 
                   <table className="w-full border-collapse mb-6">
@@ -595,7 +605,7 @@ export const Totals = ({ rows }: { rows: [string, number][] }) => {
 const TableishUser = memo(({ user }: { user: User | Contact }) => {
   const details = [
     `${user.address.street} ${user.address.houseNumber}`,
-    `${user.address.postalCode} ${user.address.city}`,
+    user.address.city,
     user.address.country,
     "",
     user.btw,

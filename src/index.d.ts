@@ -5,7 +5,6 @@ declare global {
     street: string;
     houseNumber: string;
     city: string;
-    postalCode: string;
     country: string;
   };
 
