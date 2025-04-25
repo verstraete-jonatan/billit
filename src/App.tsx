@@ -16,6 +16,7 @@ import { ContactsPage } from "./pages/ContactsPage";
 import { BillsOverview } from "./pages/BillsPage";
 import { CreateBill } from "./pages/CreatePage";
 import { QROnlyPage } from "./pages/QrOnly";
+import { Help } from "./pages/Help";
 
 const darkTheme = createTheme({
   palette: {
@@ -39,6 +40,8 @@ export const App = () => {
                     <Route path="/bills" element={<BillsOverview />} />
                     <Route path="/contacts" element={<ContactsPage />} />
                     <Route path="/qr-only" element={<QROnlyPage />} />
+                    <Route path="/help" element={<Help />} />
+
                     <Route path="/" element={<Navigate to="/create" />} />
                   </Routes>
                 </div>

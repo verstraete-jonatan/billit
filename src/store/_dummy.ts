@@ -70,7 +70,7 @@ export const dummy_bills: Bill[] = [
         btw: 21, // 21% VAT
       },
     ],
-    // structuredMessage: "+++001/2025/00001+++",
+    // structuredMessage: "001/2025/00001",
     structuredMessage: "001/2025/00001",
   },
   {
@@ -90,7 +90,7 @@ export const dummy_bills: Bill[] = [
         btw: 12, // 12% VAT
       },
     ],
-    structuredMessage: "+++002/2025/00002+++",
+    structuredMessage: "002/2025/00002",
   },
   {
     user: dummy_user,

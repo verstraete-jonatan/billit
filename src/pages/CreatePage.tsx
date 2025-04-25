@@ -159,9 +159,7 @@ export const CreateBill: React.FC = () => {
         <h2 className="text-2xl font-bold">
           {isEditMode ? "Edit bill" : "New bill"}
         </h2>
-        <div className="text-grey italic">
-          Fill in all details {">"} preview {">"} export
-        </div>
+
         <div className="space-x-2">
           <Button
             color="primary"
@@ -457,7 +455,9 @@ export const CreateBill: React.FC = () => {
                         Datum: format(new Date(), "dd/MM/yyyy", {
                           locale: nl,
                         }),
-                        "Te betalen voor": formValues.expirationDate,
+                        "Te betalen voor": formatDate(
+                          formValues.expirationDate
+                        ),
                         Factuurnummer: formValues.billingNumber,
                       }}
                     />
@@ -480,11 +480,9 @@ export const CreateBill: React.FC = () => {
                         >
                           <td className="py-2 text-xs">{`${
                             a.description
-                          } ${format(new Date(a.startDate), "dd/MM/yyyy", {
-                            locale: nl,
-                          })} - ${format(new Date(a.endDate), "dd/MM/yyyy", {
-                            locale: nl,
-                          })}`}</td>
+                          } ${formatDate(a.startDate)} - ${formatDate(
+                            a.endDate
+                          )}`}</td>
                           <td className="text-right py-2">{a.quantity}</td>
                           <td className="text-right py-2">
                             {a.unitPrice.toFixed(2)}
@@ -523,8 +521,10 @@ export const CreateBill: React.FC = () => {
                         title="Betalingsinformatie"
                         data={{
                           IBAN: formatIban(user.iban),
-                          Mededeling: formValues.structuredMessage,
-                          "Te betalen voor": formValues.expirationDate,
+                          Mededeling: `+++${formValues.structuredMessage}+++`,
+                          "Te betalen voor": formatDate(
+                            formValues.expirationDate
+                          ),
                         }}
                       />
                     </div>
@@ -709,8 +709,16 @@ const structuredMessage = {
       msg.replace(/\D/g, "")
     ) || "Incorrect format",
 
-  validate: (input: string) =>
-    [11, 12].includes(input.replace(/[^\d]/g, "").length) || "Incorrect format",
+  validate: (input: string) => {
+    if (input.includes("+")) {
+      return `Format for + signs will be added automatically. Remove them here.`;
+    }
+    if (![11, 12].includes(input.replace(/[^\d]/g, "").length)) {
+      return "need to include 11 or 12 digits";
+    }
+    return true;
+  },
+
   onBlur:
     (onChange: (e: ChangeEvent<HTMLInputElement>) => void) =>
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -720,7 +728,7 @@ const structuredMessage = {
         value = value.replace(/([0-9]{4})$/, "/$1");
       }
       // modify event value
-      event.target.value = `+++${value}+++`;
+      event.target.value = value;
       onChange(event);
     },
 };
@@ -788,3 +796,8 @@ const onExport = async (billingNumber: string | number) => {
   //   })
   //   .catch((e) => window.alert("uups" + e));
 };
+
+const formatDate = (d: string) =>
+  format(new Date(d), "dd/MM/yyyy", {
+    locale: nl,
+  });

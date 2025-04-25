@@ -4,6 +4,7 @@ import {
   ClipboardDocumentListIcon,
   UserGroupIcon,
   QrCodeIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
 import { useCallback, useState } from "react";
@@ -36,6 +37,11 @@ const navItems = [
     name: "QR only",
     path: "/qr-only",
     icon: QrCodeIcon,
+  },
+  {
+    name: "Help",
+    path: "/help",
+    icon: InformationCircleIcon,
   },
 ];
 
