@@ -55,8 +55,8 @@ const _structuredMessage = {
   },
 
   onBlur:
-    (onChange: (e: ChangeEvent<HTMLInputElement>) => void) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
+    (onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const digits = event.target.value.replace(/[^\d]/g, "");
       if (![11, 12].includes(digits.length)) {
         return;
