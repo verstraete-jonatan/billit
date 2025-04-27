@@ -35,6 +35,7 @@ import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { structuredMessage } from "src/validation";
 
 type BillForm = {
   contactId: string;
@@ -694,46 +695,6 @@ const calculateSubtotal = (assignment: Assignment) =>
 
 const calculateBtwAmount = (assignment: Assignment) =>
   calculateSubtotal(assignment) * (assignment.btw / 100);
-
-const structuredMessage = {
-  _validate: (msg: string) =>
-    /^(?:[0-9]{2,3}\/[0-9]{4}\/[0-9]{5}|\+[0-9]+\/[0-9]+\/[0-9]+)$/.test(
-      msg.replace(/\D/g, "")
-    ) || "Incorrect format",
-
-  validate: (input: string) => {
-    if (input.includes("+")) {
-      return `Format for + signs will be added automatically. Remove them here.`;
-    }
-    const nrInput = input.replace(/[^\d]/g, "").length;
-    if (![11, 12].includes(nrInput)) {
-      return `need to include 11 or 12 digits (${
-        nrInput < 11 ? 11 - nrInput : 12 - nrInput
-      })`;
-    }
-    return true;
-  },
-
-  onBlur:
-    (onChange: (e: ChangeEvent<HTMLInputElement>) => void) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const digits = event.target.value.replace(/[^\d]/g, "");
-      if (![11, 12].includes(digits.length)) {
-        return;
-      }
-
-      digits.slice();
-
-      let value = event.target.value.replaceAll(/\D/g, "");
-      value = value.replace(/^([0-9]{1,3})/, "$1/");
-      if (value.length >= 7) {
-        value = value.replace(/([0-9]{4})$/, "/$1");
-      }
-      // modify event value
-      event.target.value = value;
-      onChange(event);
-    },
-};
 
 const formatIban = (iban: string) => {
   const [country] = iban.split(/\d+/);

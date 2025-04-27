@@ -16,6 +16,7 @@ import {
   ModalContent,
   useDisclosure,
 } from "@heroui/react"; // Assuming HeroUI components
+import { EditUserModal } from "./EditUser";
 
 const navItems = [
   {
@@ -95,7 +96,7 @@ interface EditUserModalProps {
   onClose: () => void;
 }
 
-export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
+export const _EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   const { user, setUser } = useUserStore();
   const [formData, setFormData] = useState<User>({
     name: user?.name || "",
