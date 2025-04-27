@@ -419,7 +419,7 @@ export const CreateBill: React.FC = () => {
               className="overflow-y-scroll w-full h-full p-10"
               style={{ maxHeight: "100vh" }}
             >
-              {user && selectedContact ? (
+              {user && selectedContact && isPreviewOpen ? (
                 <Card
                   className="p-6 bg-white text-black shadow-2xl shadow-white w-[210mm] h-[297mm] mx-auto"
                   id="preview-content"
@@ -705,8 +705,11 @@ const structuredMessage = {
     if (input.includes("+")) {
       return `Format for + signs will be added automatically. Remove them here.`;
     }
-    if (![11, 12].includes(input.replace(/[^\d]/g, "").length)) {
-      return "need to include 11 or 12 digits";
+    const nrInput = input.replace(/[^\d]/g, "").length;
+    if (![11, 12].includes(nrInput)) {
+      return `need to include 11 or 12 digits (${
+        nrInput < 11 ? 11 - nrInput : 12 - nrInput
+      })`;
     }
     return true;
   },
@@ -714,6 +717,13 @@ const structuredMessage = {
   onBlur:
     (onChange: (e: ChangeEvent<HTMLInputElement>) => void) =>
     (event: ChangeEvent<HTMLInputElement>) => {
+      const digits = event.target.value.replace(/[^\d]/g, "");
+      if (![11, 12].includes(digits.length)) {
+        return;
+      }
+
+      digits.slice();
+
       let value = event.target.value.replaceAll(/\D/g, "");
       value = value.replace(/^([0-9]{1,3})/, "$1/");
       if (value.length >= 7) {
@@ -813,3 +823,8 @@ const formatDate = (d: string) =>
   format(new Date(d), "dd/MM/yyyy", {
     locale: nl,
   });
+// d
+//   ? format(new Date(d), "dd/MM/yyyy", {
+//       locale: nl,
+//     })
+//   : "nope";
