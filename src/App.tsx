@@ -43,6 +43,7 @@ export const App = () => {
                     <Route path="/help" element={<Help />} />
 
                     <Route path="/" element={<Navigate to="/create" />} />
+                    <Route path="/billit" element={<Navigate to="/create" />} />
                   </Routes>
                 </div>
               </div>

@@ -158,8 +158,8 @@ export const CreateBill: React.FC = () => {
         <div className="space-x-2">
           <Button
             color="primary"
-            onPress={() => setIsPreviewOpen(true)}
-            disabled={!isValid || !formValues.assignments.length}
+            onPress={() => handleSubmit(() => setIsPreviewOpen(true))()}
+            // disabled={!isValid || !formValues.assignments.length}
           >
             Preview
           </Button>
