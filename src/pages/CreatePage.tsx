@@ -78,7 +78,8 @@ export const CreateBill: React.FC = () => {
       contactId: existingBill?.contact?.id || "",
       expirationDate: existingBill?.expirationDate || "",
       billingNumber: existingBill?.billingNumber || "123",
-      structuredMessage: existingBill?.structuredMessage || "",
+      structuredMessage:
+        existingBill?.structuredMessage ?? user?.structuredMessage ?? "",
       assignments: existingBill?.assignments || [emptyAssignment],
     },
   });

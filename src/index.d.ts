@@ -20,6 +20,7 @@ declare global {
     logo: string;
     iban: string;
     voorWaardedenUrl: string;
+    structuredMessage: string;
   }
 
   export type BillStatus = "DRAFT" | "PENDING" | "PAYED";

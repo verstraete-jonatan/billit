@@ -110,6 +110,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     iban: user?.iban || "",
     logo: user?.logo || "",
     voorWaardedenUrl: user?.voorWaardedenUrl ?? "",
+    structuredMessage: user?.structuredMessage ?? "",
     id: "me",
   });
 
@@ -153,6 +154,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       iban: formData.iban,
       logo: formData.logo || "",
       voorWaardedenUrl: formData.voorWaardedenUrl,
+      structuredMessage: formData.structuredMessage,
       id: "me",
     });
     onClose();
@@ -161,80 +163,97 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit User Info">
       <ModalContent>
-        <div className="flex flex-col gap-4 p-8 bg-[#222] text-white">
-          <Input
-            label="Business Name"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            required
-          />
-          <Input
-            label="Street"
-            value={formData.address.street}
-            onChange={(e) => handleAddressChange("street", e.target.value)}
-            required
-          />
-          <Input
-            label="House Number"
-            value={formData.address.houseNumber}
-            onChange={(e) => handleAddressChange("houseNumber", e.target.value)}
-            required
-          />
-          <Input
-            label="Postal code, City name (eg. 9000, Gent)"
-            value={formData.address.city}
-            onChange={(e) => handleAddressChange("city", e.target.value)}
-            required
-          />
-          <Input
-            label="Country"
-            value={formData.address.country}
-            onChange={(e) => handleAddressChange("country", e.target.value)}
-            required
-          />
-          <Input
-            label="BTW Number"
-            value={formData.btw}
-            onChange={(e) => handleInputChange("btw", e.target.value)}
-            required
-          />
-          <Input
-            label="Email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            required
-          />
-          <Input
-            label="IBAN"
-            value={formData.iban}
-            onChange={(e) => handleInputChange("iban", e.target.value)}
-            required
-          />
-          <Input
-            label="Url algemene voorwaarden"
-            value={formData.voorWaardedenUrl}
-            onChange={(e) =>
-              handleInputChange("voorWaardedenUrl", e.target.value)
-            }
-            required
-          />
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-400">Logo</label>
-            <input
-              type="file"
-              accept="image/png"
-              onChange={handleLogoChange}
-              className="bg-gray-800 text-white border-gray-600 p-2 rounded"
+        <div className="bg-[#222] text-white">
+          <div className="max-h-[80vh] overflow-y-auto flex flex-col gap-4 p-8">
+            <p>
+              Details will appear on each bill. You can still customize the
+              bill.
+            </p>
+            <Input
+              label="Business Name"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              required
             />
-            {formData.logo && (
-              <img
-                src={formData.logo}
-                alt="Logo Preview"
-                className="h-16 w-16 object-contain mt-2"
+            <Input
+              label="Street"
+              value={formData.address.street}
+              onChange={(e) => handleAddressChange("street", e.target.value)}
+              required
+            />
+            <Input
+              label="House Number"
+              value={formData.address.houseNumber}
+              onChange={(e) =>
+                handleAddressChange("houseNumber", e.target.value)
+              }
+              required
+            />
+            <Input
+              label="Postal code, City name (eg. 9000, Gent)"
+              value={formData.address.city}
+              onChange={(e) => handleAddressChange("city", e.target.value)}
+              required
+            />
+            <Input
+              label="Country"
+              value={formData.address.country}
+              onChange={(e) => handleAddressChange("country", e.target.value)}
+              required
+            />
+            <Input
+              label="BTW Number"
+              value={formData.btw}
+              onChange={(e) => handleInputChange("btw", e.target.value)}
+              required
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              required
+            />
+            <Input
+              label="IBAN"
+              value={formData.iban}
+              onChange={(e) => handleInputChange("iban", e.target.value)}
+              required
+            />
+            <Input
+              label="Structured message (remittance)"
+              value={formData.structuredMessage}
+              onChange={(e) =>
+                handleInputChange("structuredMessage", e.target.value)
+              }
+              required
+            />
+            <Input
+              label="Url algemene voorwaarden"
+              value={formData.voorWaardedenUrl}
+              onChange={(e) =>
+                handleInputChange("voorWaardedenUrl", e.target.value)
+              }
+              required
+            />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-400">Logo</label>
+              <input
+                type="file"
+                accept="image/png"
+                onChange={handleLogoChange}
+                className="bg-gray-800 text-white border-gray-600 p-2 rounded"
               />
-            )}
+              {formData.logo && (
+                <img
+                  src={formData.logo}
+                  alt="Logo Preview"
+                  className="h-16 w-16 object-contain mt-2"
+                />
+              )}
+            </div>
           </div>
+
           <div className="flex justify-end gap-2 mt-4">
             <Button
               onPress={onClose}
