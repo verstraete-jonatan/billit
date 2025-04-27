@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
-  // base: "/billit/",
-});
+  base: mode === "production" ? "/billit/" : "/",
+}));

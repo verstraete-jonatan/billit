@@ -26,7 +26,7 @@ const darkTheme = createTheme({
 
 export const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ThemeProvider theme={darkTheme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <HeroUIProvider>
@@ -51,6 +51,6 @@ export const App = () => {
           </HeroUIProvider>
         </LocalizationProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
