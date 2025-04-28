@@ -35,7 +35,7 @@ import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { structuredMessage } from "src/validation";
+import { formatBtwNumber, formatIban, structuredMessage } from "src/validation";
 
 type BillForm = {
   contactId: string;
@@ -503,7 +503,7 @@ export const CreateBill: React.FC = () => {
                     <div className="mt-4 flex h-fit">
                       <QRCode
                         value={generateQRCodeData({
-                          iban: user.iban,
+                          iban: formatIban(user.iban),
                           message: formValues.structuredMessage,
                           amount: totalInclBtw,
                           name: user.name,
@@ -615,7 +615,8 @@ const TableishUser = memo(({ user }: { user: User | Contact }) => {
     user.address.city,
     user.address.country,
     "",
-    user.btw,
+    formatBtwNumber(user.btw),
+    formatIban(user.iban),
     user.email,
   ];
 
@@ -634,7 +635,7 @@ const TableishUser = memo(({ user }: { user: User | Contact }) => {
         ))}
       </div>
 
-      {details.join(",").includes("undefined") && (
+      {details.join(" ").includes("undefined") && (
         <div className="text-red-700 text-1xl">
           ** Missing details are "undefined" double check user(s) **
         </div>
@@ -695,11 +696,6 @@ const calculateSubtotal = (assignment: Assignment) =>
 
 const calculateBtwAmount = (assignment: Assignment) =>
   calculateSubtotal(assignment) * (assignment.btw / 100);
-
-const formatIban = (iban: string) => {
-  const [country] = iban.split(/\d+/);
-  return `${country} ${iban.replace(/\D/g, "")}`;
-};
 
 const _onExport = async (billingNumber: string | number) => {
   const element = document.getElementById("preview-content");

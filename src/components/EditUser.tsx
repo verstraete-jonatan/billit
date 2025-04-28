@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Modal, ModalContent, Input, Button } from "@heroui/react";
 import { useUserStore } from "../store/userStore";
-import { structuredMessage } from "src/validation";
+import { formatBtwNumber, structuredMessage } from "src/validation";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -206,6 +206,10 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   label="BTW-nummer"
                   value={field.value}
                   onChange={field.onChange}
+                  onBlur={(e) => {
+                    e.target.value = formatBtwNumber(field.value);
+                    field.onChange(e);
+                  }}
                   className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.btw}
                   errorMessage={errors.btw?.message}
@@ -310,13 +314,14 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const btwRegex = /^BE[0-1][0-9]{3}\.[0-9]{3}\.[0-9]{3}$/;
+const btwRegex = /^([A-Z]{2})[0-9]{2} [0-9]{6}/;
 // Allow formats like +++123/4567/89012+++ (Belgium) or ++12/3456/78901++ (other countries), or raw 12-digit number
 const structuredMessageRegex =
   /^((\+{2,3}\d{2,3}\/\d{4}\/\d{5}\+{2,3})|\d{12})$/;
 
 // Validation functions
 const validateBtw = (value: string) => {
+  return true;
   return btwRegex.test(value) || "Ongeldig BTW-nummer (bijv. BE0123.456.789)";
 };
 

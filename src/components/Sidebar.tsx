@@ -17,6 +17,7 @@ import {
   useDisclosure,
 } from "@heroui/react"; // Assuming HeroUI components
 import { EditUserModal } from "./EditUser";
+import { formatBtwNumber } from "src/validation";
 
 const navItems = [
   {
@@ -205,6 +206,9 @@ export const _EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Input
               label="BTW Number"
               value={formData.btw}
+              onBlur={() =>
+                handleInputChange("btw", formatBtwNumber(formData.btw))
+              }
               onChange={(e) => handleInputChange("btw", e.target.value)}
               required
             />

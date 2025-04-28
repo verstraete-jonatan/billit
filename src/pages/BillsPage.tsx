@@ -71,9 +71,11 @@ export const BillsOverview: React.FC = () => {
           <Button
             size="sm"
             variant="ghost"
+            color="warning"
+            className="w-[100px]"
             onPress={() => updateBillStatus(bill.id, "PENDING")}
           >
-            Mark as Pending
+            mark Pending
           </Button>
         );
       case "PENDING":
@@ -81,9 +83,11 @@ export const BillsOverview: React.FC = () => {
           <Button
             size="sm"
             variant="ghost"
+            color="success"
+            className="w-[100px]"
             onPress={() => updateBillStatus(bill.id, "PAYED")}
           >
-            Mark as Payed
+            mark Payed
           </Button>
         );
       case "PAYED":
@@ -91,9 +95,10 @@ export const BillsOverview: React.FC = () => {
           <Button
             size="sm"
             variant="ghost"
-            onPress={() => updateBillStatus(bill.id, "PENDING")}
+            className="w-[100px]"
+            onPress={() => updateBillStatus(bill.id, "DRAFT")}
           >
-            Revert
+            mark Draft
           </Button>
         );
       default:
@@ -109,7 +114,7 @@ export const BillsOverview: React.FC = () => {
           variant="solid"
           color="primary"
           startContent={<PlusIcon className="h-5 w-5" />}
-          onClick={() => navigate("/create")}
+          onPress={() => navigate("/create")}
         >
           Create Bill
         </Button>
@@ -172,8 +177,17 @@ export const BillsOverview: React.FC = () => {
                   <Button
                     size="sm"
                     variant="ghost"
+                    color="primary"
+                    isDisabled={bill.status !== "DRAFT"}
+                    onPress={() => navigate(`/create/${bill.id}`)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     color="danger"
-                    onClick={() => handleDeleteClick(bill.id)}
+                    onPress={() => handleDeleteClick(bill.id)}
                   >
                     Delete
                   </Button>
@@ -191,10 +205,10 @@ export const BillsOverview: React.FC = () => {
             <p>Are you sure you want to delete this bill?</p>
           </ModalBody>
           <ModalFooter>
-            <Button variant="flat" onClick={cancelDelete}>
+            <Button variant="flat" onPress={cancelDelete}>
               Cancel
             </Button>
-            <Button color="danger" onClick={confirmDelete}>
+            <Button color="danger" onPress={confirmDelete}>
               Delete
             </Button>
           </ModalFooter>

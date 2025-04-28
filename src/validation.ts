@@ -74,3 +74,19 @@ const _structuredMessage = {
       onChange(event);
     },
 };
+
+export const formatIban = (iban: string) => {
+  const [country] = iban.split(/\d+/);
+  return `${country.replaceAll(" ", "")} ${iban.replace(/\D/g, "")}`;
+};
+
+export const formatBtwNumber = (btw: string) => {
+  btw = btw.toUpperCase().replaceAll(" ", "");
+  const [_, suffix] = btw.split(/[A-Z]+[0-9]{2}/);
+  const [prefix] = (btw.match(/[A-Z]+[0-9]{2}/) as RegExpMatchArray) ?? [""];
+  const _btw = `${prefix} ${suffix}`;
+  return _btw;
+  // btw = "BE0420.045.137".replaceAll(".", "");
+  // console.log(btw, btw.match(/^(\w{2}\d{4})-(\d{3})-(\d)$/));
+  // return /^(\d{4})-(\d{3})-(\d)$/.exec(btw);
+};

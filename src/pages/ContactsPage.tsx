@@ -17,6 +17,7 @@ import {
 } from "@heroui/react";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { useContactsStore, useContacts } from "../store/contactsStore";
+import { formatBtwNumber, formatIban } from "src/validation";
 
 export const ContactsPage = () => {
   const {
@@ -90,6 +91,7 @@ export const ContactsPage = () => {
             City
           </TableColumn>
           <TableColumn key="btw">BTW Number</TableColumn>
+          <TableColumn key="iban">IBAN</TableColumn>
           <TableColumn key="actions">Actions</TableColumn>
         </TableHeader>
         <TableBody items={filteredContacts}>
@@ -98,6 +100,7 @@ export const ContactsPage = () => {
               <TableCell>{contact.name}</TableCell>
               <TableCell>{contact.address.city}</TableCell>
               <TableCell>{contact.btw}</TableCell>
+              <TableCell>{contact.iban}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <Button
@@ -173,11 +176,13 @@ const UpdateContactModal = ({
   const [city, setCity] = useState(contact?.address?.city || "");
   const [country, setCountry] = useState(contact?.address?.country || "");
   const [btw, setBtw] = useState(contact?.btw || "");
+  const [iban, setIban] = useState(contact?.iban || "");
 
   const handleSave = useCallback(() => {
     const newContact: Contact = {
       id: contact?.id || Date.now().toString(),
       name,
+      iban,
       address: { street, houseNumber, city, country },
       btw,
     };
@@ -190,6 +195,7 @@ const UpdateContactModal = ({
     city,
     country,
     btw,
+    iban,
     contact,
     addContact,
     updateContact,
@@ -229,7 +235,14 @@ const UpdateContactModal = ({
           <Input
             label="BTW Number"
             value={btw}
+            onBlur={() => setBtw(formatBtwNumber(btw))}
             onChange={(e) => setBtw(e.target.value)}
+          />
+          <Input
+            label="IBAN"
+            onBlur={(e) => setIban(formatIban(iban))}
+            value={iban}
+            onChange={(e) => setIban(e.target.value)}
           />
         </div>
       </ModalBody>

@@ -13,12 +13,12 @@ declare global {
     name: string;
     address: Address;
     btw: string;
+    iban: string;
     email?: string;
   }
 
   interface User extends Contact {
     logo: string;
-    iban: string;
     voorWaardedenUrl: string;
     structuredMessage: string;
   }
