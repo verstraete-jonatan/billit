@@ -4,11 +4,9 @@ import { useUserStore } from "src/store";
 import { Input } from "@heroui/react";
 import { ChangeEvent, Suspense, useCallback, useState } from "react";
 
-type FormType = {
-  iban: string;
+type FormType = Pick<User, "iban" | "name"> & {
+  amount: string;
   message: string;
-  amount: number;
-  name: string;
 };
 
 const generateQRCodeData = ({
@@ -30,6 +28,9 @@ const generateQRCodeData = ({
     remittance = message,
     information = "";
 
+  if (!isNaN(Number(amount))) {
+    amount = Number(amount).toFixed(2);
+  }
   return [
     serviceTag,
     version,
@@ -38,7 +39,7 @@ const generateQRCodeData = ({
     bic,
     name,
     iban,
-    `EUR${amount.toFixed(2)}`,
+    `EUR${amount}`,
     purpose,
     remittance,
     information,
@@ -54,8 +55,8 @@ export const QROnlyPage = () => {
 
   const [form, setForm] = useState<FormType>({
     iban: user?.iban ?? "",
-    message: "",
-    amount: 0,
+    message: user?.structuredMessage ?? "",
+    amount: "0",
     name: user?.name ?? "",
   });
 
@@ -76,6 +77,7 @@ export const QROnlyPage = () => {
           <Input
             isRequired
             label={i}
+            type={i === "amount" ? "number" : undefined}
             value={form[i]?.toString()}
             onChange={update(i)}
             className="my-1 w-[500px]"
