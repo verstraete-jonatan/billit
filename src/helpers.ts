@@ -90,3 +90,49 @@ export const formatBtwNumber = (btw: string) => {
   // console.log(btw, btw.match(/^(\w{2}\d{4})-(\d{3})-(\d)$/));
   // return /^(\d{4})-(\d{3})-(\d)$/.exec(btw);
 };
+
+export const generateQRCodeData = ({
+  iban,
+  message,
+  amount,
+  name,
+}: {
+  iban: string;
+  message: string;
+  amount: number | string;
+  name: string;
+}): string => {
+  // if (!iban.match(/^\D{2}\d{14}$/) || !message.trim() || amount <= 0) {
+  //   throw new Error("Invalid input");
+  // }
+  // see https://github.com/smhg/sepa-qr-js/blob/master/test/index.js
+  const serviceTag = "BCD",
+    version = "002",
+    characterSet = 1,
+    identification = "SCT",
+    bic = "",
+    purpose = "",
+    remittance = message,
+    information = "";
+
+  if (!isNaN(Number(amount))) {
+    amount = Number(amount).toFixed(2);
+  }
+
+  return [
+    serviceTag,
+    version,
+    characterSet,
+    identification,
+    bic,
+    name,
+    iban,
+    `EUR${amount}`,
+    purpose,
+    remittance,
+    information,
+  ].join("\n");
+
+  // const formattedAmount = `EUR${amount.toFixed(2)}`;
+  // return `BCD\n001\n1\nSCT\n\n${name}\n${iban}\n${formattedAmount}\n\n\n${structuredMessage}`;
+};

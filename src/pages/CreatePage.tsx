@@ -35,7 +35,13 @@ import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { formatBtwNumber, formatIban, structuredMessage } from "src/validation";
+import {
+  formatBtwNumber,
+  formatIban,
+  generateQRCodeData,
+  structuredMessage,
+} from "src/helpers";
+import { useQrStore } from "src/store/qrCode";
 
 type BillForm = {
   contactId: string;
@@ -62,6 +68,7 @@ export const CreateBill: React.FC = () => {
   const { addBill, updateBill, bills } = useBillStore();
   const contacts = useContacts();
   const { user } = useUserStore();
+  const { settings: qrCodeSettings } = useQrStore();
 
   const isEditMode = !!bill_id && bills.some((bill) => bill.id === bill_id);
   const existingBill = bills.find((bill) => bill.id === bill_id);
@@ -510,8 +517,9 @@ export const CreateBill: React.FC = () => {
                         })}
                         size={130}
                         qrStyle="dots"
-                        logoImage={user.logo}
                         ecLevel="M"
+                        logoImage={user.logo}
+                        {...qrCodeSettings}
                       />
                       <Tableish
                         title="Betalingsinformatie"
@@ -647,48 +655,6 @@ const TableishUser = memo(({ user }: { user: User | Contact }) => {
 // Utility to generate unique bill ID
 const generateBillId = () =>
   `BILL-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-const generateQRCodeData = ({
-  iban,
-  message,
-  amount,
-  name,
-}: {
-  iban: string;
-  message: string;
-  amount: number;
-  name: string;
-}): string => {
-  // if (!iban.match(/^\D{2}\d{14}$/) || !message.trim() || amount <= 0) {
-  //   throw new Error("Invalid input");
-  // }
-  // see https://github.com/smhg/sepa-qr-js/blob/master/test/index.js
-  const serviceTag = "BCD",
-    version = "002",
-    characterSet = 1,
-    identification = "SCT",
-    bic = "",
-    purpose = "",
-    remittance = message,
-    information = "";
-
-  return [
-    serviceTag,
-    version,
-    characterSet,
-    identification,
-    bic,
-    name,
-    iban,
-    `EUR${amount.toFixed(2)}`,
-    purpose,
-    remittance,
-    information,
-  ].join("\n");
-
-  // const formattedAmount = `EUR${amount.toFixed(2)}`;
-  // return `BCD\n001\n1\nSCT\n\n${name}\n${iban}\n${formattedAmount}\n\n\n${structuredMessage}`;
-};
 
 // Calculate totals
 const calculateSubtotal = (assignment: Assignment) =>

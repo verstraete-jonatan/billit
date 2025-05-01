@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+import { QRCode } from "react-qrcode-logo";
+
 declare global {
   type Address = {
     street: string;
@@ -53,6 +55,8 @@ declare global {
     iban: string;
     logo: string | null; // Base64 string for the logo image
   };
+
+  export type QrCodeSettings = QRCode["props"] & { enableLogo?: boolean };
 
   type Defined<A> = A extends UnDef ? never : A;
 }

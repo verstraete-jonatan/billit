@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Modal, ModalContent, Input, Button } from "@heroui/react";
 import { useUserStore } from "../store/userStore";
-import { formatBtwNumber, structuredMessage } from "src/validation";
+import { formatBtwNumber, structuredMessage } from "src/helpers";
 
 interface EditUserModalProps {
   isOpen: boolean;

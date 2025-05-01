@@ -1,11 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import {
-  DocumentPlusIcon,
-  ClipboardDocumentListIcon,
-  UserGroupIcon,
-  QrCodeIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
 
 import { useCallback, useState } from "react";
 import { useUserStore } from "../store/userStore";
@@ -17,35 +10,8 @@ import {
   useDisclosure,
 } from "@heroui/react"; // Assuming HeroUI components
 import { EditUserModal } from "./EditUser";
-import { formatBtwNumber } from "src/validation";
-
-const navItems = [
-  {
-    name: "Create",
-    path: "/create",
-    icon: DocumentPlusIcon,
-  },
-  {
-    name: "Bills",
-    path: "/bills",
-    icon: ClipboardDocumentListIcon,
-  },
-  {
-    name: "Contacts",
-    path: "/contacts",
-    icon: UserGroupIcon,
-  },
-  {
-    name: "QR only",
-    path: "/qr-only",
-    icon: QrCodeIcon,
-  },
-  {
-    name: "Help",
-    path: "/help",
-    icon: InformationCircleIcon,
-  },
-];
+import { formatBtwNumber } from "src/helpers";
+import { navItems } from "src/Router";
 
 export const Sidebar = () => {
   const location = useLocation();

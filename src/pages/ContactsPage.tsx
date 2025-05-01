@@ -17,7 +17,7 @@ import {
 } from "@heroui/react";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { useContactsStore, useContacts } from "../store/contactsStore";
-import { formatBtwNumber, formatIban } from "src/validation";
+import { formatBtwNumber, formatIban } from "src/helpers";
 
 export const ContactsPage = () => {
   const {
