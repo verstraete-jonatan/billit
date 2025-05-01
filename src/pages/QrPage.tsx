@@ -20,12 +20,16 @@ export const QrPage = () => {
   const { user } = useUserStore();
   const { settings, updateSettings } = useQrStore();
 
-  const [qrProps, setQrProps] = useState<QrCodeSettings>({ ...settings });
+  const [qrProps, setQrProps] = useState<QrCodeSettings>({
+    enableLogo: true,
+    ...settings,
+  });
+
   const [form, setForm] = useState<FormType>({
-    iban: user?.iban ?? "",
+    iban: user?.iban ?? "AB 000000000000000000",
     message: user?.structuredMessage ?? "",
     amount: "0",
-    name: user?.name ?? "",
+    name: user?.name ?? "Test",
   });
 
   const onSave = () => {
@@ -34,15 +38,11 @@ export const QrPage = () => {
 
   const update = useCallback(
     (key: keyof FormType, asBool?: boolean) => (e: ChangeEvent) => {
-      let v: string | boolean = (e.target as HTMLInputElement).value;
-
-      if (asBool) {
-        v = !Boolean(JSON.parse(v));
-      }
+      const v = (e.target as HTMLInputElement).value;
 
       setForm((prev) => ({
         ...prev,
-        [key]: asBool ? (Boolean(v) ? false : true) : v,
+        [key]: asBool ? !Boolean(JSON.parse(v)) : v,
       }));
     },
     []
@@ -50,14 +50,11 @@ export const QrPage = () => {
 
   const updateQr = useCallback(
     (key: keyof QrCodeSettings, asBool?: boolean) => (e: ChangeEvent) => {
-      let v: string | boolean = (e.target as HTMLInputElement).value;
+      const v = (e.target as HTMLInputElement).value;
 
-      if (asBool) {
-        v = !Boolean(JSON.parse(v));
-      }
       setQrProps((prev) => ({
         ...prev,
-        [key]: v,
+        [key]: asBool ? !Boolean(JSON.parse(v)) : v,
       }));
     },
     []
@@ -86,7 +83,7 @@ export const QrPage = () => {
             fgColor="grey"
             bgColor="black"
             {...qrProps}
-            logoImage={Boolean(qrProps.enableLogo) ? user?.logo : undefined}
+            logoImage={!Boolean(qrProps.enableLogo) ? undefined : user?.logo}
             size={300}
             ecLevel="L"
             style={{
@@ -103,6 +100,9 @@ export const QrPage = () => {
             <Select
               label="Qr style"
               value={qrProps.qrStyle}
+              defaultSelectedKeys={
+                qrProps.qrStyle ? [qrProps.qrStyle] : undefined
+              }
               onChange={updateQr("qrStyle")}
               className="mb-4"
             >
@@ -113,6 +113,9 @@ export const QrPage = () => {
             <Select
               label="Foreground"
               value={qrProps.fgColor}
+              defaultSelectedKeys={
+                qrProps.fgColor ? [qrProps.fgColor] : undefined
+              }
               onChange={updateQr("fgColor")}
               className="mb-4"
             >
@@ -122,17 +125,25 @@ export const QrPage = () => {
             </Select>
             <Select
               label="Background"
-              value={qrProps.fgColor}
+              value={qrProps.bgColor}
+              defaultSelectedKeys={
+                qrProps.bgColor ? [qrProps.bgColor] : undefined
+              }
               onChange={updateQr("bgColor")}
               className="mb-4"
             >
-              {["black", "white", "grey"].map((i) => (
+              {["black", "white", "grey", "transparent"].map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
               ))}
             </Select>
             <Select
               label="Enable/disable logo"
               value={String(!!qrProps.enableLogo)}
+              defaultSelectedKeys={
+                qrProps.enableLogo !== undefined
+                  ? [String(qrProps.enableLogo)]
+                  : undefined
+              }
               onChange={updateQr("enableLogo", true)}
               className="mb-4"
             >

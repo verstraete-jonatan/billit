@@ -2,11 +2,8 @@ import React, {
   useCallback,
   useState,
   useEffect,
-  ChangeEvent,
-  Suspense,
   ReactNode,
   Fragment,
-  useRef,
   memo,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -33,7 +30,7 @@ import { QRCode } from "react-qrcode-logo";
 
 import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
-import { format } from "date-fns";
+import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
 import { nl } from "date-fns/locale";
 import {
   formatBtwNumber,
@@ -102,7 +99,7 @@ export const CreateBill: React.FC = () => {
   const [isLoading, setLoading] = useState(false);
 
   const totalExclBtw = formValues.assignments.reduce(
-    (sum, a) => sum + calculateSubtotal(a),
+    (sum, a) => sum + calcSubtotal(a),
     0
   );
   const totalBtw = formValues.assignments.reduce(
@@ -116,7 +113,7 @@ export const CreateBill: React.FC = () => {
     if (!user || !selectedContact) {
       addToast({
         color: "danger",
-        title: "No user or contact. Edit this in the sidebar.",
+        title: "No user or contact.",
       });
       return;
     }
@@ -468,30 +465,31 @@ export const CreateBill: React.FC = () => {
 
                   <table className="w-full border-collapse mb-6">
                     <thead>
-                      <tr className="border-b border-t border-black text-sm">
-                        <th className="text-left py-2">Omschrijving</th>
-                        <th className="text-right py-2">Aantal</th>
-                        <th className="text-right py-2">Eenheidsprijs</th>
-                        <th className="text-right py-2">Subtotaal</th>
+                      <tr className="border-b border-t border-black text-sm text-left">
+                        <th className="">Datum</th>
+                        <th className="">Omschrijving</th>
+                        <th className="">Prijs x aantal</th>
+                        <th className="">incl. btw</th>
                       </tr>
                     </thead>
                     <tbody>
                       {formValues.assignments.map((a, index) => (
                         <tr
-                          key={index}
-                          className="border-b border-gray-200 text-sm"
+                          key={`row-${index}-${a.description}`}
+                          className="border-b border-gray-200 text-sm font-medium font-mono"
                         >
-                          <td className="py-2 text-xs">{`${
-                            a.description
-                          } ${formatDate(a.startDate)} - ${formatDate(
-                            a.endDate
-                          )}`}</td>
-                          <td className="text-right py-2">{a.quantity}</td>
-                          <td className="text-right py-2">
-                            {a.unitPrice.toFixed(2)}
+                          <td className="">
+                            {formatDateRange(
+                              new Date(a.startDate),
+                              new Date(a.endDate)
+                            )}
                           </td>
-                          <td className="text-right py-2">
-                            {calculateSubtotal(a).toFixed(2)}
+                          <td className="">{a.description}</td>
+                          <td className="">{`${calcSubtotal(a).toFixed(2)} x ${
+                            a.quantity
+                          }`}</td>
+                          <td className="">
+                            {`${calculateBtwAmount(a).toFixed(2)} (${a.btw}%)`}
                           </td>
                         </tr>
                       ))}
@@ -501,7 +499,7 @@ export const CreateBill: React.FC = () => {
                     <Totals
                       rows={[
                         ["Subtotaal", totalExclBtw],
-                        [`${formValues.assignments[0]?.btw}% BTW`, totalBtw],
+                        ["btw", totalBtw],
                         ["Totaal", totalInclBtw],
                       ]}
                     />
@@ -657,51 +655,12 @@ const generateBillId = () =>
   `BILL-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 // Calculate totals
-const calculateSubtotal = (assignment: Assignment) =>
+const calcSubtotal = (assignment: Assignment) =>
   assignment.quantity * assignment.unitPrice;
 
 const calculateBtwAmount = (assignment: Assignment) =>
-  calculateSubtotal(assignment) * (assignment.btw / 100);
+  calcSubtotal(assignment) * (assignment.btw / 100);
 
-const _onExport = async (billingNumber: string | number) => {
-  const element = document.getElementById("preview-content");
-
-  const opt = {
-    margin: 0,
-    filename: `factuur-${billingNumber}.pdf`,
-    image: { type: "png", quality: 2 },
-    html2canvas: { scale: 1, useCORS: true },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  };
-
-  await html2pdf().set(opt).from(element).save();
-};
-
-// const onExport = async (billingNumber: string | number) => {
-//   const element = document.getElementById("preview-content");
-//   if (!element) {
-//     return alert("Ops can't download :|");
-//   }
-
-//   // Use html2canvas to render the element with styles
-//   const canvas = await html2canvas(element, {
-//     scale: 2, // Higher scale for better quality
-//     useCORS: true, // If there are external images (e.g., logo)
-//     backgroundColor: "#ffffff", // Ensure the background is white
-//   });
-
-//   const imgData = canvas.toDataURL("image/png");
-//   const pdf = new jsPDF({
-//     orientation: "portrait",
-//     unit: "mm",
-//     format: "a4",
-//   });
-
-//   const imgWidth = 210; // A4 width in mm
-//   const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
-//   pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-//   pdf.save(`factuur-${billingNumber}.pdf`);
-// };
 const onExport = async (billingNumber: string | number) => {
   const element = document.getElementById("preview-content");
 
@@ -742,7 +701,7 @@ const onExport = async (billingNumber: string | number) => {
     .save();
 };
 
-const formatDate = (d: string) =>
+const formatDate = (d: string | Date) =>
   format(new Date(d), "dd/MM/yyyy", {
     locale: nl,
   });
@@ -751,3 +710,18 @@ const formatDate = (d: string) =>
 //       locale: nl,
 //     })
 //   : "nope";
+
+function formatDateRange(start: Date, end: Date): string {
+  return `${formatDate(start)} - ${formatDate(end)}`;
+
+  if (isSameDay(start, end)) {
+    return format(start, "dd/MM/yyyy");
+  }
+  if (isSameMonth(start, end) && isSameYear(start, end)) {
+    return `${format(start, "d")}-${format(end, "d MMM yyyy")}`;
+  }
+  if (isSameYear(start, end)) {
+    return `${format(start, "d MMM")} - ${format(end, "d MMM yyyy")}`;
+  }
+  return `${format(start, "dd/MM/yyyy")} - ${format(end, "dd/MM/yyyy")}`;
+}

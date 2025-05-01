@@ -1,3 +1,10 @@
+import { isValid as isIbanValid, toBBAN, printFormat } from "iban-ts";
+
+// type Fn = {
+//   validate: (i: string)=> boolean | string | void
+//   onBlur: (onChange: (value: string) => void) =>
+//     (event: React.ChangeEvent<HTMLInputElement>) => void
+// }
 export const structuredMessage = {
   validate: (input: string) => {
     if (input.includes("+")) {
@@ -35,47 +42,8 @@ export const structuredMessage = {
     },
 };
 
-const _structuredMessage = {
-  _validate: (msg: string) =>
-    /^(?:[0-9]{2,3}\/[0-9]{4}\/[0-9]{5}|\+[0-9]+\/[0-9]+\/[0-9]+)$/.test(
-      msg.replace(/\D/g, "")
-    ) || "Incorrect format",
-
-  validate: (input: string) => {
-    if (input.includes("+")) {
-      return `Format for + signs will be added automatically. Remove them here.`;
-    }
-    const nrInput = input.replace(/[^\d]/g, "").length;
-    if (![11, 12].includes(nrInput)) {
-      return `need to include 11 or 12 digits (${
-        nrInput < 11 ? 11 - nrInput : 12 - nrInput
-      })`;
-    }
-    return true;
-  },
-
-  onBlur:
-    (onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const digits = event.target.value.replace(/[^\d]/g, "");
-      if (![11, 12].includes(digits.length)) {
-        return;
-      }
-
-      digits.slice();
-
-      let value = event.target.value.replaceAll(/\D/g, "");
-      value = value.replace(/^([0-9]{1,3})/, "$1/");
-      if (value.length >= 7) {
-        value = value.replace(/([0-9]{4})$/, "/$1");
-      }
-      // modify event value
-      event.target.value = value;
-      onChange(event);
-    },
-};
-
 export const formatIban = (iban: string) => {
+  return printFormat(iban);
   const [country] = iban.split(/\d+/);
   return `${country.replaceAll(" ", "")} ${iban.replace(/\D/g, "")}`;
 };
