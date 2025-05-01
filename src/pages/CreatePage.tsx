@@ -11,6 +11,7 @@ import {
   DocumentDuplicateIcon,
   PlusIcon,
   TrashIcon,
+  XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
@@ -258,143 +259,155 @@ export const CreateBill: React.FC = () => {
           />
         </div>
 
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto max-h-[90vh]">
           <h3 className="font-semibold mb-2">Assignments</h3>
+
           {fields.map((assignment, index) => (
-            <div key={assignment.id} className="border p-4 rounded-lg mb-4">
-              <Controller
-                name={`assignments.${index}.description`}
-                control={control}
-                rules={{ required: "Required" }}
-                render={({ field }) => (
-                  <Input
-                    size="sm"
-                    isRequired
-                    label="Description"
-                    value={field.value}
-                    onChange={field.onChange}
-                    className="mb-2"
-                    isInvalid={!!errors.assignments?.[index]?.description}
-                    errorMessage={
-                      errors.assignments?.[index]?.description?.message
-                    }
+            <Card key={assignment.id} className="p-2 mb-4">
+              <div className="flex gap-3 flex-col">
+                <Controller
+                  name={`assignments.${index}.description`}
+                  control={control}
+                  rules={{ required: "Required" }}
+                  render={({ field }) => (
+                    <Input
+                      size="sm"
+                      isRequired
+                      label="Description"
+                      value={field.value}
+                      onChange={field.onChange}
+                      isInvalid={!!errors.assignments?.[index]?.description}
+                      errorMessage={
+                        errors.assignments?.[index]?.description?.message
+                      }
+                    />
+                  )}
+                />
+
+                <div className="flex gap-1">
+                  <Controller
+                    name={`assignments.${index}.quantity`}
+                    control={control}
+                    rules={{ required: "Required", min: 1 }}
+                    render={({ field }) => (
+                      <Input
+                        isRequired
+                        size="sm"
+                        label="Amount"
+                        type="number"
+                        value={field.value.toString()}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
+                        isInvalid={!!errors.assignments?.[index]?.quantity}
+                        errorMessage={
+                          errors.assignments?.[index]?.quantity?.message
+                        }
+                      />
+                    )}
                   />
-                )}
-              />
-              <Controller
-                name={`assignments.${index}.startDate`}
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Start date"
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={(value) => field.onChange(value?.toString())}
-                    className="mb-2 !text-white"
+                  <Controller
+                    name={`assignments.${index}.unitPrice`}
+                    control={control}
+                    rules={{ required: "Required", min: 0 }}
+                    render={({ field }) => (
+                      <Input
+                        isRequired
+                        size="sm"
+                        label="Unitprice"
+                        type="number"
+                        value={field.value.toString()}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value))
+                        }
+                        isInvalid={!!errors.assignments?.[index]?.unitPrice}
+                        errorMessage={
+                          errors.assignments?.[index]?.unitPrice?.message
+                        }
+                      />
+                    )}
                   />
-                )}
-              />
-              <Controller
-                name={`assignments.${index}.endDate`}
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="End date"
-                    value={field.value ? new Date(field.value) : null}
-                    onChange={(value) => field.onChange(value?.toString())}
-                    className="mb-2"
+                  <Controller
+                    name={`assignments.${index}.btw`}
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        isRequired
+                        size="sm"
+                        label="BTW"
+                        defaultSelectedKeys={[field.value.toString()]}
+                      >
+                        <SelectItem key="6">
+                          6%
+                          <p>{field.value}</p>
+                        </SelectItem>
+                        <SelectItem key="12">12%</SelectItem>
+                        <SelectItem key="21">21%</SelectItem>
+                      </Select>
+                    )}
                   />
-                )}
-              />
-              <Controller
-                name={`assignments.${index}.quantity`}
-                control={control}
-                rules={{ required: "Required", min: 1 }}
-                render={({ field }) => (
-                  <Input
-                    isRequired
-                    size="sm"
-                    label="Aantal"
-                    type="number"
-                    value={field.value.toString()}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                    className="mb-2"
-                    isInvalid={!!errors.assignments?.[index]?.quantity}
-                    errorMessage={
-                      errors.assignments?.[index]?.quantity?.message
-                    }
+                </div>
+
+                <div className="flex gap-1">
+                  <Controller
+                    name={`assignments.${index}.startDate`}
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        // minDate={new Date()}
+                        label="Start date"
+                        value={field.value ? new Date(field.value) : null}
+                        onChange={(value) => field.onChange(value?.toString())}
+                        className="flex-1"
+                      />
+                    )}
                   />
-                )}
-              />
-              <Controller
-                name={`assignments.${index}.unitPrice`}
-                control={control}
-                rules={{ required: "Required", min: 0 }}
-                render={({ field }) => (
-                  <Input
-                    isRequired
-                    size="sm"
-                    label="Eenheidsprijs"
-                    type="number"
-                    value={field.value.toString()}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    className="mb-2"
-                    isInvalid={!!errors.assignments?.[index]?.unitPrice}
-                    errorMessage={
-                      errors.assignments?.[index]?.unitPrice?.message
-                    }
+                  <Controller
+                    name={`assignments.${index}.endDate`}
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        label="End date"
+                        value={field.value ? new Date(field.value) : null}
+                        onChange={(value) => field.onChange(value?.toString())}
+                        className="flex-1"
+                      />
+                    )}
                   />
-                )}
-              />
-              <Controller
-                name={`assignments.${index}.btw`}
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    isRequired
-                    size="sm"
-                    label="BTW"
-                    defaultSelectedKeys={[field.value.toString()]}
-                    className="mb-2"
+                  <div className="flex-1"></div>
+                </div>
+
+                <div className="flex justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    // color="primary"
+                    onPress={() => insert(index + 1, { ...assignment })}
                   >
-                    <SelectItem key="6">
-                      6%
-                      <p>{field.value}</p>
-                    </SelectItem>
-                    <SelectItem key="12">12%</SelectItem>
-                    <SelectItem key="21">21%</SelectItem>
-                  </Select>
-                )}
-              />
-
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  // color="success"
-                  onPress={() => insert(index + 1, { ...assignment })}
-                  isIconOnly
-                >
-                  copy
-                </Button>
-                <Button
-                  variant="ghost"
-                  // color="danger"
-                  onPress={() => remove(index)}
-                  // size="sm"
-
-                  isIconOnly
-                >
-                  X
-                </Button>
+                    Copy
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    // color="warning"
+                    onPress={() => remove(index)}
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
-            </div>
+            </Card>
           ))}
-          <Button
-            variant="flat"
-            startContent={<PlusIcon className="h-5 w-5" />}
-            onPress={() => append(emptyAssignment)}
-          >
-            Add Assignment
-          </Button>
+          <div className="flex justify-center items-center">
+            <Button
+              variant="light"
+              color="primary"
+              startContent={<PlusIcon className="h-5 w-5" />}
+              onPress={() => append(emptyAssignment)}
+              isIconOnly
+              size="lg"
+              className="m-auto"
+              title="add new assignment"
+            />
+          </div>
         </div>
       </div>
 
