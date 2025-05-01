@@ -43,6 +43,9 @@ declare global {
     startDate: string;
     endDate: string;
     quantity: number;
+    // anything
+    unit?: string;
+    // price per unit
     unitPrice: number;
     btw: 6 | 12 | 21;
   }

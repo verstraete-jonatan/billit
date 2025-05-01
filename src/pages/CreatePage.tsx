@@ -1,17 +1,17 @@
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  ReactNode,
-  Fragment,
-  memo,
-} from "react";
+import React, { useCallback, useState, useEffect, Fragment, memo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-
+import { nl } from "date-fns/locale";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
+import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
+import { QRCode } from "react-qrcode-logo";
 
+import {
+  DocumentDuplicateIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@heroicons/react/20/solid";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   Button,
@@ -25,20 +25,17 @@ import {
   Image,
   addToast,
 } from "@heroui/react";
-import { PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
-import { QRCode } from "react-qrcode-logo";
 
 import { useBillStore, useContacts } from "../store";
 import { useUserStore } from "../store/userStore";
-import { format, isSameDay, isSameMonth, isSameYear } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useQrStore } from "src/store/qrCode";
+
 import {
   formatBtwNumber,
   formatIban,
   generateQRCodeData,
   structuredMessage,
 } from "src/helpers";
-import { useQrStore } from "src/store/qrCode";
 
 type BillForm = {
   contactId: string;
@@ -356,10 +353,6 @@ export const CreateBill: React.FC = () => {
                     isRequired
                     size="sm"
                     label="BTW"
-                    // value={field.value.toString()}
-                    // onChange={(e) =>
-                    //   field.onChange(parseInt(e.target.value) as 6 | 12 | 21)
-                    // }
                     defaultSelectedKeys={[field.value.toString()]}
                     className="mb-2"
                   >
@@ -376,19 +369,21 @@ export const CreateBill: React.FC = () => {
               <div className="flex gap-2">
                 <Button
                   variant="ghost"
-                  onPress={() => insert(index + 1, assignment)}
-                  size="sm"
+                  // color="success"
+                  onPress={() => insert(index + 1, { ...assignment })}
+                  isIconOnly
                 >
-                  Copy
+                  copy
                 </Button>
                 <Button
                   variant="ghost"
-                  color="danger"
+                  // color="danger"
                   onPress={() => remove(index)}
-                  startContent={<TrashIcon className="h-5 w-5" />}
-                  size="sm"
+                  // size="sm"
+
+                  isIconOnly
                 >
-                  Delete
+                  X
                 </Button>
               </div>
             </div>
@@ -466,10 +461,10 @@ export const CreateBill: React.FC = () => {
                   <table className="w-full border-collapse mb-6">
                     <thead>
                       <tr className="border-b border-t border-black text-sm text-left">
-                        <th className="">Datum</th>
-                        <th className="">Omschrijving</th>
-                        <th className="">Prijs x aantal</th>
-                        <th className="">incl. btw</th>
+                        <th>Omschrijving</th>
+                        <th>Aantal</th>
+                        <th>Eenheidsprijs</th>
+                        <th>Subtotal</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -478,19 +473,22 @@ export const CreateBill: React.FC = () => {
                           key={`row-${index}-${a.description}`}
                           className="border-b border-gray-200 text-sm font-medium font-mono"
                         >
-                          <td className="">
-                            {formatDateRange(
+                          <td>
+                            {`${a.description} ${formatDateRange(
                               new Date(a.startDate),
                               new Date(a.endDate)
-                            )}
+                            )}`}
                           </td>
-                          <td className="">{a.description}</td>
-                          <td className="">{`${calcSubtotal(a).toFixed(2)} x ${
+                          <td>
+                            {`${a.quantity} ${a.unit ? `(${a.unit})` : ""}`}
+                          </td>
+                          <td>{`${calcSubtotal(a).toFixed(2)} x ${
                             a.quantity
                           }`}</td>
-                          <td className="">
+                          <td>
                             {`${calculateBtwAmount(a).toFixed(2)} (${a.btw}%)`}
                           </td>
+                          {/* <td >{a.description}</td> */}
                         </tr>
                       ))}
                     </tbody>
@@ -558,15 +556,6 @@ export const CreateBill: React.FC = () => {
     </div>
   );
 };
-
-const Text = ({
-  children,
-  ...props
-}: { children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) => (
-  <div {...props} className={`text-sm ${props.className}`}>
-    {children}
-  </div>
-);
 
 const Tableish = ({
   data,
@@ -705,11 +694,6 @@ const formatDate = (d: string | Date) =>
   format(new Date(d), "dd/MM/yyyy", {
     locale: nl,
   });
-// d
-//   ? format(new Date(d), "dd/MM/yyyy", {
-//       locale: nl,
-//     })
-//   : "nope";
 
 function formatDateRange(start: Date, end: Date): string {
   return `${formatDate(start)} - ${formatDate(end)}`;
