@@ -27,8 +27,8 @@ import {
   addToast,
 } from "@heroui/react";
 
-import { useBillStore, useContacts } from "../store";
-import { useUserStore } from "../store/userStore";
+import { useBillStore, useContacts } from "../../store";
+import { useUserStore } from "../../store/userStore";
 import { useQrStore } from "src/store/qrCode";
 
 import {
@@ -37,14 +37,6 @@ import {
   generateQRCodeData,
   structuredMessage,
 } from "src/helpers";
-
-type BillForm = {
-  contactId: string;
-  expirationDate: string;
-  billingNumber: string;
-  structuredMessage: string;
-  assignments: Assignment[];
-};
 
 const now = new Date().toString();
 const emptyAssignment: Assignment = {
@@ -177,8 +169,8 @@ export const CreateBill: React.FC = () => {
       </div>
 
       {/* Form Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+      <div className="">
+        <div className="w-1/2">
           <Controller
             name="contactId"
             control={control}
@@ -200,42 +192,44 @@ export const CreateBill: React.FC = () => {
               </Select>
             )}
           />
-          <Controller
-            name="expirationDate"
-            control={control}
-            rules={{ required: "Required" }}
-            render={({ field }) => (
-              <DatePicker
-                label="Vervaldatum"
-                value={field.value ? new Date(field.value) : null}
-                onChange={(value) => field.onChange(value?.toString())}
-                minDate={new Date()}
-                className="mb-4"
-                slotProps={{
-                  textField: {
-                    error: !!errors.expirationDate,
-                    helperText: errors.expirationDate?.message,
-                  },
-                }}
-              />
-            )}
-          />
-          <Controller
-            name="billingNumber"
-            control={control}
-            rules={{ required: "Factuurnummer is verplicht" }}
-            render={({ field }) => (
-              <Input
-                isRequired
-                label="Factuurnummer"
-                value={field.value}
-                onChange={field.onChange}
-                className="mb-4"
-                isInvalid={!!errors.billingNumber}
-                errorMessage={errors.billingNumber?.message}
-              />
-            )}
-          />
+          <div className="flex justify-between gap-2">
+            <Controller
+              name="expirationDate"
+              control={control}
+              rules={{ required: "Required" }}
+              render={({ field }) => (
+                <DatePicker
+                  label="Vervaldatum"
+                  value={field.value ? new Date(field.value) : null}
+                  onChange={(value) => field.onChange(value?.toString())}
+                  minDate={new Date()}
+                  className="mb-4"
+                  slotProps={{
+                    textField: {
+                      error: !!errors.expirationDate,
+                      helperText: errors.expirationDate?.message,
+                    },
+                  }}
+                />
+              )}
+            />
+            <Controller
+              name="billingNumber"
+              control={control}
+              rules={{ required: "Factuurnummer is verplicht" }}
+              render={({ field }) => (
+                <Input
+                  isRequired
+                  label="Factuurnummer"
+                  value={field.value}
+                  onChange={field.onChange}
+                  className="mb-4"
+                  isInvalid={!!errors.billingNumber}
+                  errorMessage={errors.billingNumber?.message}
+                />
+              )}
+            />
+          </div>
           <Controller
             name="structuredMessage"
             control={control}
@@ -260,142 +254,166 @@ export const CreateBill: React.FC = () => {
         </div>
 
         <div className="overflow-y-auto max-h-[90vh]">
-          <h3 className="font-semibold mb-2">Assignments</h3>
-
-          {fields.map((assignment, index) => (
-            <Card key={assignment.id} className="p-2 mb-4">
-              <div className="flex gap-3 flex-col">
-                <Controller
-                  name={`assignments.${index}.description`}
-                  control={control}
-                  rules={{ required: "Required" }}
-                  render={({ field }) => (
-                    <Input
-                      size="sm"
-                      isRequired
-                      label="Description"
-                      value={field.value}
-                      onChange={field.onChange}
-                      isInvalid={!!errors.assignments?.[index]?.description}
-                      errorMessage={
-                        errors.assignments?.[index]?.description?.message
-                      }
+          <h2 className="font-semibold my-2">Assignments</h2>
+          <table className="w-full border-collapse mb-6">
+            <thead>
+              <tr className="border-b border-t border-black text-sm text-left">
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Unit price</th>
+                <th>btw</th>
+                <th>Dates</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fields.map((assignment, index) => (
+                <tr
+                  key={`assignment-${index}-${assignment.id}`}
+                  className="border-b border-gray-200 text-sm font-medium font-mono"
+                >
+                  {/* <div className="flex gap-3 flex-col"> */}
+                  {/* <div className="flex gap-1"> */}
+                  <td>
+                    <Controller
+                      name={`assignments.${index}.description`}
+                      control={control}
+                      rules={{ required: "Required" }}
+                      render={({ field }) => (
+                        <Input
+                          isRequired
+                          className="flex-5"
+                          label="Description"
+                          value={field.value}
+                          onChange={field.onChange}
+                          isInvalid={!!errors.assignments?.[index]?.description}
+                          errorMessage={
+                            errors.assignments?.[index]?.description?.message
+                          }
+                        />
+                      )}
                     />
-                  )}
-                />
-
-                <div className="flex gap-1">
-                  <Controller
-                    name={`assignments.${index}.quantity`}
-                    control={control}
-                    rules={{ required: "Required", min: 1 }}
-                    render={({ field }) => (
-                      <Input
-                        isRequired
-                        size="sm"
-                        label="Amount"
-                        type="number"
-                        value={field.value.toString()}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value))
-                        }
-                        isInvalid={!!errors.assignments?.[index]?.quantity}
-                        errorMessage={
-                          errors.assignments?.[index]?.quantity?.message
-                        }
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`assignments.${index}.unitPrice`}
-                    control={control}
-                    rules={{ required: "Required", min: 0 }}
-                    render={({ field }) => (
-                      <Input
-                        isRequired
-                        size="sm"
-                        label="Unitprice"
-                        type="number"
-                        value={field.value.toString()}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                        isInvalid={!!errors.assignments?.[index]?.unitPrice}
-                        errorMessage={
-                          errors.assignments?.[index]?.unitPrice?.message
-                        }
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`assignments.${index}.btw`}
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        isRequired
-                        size="sm"
-                        label="BTW"
-                        defaultSelectedKeys={[field.value.toString()]}
-                      >
-                        <SelectItem key="6">
-                          6%
-                          <p>{field.value}</p>
-                        </SelectItem>
-                        <SelectItem key="12">12%</SelectItem>
-                        <SelectItem key="21">21%</SelectItem>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                <div className="flex gap-1">
-                  <Controller
-                    name={`assignments.${index}.startDate`}
-                    control={control}
-                    render={({ field }) => (
-                      <DatePicker
-                        // minDate={new Date()}
-                        label="Start date"
-                        value={field.value ? new Date(field.value) : null}
-                        onChange={(value) => field.onChange(value?.toString())}
-                        className="flex-1"
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`assignments.${index}.endDate`}
-                    control={control}
-                    render={({ field }) => (
-                      <DatePicker
-                        label="End date"
-                        value={field.value ? new Date(field.value) : null}
-                        onChange={(value) => field.onChange(value?.toString())}
-                        className="flex-1"
-                      />
-                    )}
-                  />
-                  <div className="flex-1"></div>
-                </div>
-
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    // color="primary"
-                    onPress={() => insert(index + 1, { ...assignment })}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    // color="warning"
-                    onPress={() => remove(index)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+                  </td>
+                  <td>
+                    <Controller
+                      name={`assignments.${index}.quantity`}
+                      control={control}
+                      rules={{ required: "Required", min: 1 }}
+                      render={({ field }) => (
+                        <Input
+                          isRequired
+                          label="Amount"
+                          type="number"
+                          className="flex-1"
+                          value={field.value.toString()}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
+                          }
+                          isInvalid={!!errors.assignments?.[index]?.quantity}
+                          errorMessage={
+                            errors.assignments?.[index]?.quantity?.message
+                          }
+                        />
+                      )}
+                    />
+                  </td>
+                  <td>
+                    <Controller
+                      name={`assignments.${index}.unitPrice`}
+                      control={control}
+                      rules={{ required: "Required", min: 0 }}
+                      render={({ field }) => (
+                        <Input
+                          isRequired
+                          className="flex-1"
+                          label="Unitprice"
+                          type="number"
+                          value={field.value.toString()}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                          isInvalid={!!errors.assignments?.[index]?.unitPrice}
+                          errorMessage={
+                            errors.assignments?.[index]?.unitPrice?.message
+                          }
+                        />
+                      )}
+                    />
+                  </td>
+                  <td>
+                    <Controller
+                      name={`assignments.${index}.btw`}
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          isRequired
+                          label="BTW"
+                          defaultSelectedKeys={[field.value.toString()]}
+                          className="flex-1"
+                        >
+                          <SelectItem key="6">
+                            6%
+                            <p>{field.value}</p>
+                          </SelectItem>
+                          <SelectItem key="12">12%</SelectItem>
+                          <SelectItem key="21">21%</SelectItem>
+                        </Select>
+                      )}
+                    />
+                  </td>
+                  {/* </div> */}
+                  <td className="flex gap-1">
+                    <Controller
+                      name={`assignments.${index}.startDate`}
+                      control={control}
+                      render={({ field }) => (
+                        <DatePicker
+                          // minDate={new Date()}
+                          label="Start date"
+                          value={field.value ? new Date(field.value) : null}
+                          onChange={(value) =>
+                            field.onChange(value?.toString())
+                          }
+                          className="flex-1"
+                        />
+                      )}
+                    />
+                    <Controller
+                      name={`assignments.${index}.endDate`}
+                      control={control}
+                      render={({ field }) => (
+                        <DatePicker
+                          label="End date"
+                          value={field.value ? new Date(field.value) : null}
+                          onChange={(value) =>
+                            field.onChange(value?.toString())
+                          }
+                          className="flex-1"
+                        />
+                      )}
+                    />
+                    <div className="flex-1"></div>
+                  </td>
+                  {/* <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      // color="primary"
+                      onPress={() => insert(index + 1, { ...assignment })}
+                    >
+                      Copy
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      // color="warning"
+                      onPress={() => remove(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div> */}
+                  {/* </div> */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <div className="flex justify-center items-center">
             <Button
               variant="light"

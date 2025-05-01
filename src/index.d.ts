@@ -61,6 +61,14 @@ declare global {
 
   export type QrCodeSettings = QRCode["props"] & { enableLogo?: boolean };
 
+  type BillForm = {
+    contactId: string;
+    expirationDate: string;
+    billingNumber: string;
+    structuredMessage: string;
+    assignments: Assignment[];
+  };
+
   type Defined<A> = A extends UnDef ? never : A;
 }
 export {};
