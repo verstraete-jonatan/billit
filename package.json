@@ -21,6 +21,7 @@
     "@heroui/react": "^2.8.0-beta.2",
     "@mui/material": "^7.0.2",
     "@mui/x-date-pickers": "^8.0.0-beta.3",
+    "@tanstack/react-table": "^8.21.3",
     "date-fns": "^4.1.0",
     "html2canvas-pro": "^1.5.8",
     "html2pdf.js": "^0.9.0",

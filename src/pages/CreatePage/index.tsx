@@ -38,15 +38,8 @@ import {
   structuredMessage,
 } from "src/helpers";
 
-const now = new Date().toString();
-const emptyAssignment: Assignment = {
-  description: "",
-  startDate: now,
-  endDate: now,
-  quantity: 1,
-  unitPrice: 0,
-  btw: 21,
-};
+import { emptyAssignment } from "./helpers";
+import { Assignments } from "./CreateAssignments";
 
 export const CreateBill: React.FC = () => {
   const { bill_id } = useParams<{ bill_id: string }>();
@@ -79,14 +72,14 @@ export const CreateBill: React.FC = () => {
     },
   });
 
-  const { fields, append, remove, insert } = useFieldArray<BillForm>({
-    control,
-    name: "assignments",
-  });
-
   const formValues = watch();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
+
+  const assignmentRows = useFieldArray<BillForm>({
+    control,
+    name: "assignments",
+  });
 
   const totalExclBtw = formValues.assignments.reduce(
     (sum, a) => sum + calcSubtotal(a),
@@ -253,180 +246,7 @@ export const CreateBill: React.FC = () => {
           />
         </div>
 
-        <div className="overflow-y-auto max-h-[90vh]">
-          <h2 className="font-semibold my-2">Assignments</h2>
-          <table className="w-full border-collapse mb-6">
-            <thead>
-              <tr className="border-b border-t border-black text-sm text-left">
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Unit price</th>
-                <th>btw</th>
-                <th>Dates</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fields.map((assignment, index) => (
-                <tr
-                  key={`assignment-${index}-${assignment.id}`}
-                  className="border-b border-gray-200 text-sm font-medium font-mono"
-                >
-                  {/* <div className="flex gap-3 flex-col"> */}
-                  {/* <div className="flex gap-1"> */}
-                  <td>
-                    <Controller
-                      name={`assignments.${index}.description`}
-                      control={control}
-                      rules={{ required: "Required" }}
-                      render={({ field }) => (
-                        <Input
-                          isRequired
-                          className="flex-5"
-                          label="Description"
-                          value={field.value}
-                          onChange={field.onChange}
-                          isInvalid={!!errors.assignments?.[index]?.description}
-                          errorMessage={
-                            errors.assignments?.[index]?.description?.message
-                          }
-                        />
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <Controller
-                      name={`assignments.${index}.quantity`}
-                      control={control}
-                      rules={{ required: "Required", min: 1 }}
-                      render={({ field }) => (
-                        <Input
-                          isRequired
-                          label="Amount"
-                          type="number"
-                          className="flex-1"
-                          value={field.value.toString()}
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
-                          }
-                          isInvalid={!!errors.assignments?.[index]?.quantity}
-                          errorMessage={
-                            errors.assignments?.[index]?.quantity?.message
-                          }
-                        />
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <Controller
-                      name={`assignments.${index}.unitPrice`}
-                      control={control}
-                      rules={{ required: "Required", min: 0 }}
-                      render={({ field }) => (
-                        <Input
-                          isRequired
-                          className="flex-1"
-                          label="Unitprice"
-                          type="number"
-                          value={field.value.toString()}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value))
-                          }
-                          isInvalid={!!errors.assignments?.[index]?.unitPrice}
-                          errorMessage={
-                            errors.assignments?.[index]?.unitPrice?.message
-                          }
-                        />
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <Controller
-                      name={`assignments.${index}.btw`}
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          isRequired
-                          label="BTW"
-                          defaultSelectedKeys={[field.value.toString()]}
-                          className="flex-1"
-                        >
-                          <SelectItem key="6">
-                            6%
-                            <p>{field.value}</p>
-                          </SelectItem>
-                          <SelectItem key="12">12%</SelectItem>
-                          <SelectItem key="21">21%</SelectItem>
-                        </Select>
-                      )}
-                    />
-                  </td>
-                  {/* </div> */}
-                  <td className="flex gap-1">
-                    <Controller
-                      name={`assignments.${index}.startDate`}
-                      control={control}
-                      render={({ field }) => (
-                        <DatePicker
-                          // minDate={new Date()}
-                          label="Start date"
-                          value={field.value ? new Date(field.value) : null}
-                          onChange={(value) =>
-                            field.onChange(value?.toString())
-                          }
-                          className="flex-1"
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={`assignments.${index}.endDate`}
-                      control={control}
-                      render={({ field }) => (
-                        <DatePicker
-                          label="End date"
-                          value={field.value ? new Date(field.value) : null}
-                          onChange={(value) =>
-                            field.onChange(value?.toString())
-                          }
-                          className="flex-1"
-                        />
-                      )}
-                    />
-                    <div className="flex-1"></div>
-                  </td>
-                  {/* <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      // color="primary"
-                      onPress={() => insert(index + 1, { ...assignment })}
-                    >
-                      Copy
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      // color="warning"
-                      onPress={() => remove(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div> */}
-                  {/* </div> */}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="flex justify-center items-center">
-            <Button
-              variant="light"
-              color="primary"
-              startContent={<PlusIcon className="h-5 w-5" />}
-              onPress={() => append(emptyAssignment)}
-              isIconOnly
-              size="lg"
-              className="m-auto"
-              title="add new assignment"
-            />
-          </div>
-        </div>
+        <Assignments control={control} fields={assignmentRows} />
       </div>
 
       {/* Preview Modal */}
