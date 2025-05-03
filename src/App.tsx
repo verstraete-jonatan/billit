@@ -19,7 +19,7 @@ export const App = () => {
     <HashRouter>
       <ThemeProvider theme={darkTheme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <HeroUIProvider>
+          <HeroUIProvider locale="en-US">
             <ToastProvider />
             <main className="dark text-foreground bg-background">
               <div className="flex h-screen w-screen">

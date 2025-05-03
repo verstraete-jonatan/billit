@@ -59,7 +59,7 @@ declare global {
     logo: string | null; // Base64 string for the logo image
   };
 
-  export type QrCodeSettings = QRCode["props"] & { enableLogo?: boolean };
+  export type QrCodeSettings = QRCode["props"] & { enableLogo: boolean };
 
   type BillForm = {
     contactId: string;

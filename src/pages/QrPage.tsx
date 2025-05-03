@@ -3,9 +3,17 @@ import { QRCode } from "react-qrcode-logo";
 import { useUserStore } from "src/store";
 
 import { Button, Input, Select, SelectItem } from "@heroui/react";
-import { ChangeEvent, Suspense, useCallback, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { generateQRCodeData } from "src/helpers";
 import { useQrStore } from "src/store/qrCode";
+import { debounce } from "@mui/material";
 
 type FormType = Pick<User, "iban" | "name"> & {
   amount: string;
@@ -21,7 +29,6 @@ export const QrPage = () => {
   const { settings, updateSettings } = useQrStore();
 
   const [qrProps, setQrProps] = useState<QrCodeSettings>({
-    enableLogo: true,
     ...settings,
   });
 
@@ -32,9 +39,9 @@ export const QrPage = () => {
     name: user?.name ?? "Test",
   });
 
-  const onSave = () => {
+  useEffect(() => {
     updateSettings(qrProps);
-  };
+  }, [qrProps]);
 
   const update = useCallback(
     (key: keyof FormType, asBool?: boolean) => (e: ChangeEvent) => {
@@ -54,7 +61,7 @@ export const QrPage = () => {
 
       setQrProps((prev) => ({
         ...prev,
-        [key]: asBool ? !Boolean(JSON.parse(v)) : v,
+        [key]: asBool ? Boolean(JSON.parse(v)) : v,
       }));
     },
     []
@@ -66,6 +73,7 @@ export const QrPage = () => {
         <div className="w-full flex h-fit">
           {field.map((i) => (
             <Input
+              key={i}
               isRequired
               label={i}
               type={i === "amount" ? "number" : undefined}
@@ -105,6 +113,7 @@ export const QrPage = () => {
               }
               onChange={updateQr("qrStyle")}
               className="mb-4"
+              disallowEmptySelection
             >
               {qrStyles.map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
@@ -118,6 +127,7 @@ export const QrPage = () => {
               }
               onChange={updateQr("fgColor")}
               className="mb-4"
+              disallowEmptySelection
             >
               {["black", "white", "grey"].map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
@@ -139,17 +149,14 @@ export const QrPage = () => {
             <Select
               label="Enable/disable logo"
               value={String(!!qrProps.enableLogo)}
-              defaultSelectedKeys={
-                qrProps.enableLogo !== undefined
-                  ? [String(qrProps.enableLogo)]
-                  : undefined
-              }
+              defaultSelectedKeys={[String(qrProps.enableLogo)]}
               onChange={updateQr("enableLogo", true)}
               className="mb-4"
+              disallowEmptySelection
             >
               {[true, false].map((i) => (
                 <SelectItem key={String(i)}>
-                  {i ? "Disable" : "Enable"}
+                  {!i ? "Disable" : "Enable"}
                 </SelectItem>
               ))}
             </Select>
@@ -158,16 +165,16 @@ export const QrPage = () => {
 
         <div className="w-full flex justify-center items-center h-[100px]">
           <div className="text-center">
-            <Button
+            {/* <Button
               type="button"
               color="primary"
               // className="w-[60%] py-2 m-auto"
               onPress={onSave}
             >
               Save
-            </Button>
-            <p className="text-xs text-[#555] italic pt-1">
-              Only styling of QR code is saved.
+            </Button> */}
+            <p className="text-md text-[#555] italic pt-1">
+              Changes are saved automatically when updating.
             </p>
           </div>
         </div>

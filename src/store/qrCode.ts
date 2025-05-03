@@ -10,7 +10,7 @@ interface QrStore {
 export const useQrStore = create<QrStore>()(
   persist(
     (set) => ({
-      settings: {},
+      settings: { enableLogo: true },
       updateSettings: (settings: QrCodeSettings) => {
         set((state) => ({
           settings: { ...state.settings, ...settings } as QrCodeSettings,
