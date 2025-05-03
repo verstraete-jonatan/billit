@@ -20,7 +20,6 @@ export const Assignments = ({
   control: Control<BillForm, any, BillForm>;
 }) => {
   const onDuplicate = (index: number, assignment: Assignment) => () => {
-    console.log(assignment);
     insert(index + 1, { ...assignment }, { shouldFocus: true });
   };
 
