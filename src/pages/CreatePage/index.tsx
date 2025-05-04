@@ -48,6 +48,7 @@ import {
   formatBtwNumber,
   formatIban,
   generateQRCodeData,
+  useBeforeLeave,
   validationMessage,
 } from "src/helpers";
 import { ThemeProvider } from "@mui/material";
@@ -107,12 +108,11 @@ export const CreateBill: React.FC = () => {
     name: "assignments",
   });
 
-  useBeforeUnload(() => {
-    console.log("olalla");
-    // onSave();
-  });
-
   const onSubmit = (fn: () => any) => () => handleSubmit(fn, onError)();
+  // useBeforeLeave(isDirty, () => onSave(false));
+  useBeforeUnload(() => {
+    isDirty && onSave(false);
+  });
 
   const onError = useCallback(() => {
     try {
@@ -122,8 +122,6 @@ export const CreateBill: React.FC = () => {
         "ref" in firstErr
           ? firstErr.ref
           : (Object.values(firstErr)[0] as any)?.ref;
-
-      console.log("ONERR", ref, firstErr);
 
       ref?.focus();
     } catch (e) {
@@ -199,11 +197,23 @@ export const CreateBill: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    console.log("saving");
-    return () => {
+    const handleHashChange = () => {
+      console.log("saving");
       onSave(false);
     };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
   }, [onSave]);
+
+  // useEffect(() => {
+  //   console.log("saving");
+  //   return () => {
+  //     onSave(false);
+  //   };
+  // }, [onSave]);
 
   // TanStack Table columns for edit mode
   const columns = useMemo(

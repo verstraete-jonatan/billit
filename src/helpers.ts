@@ -1,4 +1,6 @@
 import { isValid as isIbanValid, toBBAN, printFormat } from "iban-ts";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation, useBlocker } from "react-router-dom";
 
 // type Fn = {
 //   validate: (i: string)=> boolean | string | void
@@ -104,4 +106,29 @@ type ValidationItem = {
   onBlur: (
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+export const useBeforeLeave = (shouldBlock: boolean, callback: () => void) => {
+  const navigate = useNavigate();
+  const [nextLocation, setNextLocation] = useState<string | null>(null);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      shouldBlock && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setNextLocation(blocker.location.pathname);
+    }
+  }, [blocker.state]);
+
+  useEffect(() => {
+    if (nextLocation) {
+      callback();
+      blocker.proceed?.();
+      setNextLocation(null);
+      navigate(nextLocation);
+    }
+  }, [blocker, nextLocation, callback, navigate]);
 };

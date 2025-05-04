@@ -6,7 +6,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import { Sidebar } from "./components/Sidebar";
 
-import { AppRoutes } from "./Router";
+import { AppRoutes } from "./Routes";
 import { darkTheme } from "./themes";
 
 export const App = () => {

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button, useDisclosure } from "@heroui/react"; // Assuming HeroUI components
 import { EditUserModal } from "./EditUserModal";
 
-import { navItems } from "src/Router";
+import { navItems } from "src/Routes";
 import { EyeIcon } from "@heroicons/react/24/outline";
 
 export const Sidebar = () => {
