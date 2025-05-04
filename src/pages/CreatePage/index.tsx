@@ -392,6 +392,7 @@ export const CreateBill: React.FC = () => {
               <Button
                 color={isEditing ? "primary" : "secondary"}
                 onPress={() => setIsEditing(!isEditing)}
+                isDisabled={isExporting}
                 startContent={
                   isEditing ? (
                     <EyeIcon className="h-5 w-5" />
