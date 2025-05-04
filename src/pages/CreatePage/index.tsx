@@ -138,9 +138,9 @@ export const CreateBill: React.FC = () => {
   const selectedContact = contacts.find((c) => c.id === formValues.contactId);
 
   const onSave = useCallback(
-    (v = true) => {
+    (verboseAndNav = true) => {
       if (!user || !selectedContact || !isValid) {
-        v &&
+        verboseAndNav &&
           addToast({
             color: "danger",
             title: "No user or missing details.",
@@ -159,13 +159,20 @@ export const CreateBill: React.FC = () => {
         assignments: formValues.assignments,
       };
       updateBill(billData);
-      v && navigate("/bills");
+      // verboseAndNav && navigate("/bills");
     },
     [billId]
   );
 
   const handleExport = useCallback(async () => {
-    onSave();
+    if (!isValid) {
+      addToast({
+        color: "danger",
+        title: "No user or missing details.",
+      });
+      return;
+    }
+    onSave(true);
     setExporting(true);
     try {
       await exportToPdf(formValues.billingNumber);
@@ -174,7 +181,7 @@ export const CreateBill: React.FC = () => {
       window.alert("Reload page - " + error.message);
     }
     setExporting(false);
-  }, [formValues.billingNumber]);
+  }, [formValues.billingNumber, isValid]);
 
   useEffect(() => {
     if (!user?.iban) {
