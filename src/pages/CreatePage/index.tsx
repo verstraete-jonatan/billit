@@ -179,6 +179,9 @@ export const CreateBill: React.FC = () => {
   );
 
   const handleExport = useCallback(async () => {
+    if (isEditing) {
+      setIsEditing(false);
+    }
     if (!onSave(true)) {
       return;
     }
@@ -190,7 +193,7 @@ export const CreateBill: React.FC = () => {
       window.alert("Reload page - " + error.message);
     }
     setExporting(false);
-  }, [formValues.billingNumber, onSave]);
+  }, [formValues.billingNumber, isEditing, onSave]);
 
   useEffect(() => {
     if (!user?.iban) {
