@@ -7,12 +7,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Sidebar } from "./components/Sidebar";
 
 import { AppRoutes } from "./Router";
-
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
+import { darkTheme } from "./themes";
 
 export const App = () => {
   return (

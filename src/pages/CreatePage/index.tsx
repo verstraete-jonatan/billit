@@ -46,6 +46,7 @@ import {
 } from "src/helpers";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { validation_message } from "./helpers";
+import { darkTheme, lightTheme } from "src/themes";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -398,13 +399,13 @@ export const CreateBill: React.FC = () => {
   const og_width = ` ${isEditing ? "w-2/3" : "w-[210mm]"}`;
 
   return (
-    <ThemeProvider theme={lightTheme}>
-      <main className="light text-foreground bg-background">
+    <ThemeProvider theme={darkTheme}>
+      <main className={`${isEditMode ? "dark" : "light"}`}>
         <div
           className="h-screen p-6 flex flex-col items-center"
           style={{
             background:
-              "linear-gradient(90deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 28, 1) 13%, rgba(5, 0, 20, 1) 35%, rgba(0, 0, 20, 1) 67%, rgba(8, 0, 20, 1) 85%, rgba(0, 0, 0, 1) 100%)",
+              "linear-gradient(90deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 15, 1) 13%, rgba(2, 0, 10, 1) 35%, rgba(0, 0, 10, 1) 67%, rgba(4, 0, 10, 1) 85%, rgba(0, 0, 0, 1) 100%)",
           }}
         >
           {/* Action Buttons */}
@@ -414,7 +415,6 @@ export const CreateBill: React.FC = () => {
             </h2>
             <div className="space-x-2">
               <Button
-                variant="ghost"
                 color={isEditing ? "primary" : "secondary"}
                 onPress={() => setIsEditing(!isEditing)}
                 startContent={
@@ -461,10 +461,9 @@ export const CreateBill: React.FC = () => {
           {user ? (
             <>
               <Card
-                className={
-                  "p-6 bg-white text-black shadow-2xl h-[297mm] overflow-scroll" +
-                  og_width
-                }
+                className={`shadow-2xl h-[297mm] overflow-scroll p-6 ${
+                  isEditing ? "bg-black text-white" : "bg-white text-black"
+                } ${og_width}`}
                 id="bill-content"
               >
                 {/* Header */}
@@ -589,9 +588,19 @@ export const CreateBill: React.FC = () => {
                 {/* Assignments Table */}
                 {isEditing ? (
                   <>
-                    <table className="w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 bg-white">
+                    <table
+                      className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
+                        isEditing ? "bg-black" : "bg-white"
+                      }`}
+                    >
                       <thead>
-                        <tr className="border-b border-t border-gray-300 text-sm text-left bg-gray-100 text-gray-700 uppercase">
+                        <tr
+                          className={`border-b border-t  text-sm text-left  uppercase ${
+                            isEditing
+                              ? "bg-gray-900 text-gray-100 border-gray-800"
+                              : "bg-gray-100 text-gray-700 border-gray-300"
+                          }`}
+                        >
                           {table.getHeaderGroups().map((headerGroup) => (
                             <React.Fragment key={headerGroup.id}>
                               {headerGroup.headers.map((header) => (
@@ -612,7 +621,11 @@ export const CreateBill: React.FC = () => {
                         {table.getRowModel().rows.map((row) => (
                           <tr
                             key={row.id}
-                            className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                            className={`border-b transition-colors ${
+                              isEditing
+                                ? "border-gray-900 hover:bg-gray-900"
+                                : "border-gray-200 hover:bg-gray-50"
+                            }`}
                           >
                             {row.getVisibleCells().map((cell) => (
                               <td key={cell.id} className="px-4 py-3">
@@ -706,16 +719,13 @@ export const CreateBill: React.FC = () => {
                         ecLevel="M"
                         logoImage={user.logo}
                         {...qrCodeSettings}
-                        style={{
-                          filter: "opacity(0.8)",
-                        }}
                       />
 
                       {isEditing && (
                         <div className="absolute top-[35%] left-0 bg-[#ffffff33] backdrop-blur shadow text-center py-1 w-full opacity-90">
                           Modify{" "}
                           <a href="#qr" className="link">
-                            @QR page
+                            QR page
                           </a>
                         </div>
                       )}
@@ -723,6 +733,7 @@ export const CreateBill: React.FC = () => {
 
                     <div className="min-w-[300px]">
                       <div className="font-black">Betalingsinformatie</div>
+                      <hr className="mb-2" />
                       <div className="grid grid-cols-2 gap-0.5">
                         <div className="font-medium pr-2 text-sm">IBAN:</div>
                         <div className="text-[#111] text-sm">
@@ -743,6 +754,7 @@ export const CreateBill: React.FC = () => {
                               }}
                               render={({ field }) => (
                                 <Input
+                                  label="structured message"
                                   isRequired
                                   max={12 + 2 + 6}
                                   value={field.value}
@@ -835,7 +847,7 @@ const TableishUser = ({ user }: { user?: User | Contact }) => {
   return (
     <div className="w-[300px]">
       <div className="font-bold">{user.name}</div>
-      <hr />
+      <hr className="mb-2" />
       <div className="grid grid-cols-1 gap-0.5">
         {details.map((i, index) => (
           <div
@@ -879,9 +891,3 @@ const Totals = ({ rows }: { rows: [string, number][] }) => (
     })}
   </div>
 );
-
-const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-  },
-});
