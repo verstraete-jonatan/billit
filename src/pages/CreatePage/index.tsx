@@ -377,6 +377,7 @@ export const CreateBill: React.FC = () => {
   });
 
   const og_width = ` ${isEditing ? "w-2/3" : "w-[210mm]"}`;
+  const isDarkMode = false && isEditMode;
 
   if (!user?.iban || !user?.name) {
     return (
@@ -389,18 +390,12 @@ export const CreateBill: React.FC = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <main className={`${isEditMode ? "dark" : "light"}`}>
-        <div
-          className="h-screen p-6 flex flex-col items-center"
-          style={{
-            _background:
-              "linear-gradient(90deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 15, 1) 13%, rgba(2, 0, 10, 1) 35%, rgba(0, 0, 10, 1) 67%, rgba(4, 0, 10, 1) 85%, rgba(0, 0, 0, 1) 100%)",
-          }}
-        >
+      <main className={`${isDarkMode ? "dark" : "light"}`}>
+        <div className="h-screen p-6 flex flex-col items-center">
           {/* Action Buttons */}
           <div className={"w-[210mm] flex justify-between mb-4"}>
             <h2 className="text-2xl font-bold text-white">
-              {isEditMode ? "Edit Bill" : "New Bill"}
+              {isDarkMode ? "Edit Bill" : "New Bill"}
             </h2>
             <div className="space-x-2">
               <Button
@@ -451,7 +446,7 @@ export const CreateBill: React.FC = () => {
             <>
               <Card
                 className={`shadow-2xl h-[297mm] overflow-scroll p-6 shadow-[#102] ${
-                  isEditing ? "bg-black text-white" : "bg-white text-black"
+                  isDarkMode ? "bg-black text-white" : "bg-white text-black"
                 } ${og_width}`}
                 id="bill-content"
               >
@@ -508,7 +503,7 @@ export const CreateBill: React.FC = () => {
                       <div className="font-medium pr-2 text-sm">Datum:</div>
                       <div
                         className={`text-sm ${
-                          isEditing ? "text-white" : "text-[#111]"
+                          isDarkMode ? "text-white" : "text-[#111]"
                         }`}
                       >
                         {format(new Date(), "dd/MM/yyyy", { locale: nl })}
@@ -518,7 +513,7 @@ export const CreateBill: React.FC = () => {
                       </div>
                       <div
                         className={`text-sm ${
-                          isEditing ? "text-white" : "text-[#111]"
+                          isDarkMode ? "text-white" : "text-[#111]"
                         }`}
                       >
                         {isEditing ? (
@@ -554,7 +549,7 @@ export const CreateBill: React.FC = () => {
                       </div>
                       <div
                         className={`text-sm ${
-                          isEditing ? "text-white" : "text-[#111]"
+                          isDarkMode ? "text-white" : "text-[#111]"
                         }`}
                       >
                         {isEditing ? (
@@ -623,13 +618,13 @@ export const CreateBill: React.FC = () => {
                   <>
                     <table
                       className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
-                        isEditing ? "bg-black" : "bg-white"
+                        isDarkMode ? "bg-black" : "bg-white"
                       }`}
                     >
                       <thead>
                         <tr
                           className={`border-b border-t  text-sm text-left  uppercase ${
-                            isEditing
+                            isDarkMode
                               ? "bg-gray-900 text-gray-100 border-gray-800"
                               : "bg-gray-100 text-gray-700 border-gray-300"
                           }`}
@@ -655,7 +650,7 @@ export const CreateBill: React.FC = () => {
                           <tr
                             key={row.id}
                             className={`border-b transition-colors ${
-                              isEditing
+                              isDarkMode
                                 ? "border-gray-900 hover:bg-gray-900"
                                 : "border-gray-200 hover:bg-gray-50"
                             }`}
@@ -679,7 +674,6 @@ export const CreateBill: React.FC = () => {
                         startContent={<PlusIcon className="h-5 w-5" />}
                         onPress={() => append(emptyAssignment)}
                         size="lg"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Add Assignment
                       </Button>
@@ -754,14 +748,14 @@ export const CreateBill: React.FC = () => {
                         {...qrCodeSettings}
                       />
 
-                      {isEditing && (
+                      {/* {isEditing && (
                         <div className="absolute top-[35%] left-0 bg-[#ffffff33] backdrop-blur shadow text-center py-1 w-full opacity-90">
                           Modify{" "}
                           <a href="#qr" className="link">
                             QR page
                           </a>
                         </div>
-                      )}
+                      )} */}
                     </div>
 
                     <div className="min-w-[300px]">
@@ -771,7 +765,7 @@ export const CreateBill: React.FC = () => {
                         <div className="font-medium pr-2 text-sm">IBAN:</div>
                         <div
                           className={`text-sm ${
-                            isEditing ? "text-white" : "text-[#111]"
+                            isDarkMode ? "text-white" : "text-[#111]"
                           }`}
                         >
                           {formatIban(user.iban)}
@@ -781,7 +775,7 @@ export const CreateBill: React.FC = () => {
                         </div>
                         <div
                           className={`text-sm ${
-                            isEditing ? "text-white" : "text-[#111]"
+                            isDarkMode ? "text-white" : "text-[#111]"
                           }`}
                         >
                           {formValues.structuredMessage}
@@ -791,7 +785,7 @@ export const CreateBill: React.FC = () => {
                         </div>
                         <div
                           className={`text-sm ${
-                            isEditing ? "text-white" : "text-[#111]"
+                            isDarkMode ? "text-white" : "text-[#111]"
                           }`}
                         >
                           {formatDate(formValues.expirationDate)}
