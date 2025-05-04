@@ -810,17 +810,9 @@ export const CreateBill: React.FC = () => {
                 </div>
               </Card>
               <div className="italic text-white text-xs font-mono text-center">
-                <div>
-                  {isEditing
-                    ? "Changes are saved automatically"
-                    : " True size display A4 (210mm x 297mm)"}
-                  <div
-                    className="inline underline cursor-pointer pl-2"
-                    onClick={invertColors}
-                  >
-                    Invert <EyeIcon className="h-5 w-5 inline" />
-                  </div>
-                </div>
+                {isEditing
+                  ? "Changes are saved automatically"
+                  : " True size display A4 (210mm x 297mm)"}
               </div>
             </>
           ) : (
@@ -854,6 +846,7 @@ const TableishUser = ({ user }: { user?: User | Contact }) => {
       iban: "",
       settings: {},
     } satisfies User);
+
   const details = [
     `${user.address.street} ${user.address.houseNumber}`,
     user.address.city,
@@ -932,11 +925,3 @@ const totalWithBtw = (assignment: Assignment) =>
 // Format date utility
 const formatDate = (d?: string | Date) =>
   d ? format(new Date(d), "dd/MM/yyyy", { locale: nl }) : "-";
-
-const invertColors = () => {
-  const elm = document.getElementById("bill-content");
-  if (elm) {
-    elm.classList.toggle("invert-100");
-    console.log(elm.classList);
-  }
-};

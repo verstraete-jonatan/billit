@@ -9,22 +9,6 @@ interface EditUserModalProps {
   onClose: () => void;
 }
 
-type UserForm = {
-  name: string;
-  address: {
-    street: string;
-    houseNumber: string;
-    city: string;
-    country: string;
-  };
-  btw: string;
-  email: string;
-  iban: string;
-  structuredMessage: string;
-  voorwaardedenUrl: string;
-  logo: string | null;
-};
-
 export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   const { user, setUser } = useUserStore();
 
@@ -34,22 +18,10 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<UserForm>({
+  } = useForm<User>({
     mode: "onChange",
     defaultValues: {
-      name: user?.name || "",
-      address: {
-        street: user?.address.street || "",
-        houseNumber: user?.address.houseNumber || "",
-        city: user?.address.city || "",
-        country: user?.address.country || "",
-      },
-      btw: user?.btw || "",
-      email: user?.email || "",
-      iban: user?.iban || "",
-      structuredMessage: user?.structuredMessage || "",
-      voorwaardedenUrl: user?.voorwaardedenUrl || "",
-      logo: user?.logo || null,
+      ...user,
     },
   });
 
@@ -66,18 +38,8 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     }
   };
 
-  const onSubmit = (data: UserForm) => {
-    setUser({
-      id: "me",
-      name: data.name,
-      address: data.address,
-      btw: data.btw,
-      email: data.email,
-      iban: data.iban,
-      logo: data.logo || "",
-      voorwaardedenUrl: data.voorwaardedenUrl,
-      structuredMessage: data.structuredMessage,
-    });
+  const onSubmit = (data: User) => {
+    setUser({ ...user, ...data });
     onClose();
   };
 
@@ -268,6 +230,8 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   value={field.value}
                   onChange={field.onChange}
                   className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
+                  isInvalid={!!errors.voorwaardedenUrl}
+                  errorMessage={errors.voorwaardedenUrl?.message}
                 />
               )}
             />
@@ -322,6 +286,6 @@ const validateBtw = (value: string) => {
   return btwRegex.test(value) || "Ongeldig BTW-nummer (bijv. BE0123.456.789)";
 };
 
-const validateEmail = (value: string) => {
-  return emailRegex.test(value) || "invalid email";
+const validateEmail = (value?: string) => {
+  return (value && emailRegex.test(value)) || "invalid email";
 };

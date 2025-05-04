@@ -244,6 +244,7 @@ const UpdateContactModal = ({
             value={iban}
             onChange={(e) => setIban(e.target.value)}
           />
+          <p>note: no validation here, make sure to fill in correctly</p>
         </div>
       </ModalBody>
       <ModalFooter>
