@@ -17,7 +17,12 @@ export const App = () => {
           <HeroUIProvider locale="en-US">
             <ToastProvider />
             <main className="dark text-foreground bg-background">
-              <div className="flex h-screen w-screen">
+              <div
+                className={`flex h-screen w-screen ${
+                  // "bg-radial-[at_25%_25%] from-[#010002] to-[#222] to-75%"
+                  "bg-radial-[at_95%_25%] to-[#050108] from-[#121417] to-70%"
+                }`}
+              >
                 <Sidebar />
                 <div className="flex-grow">
                   <AppRoutes />

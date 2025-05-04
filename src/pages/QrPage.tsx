@@ -95,7 +95,7 @@ export const QrPage = () => {
             size={300}
             ecLevel="L"
             style={{
-              boxShadow: "0px 0px 20px 0px #fff",
+              boxShadow: "0px 0px 20px 0px #fff5",
             }}
           />
         </div>
@@ -142,7 +142,7 @@ export const QrPage = () => {
               onChange={updateQr("bgColor")}
               className="mb-4"
             >
-              {["black", "white", "grey", "transparent"].map((i) => (
+              {["black", "white", "grey"].map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
               ))}
             </Select>

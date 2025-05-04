@@ -1,3 +1,5 @@
+import { Card, CardBody, CardHeader } from "@heroui/react";
+
 const infos: [string, string][] = [
   [
     "Export",
@@ -10,12 +12,12 @@ const infos: [string, string][] = [
 ];
 export const Help = () => {
   return (
-    <div className="p-10 m-10">
+    <div className="p-10 m-10 ">
       {infos.map(([k, v]) => (
-        <div className="mb-10">
-          <h3 className="font-black">{k}:</h3>
-          <div className="text-grey italic">{v}</div>
-        </div>
+        <Card key={k} className="p-5 shadow-xl mb-2 text-sm">
+          <CardHeader className="font-black">{k}</CardHeader>
+          <CardBody className="text-grey italic">{v}</CardBody>
+        </Card>
       ))}
     </div>
   );

@@ -11,7 +11,7 @@ export const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <aside className="w-64 bg-[#0A0A0A] text-white h-full flex flex-col border-r border-gray-700">
+    <aside className="w-64 bg-[#0A0A0A] text-white h-full flex flex-col border-r border-gray-700 shadow-xl">
       <div className="p-6">
         <div className="flex items-center justify-center">
           <img
