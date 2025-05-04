@@ -721,11 +721,11 @@ export const CreateBill: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-                {/* Footer */}
-                <div className="text-grey text-sm w-full text-right text-gray-900">
-                  <p>Algemene voorwaarden:</p>
-                  <a href={user.voorwaardedenUrl}>{user.voorwaardedenUrl}</a>
+
+                  <div className="text-grey text-sm w-full text-right text-gray-900">
+                    <p>Algemene voorwaarden:</p>
+                    <a href={user.voorwaardedenUrl}>{user.voorwaardedenUrl}</a>
+                  </div>
                 </div>
               </Fragment>
             )}
