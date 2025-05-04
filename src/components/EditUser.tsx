@@ -21,7 +21,7 @@ type UserForm = {
   email: string;
   iban: string;
   structuredMessage: string;
-  voorWaardedenUrl: string;
+  voorwaardedenUrl: string;
   logo: string | null;
 };
 
@@ -48,7 +48,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       email: user?.email || "",
       iban: user?.iban || "",
       structuredMessage: user?.structuredMessage || "",
-      voorWaardedenUrl: user?.voorWaardedenUrl || "",
+      voorwaardedenUrl: user?.voorwaardedenUrl || "",
       logo: user?.logo || null,
     },
   });
@@ -75,7 +75,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       email: data.email,
       iban: data.iban,
       logo: data.logo || "",
-      voorWaardedenUrl: data.voorWaardedenUrl,
+      voorwaardedenUrl: data.voorwaardedenUrl,
       structuredMessage: data.structuredMessage,
     });
     onClose();
@@ -260,7 +260,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             {/* Voorwaarden URL */}
             <Controller
               rules={{ required: "is required" }}
-              name="voorWaardedenUrl"
+              name="voorwaardedenUrl"
               control={control}
               render={({ field }) => (
                 <Input

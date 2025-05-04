@@ -804,8 +804,8 @@ export const CreateBill: React.FC = () => {
                 {/* Footer */}
                 <div className="text-grey text-sm w-full text-right">
                   <p>Algemene voorwaarden:</p>
-                  <a href={user.voorWaardedenUrl} className="text-primary">
-                    {user.voorWaardedenUrl}
+                  <a href={user.voorwaardedenUrl} className="text-primary">
+                    {user.voorwaardedenUrl}
                   </a>
                 </div>
               </Card>
@@ -836,21 +836,24 @@ export const CreateBill: React.FC = () => {
 
 // Helper components (TableishUser, Totals)
 const TableishUser = ({ user }: { user?: User | Contact }) => {
-  user = user ?? {
-    logo: "",
-    voorWaardedenUrl: "",
-    structuredMessage: "",
-    id: "",
-    name: "",
-    address: {
-      street: "",
-      houseNumber: "",
-      city: "",
-      country: "",
-    },
-    btw: "",
-    iban: "",
-  };
+  user =
+    user ??
+    ({
+      logo: "",
+      voorwaardedenUrl: "",
+      structuredMessage: "",
+      id: "",
+      name: "",
+      address: {
+        street: "",
+        houseNumber: "",
+        city: "",
+        country: "",
+      },
+      btw: "",
+      iban: "",
+      settings: {},
+    } satisfies User);
   const details = [
     `${user.address.street} ${user.address.houseNumber}`,
     user.address.city,

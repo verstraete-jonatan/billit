@@ -48,6 +48,7 @@ export const Sidebar = () => {
           );
         })}
       </nav>
+      <hr className="flex-1 w-2/3" />
       <div className="p-6 border-t border-gray-700">
         <Button onPress={onOpen} color="primary" variant="light">
           Edit my Info
@@ -77,8 +78,9 @@ export const _EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     email: user?.email || "",
     iban: user?.iban || "",
     logo: user?.logo || "",
-    voorWaardedenUrl: user?.voorWaardedenUrl ?? "",
+    voorwaardedenUrl: user?.voorwaardedenUrl ?? "",
     structuredMessage: user?.structuredMessage ?? "",
+    settings: user?.settings ?? {},
     id: "me",
   });
 
@@ -121,8 +123,9 @@ export const _EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
       email: formData.email,
       iban: formData.iban,
       logo: formData.logo || "",
-      voorWaardedenUrl: formData.voorWaardedenUrl,
+      voorwaardedenUrl: formData.voorwaardedenUrl,
       structuredMessage: formData.structuredMessage,
+      settings: formData.settings,
       id: "me",
     });
     onClose();
@@ -201,9 +204,9 @@ export const _EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             />
             <Input
               label="Url algemene voorwaarden"
-              value={formData.voorWaardedenUrl}
+              value={formData.voorwaardedenUrl}
               onChange={(e) =>
-                handleInputChange("voorWaardedenUrl", e.target.value)
+                handleInputChange("voorwaardedenUrl", e.target.value)
               }
               required
             />

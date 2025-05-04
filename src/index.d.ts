@@ -21,8 +21,12 @@ declare global {
 
   interface User extends Contact {
     logo: string;
-    voorWaardedenUrl: string;
+    voorwaardedenUrl: string;
     structuredMessage: string;
+    settings: {
+      invert?: boolean;
+      blackWhite?: boolean;
+    };
   }
 
   export type BillStatus = "DRAFT" | "PENDING" | "PAYED";
