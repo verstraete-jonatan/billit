@@ -205,25 +205,6 @@ export const CreateBill: React.FC = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      console.log("saving");
-      onSave(false);
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, [onSave]);
-
-  // useEffect(() => {
-  //   console.log("saving");
-  //   return () => {
-  //     onSave(false);
-  //   };
-  // }, [onSave]);
-
   // TanStack Table columns for edit mode
   const columns = useMemo(
     () => [
@@ -369,14 +350,6 @@ export const CreateBill: React.FC = () => {
 
   const og_width = ` ${isEditing ? "w-[280mm]" : "w-[210mm]"}`;
   const isDarkMode = false && isEditing;
-
-  useEffect(() => {
-    if (isDirty) {
-      return () => {
-        onSave();
-      };
-    }
-  }, [isDirty, onSave]);
 
   if (!user?.iban || !user?.name) {
     return (
