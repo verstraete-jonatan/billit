@@ -144,17 +144,20 @@ export const CreateBill: React.FC = () => {
   const selectedContact = contacts.find((c) => c.id === formValues.contactId);
 
   const onSave = useCallback(
-    (verboseAndNav = true) => {
+    (verboseAndNav = true): boolean => {
+      if (isExporting) {
+        return false;
+      }
       if (!user || !selectedContact || !isValid) {
         verboseAndNav &&
           addToast({
             color: "danger",
             title: "No user or missing details.",
           });
-        return;
+        return false;
       }
 
-      const billData: Bill = {
+      updateBill({
         id: billId,
         user,
         contact: { ...selectedContact },
@@ -163,22 +166,18 @@ export const CreateBill: React.FC = () => {
         billingNumber: formValues.billingNumber,
         structuredMessage: formValues.structuredMessage,
         assignments: formValues.assignments,
-      };
-      updateBill(billData);
+      });
+
+      return true;
       // verboseAndNav && navigate("/bills");
     },
-    [billId]
+    [billId, user, selectedContact, isValid, formValues, isExporting]
   );
 
   const handleExport = useCallback(async () => {
-    if (!isValid) {
-      addToast({
-        color: "danger",
-        title: "No user or missing details.",
-      });
+    if (!onSave(true)) {
       return;
     }
-    onSave(true);
     setExporting(true);
     try {
       await exportToPdf(formValues.billingNumber);
@@ -187,7 +186,7 @@ export const CreateBill: React.FC = () => {
       window.alert("Reload page - " + error.message);
     }
     setExporting(false);
-  }, [formValues.billingNumber, isValid]);
+  }, [formValues.billingNumber, onSave]);
 
   useEffect(() => {
     if (!user?.iban) {
@@ -293,6 +292,7 @@ export const CreateBill: React.FC = () => {
               <Select
                 isRequired
                 defaultSelectedKeys={[field.value.toString()]}
+                label="btw"
                 radius="sm"
                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                 className="w-[100px]"

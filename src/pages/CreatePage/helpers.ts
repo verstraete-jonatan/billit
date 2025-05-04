@@ -54,6 +54,8 @@ export const exportToPdf = async (billingNumber: string) => {
     //   }
     // })
     .then((pdf: any) => {
+      console.log({ pdf });
+      return pdf;
       // Get total pages and iterate in reverse order
       const totalPages = pdf.internal.getNumberOfPages();
       Array.from({ length: totalPages }, (_, i) => totalPages - i).forEach(
