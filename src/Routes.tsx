@@ -5,7 +5,8 @@ import {
   QrCodeIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Route, Routes, Navigate } from "react-router-dom";
+
+import { Navigate, Routes, Route } from "react-router";
 
 import { ContactsPage } from "./pages/Contacts";
 import { BillsOverview } from "./pages/BillsPage";

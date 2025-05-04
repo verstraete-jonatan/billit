@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 
 import { Button, useDisclosure } from "@heroui/react"; // Assuming HeroUI components
 import { EditUserModal } from "./EditUserModal";
@@ -11,7 +11,7 @@ export const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <aside className="w-64 bg-[#0A0A0A] text-white h-full flex flex-col border-r border-gray-700 shadow-xl">
+    <aside className="w-64 bg-[#0A0A0A] text-white h-full flex flex-col border-r border-gray-700 shadow-xl overflow-y-scroll overflow-x-hidden">
       <div className="p-6">
         <div className="flex items-center justify-center">
           <img
@@ -28,7 +28,7 @@ export const Sidebar = () => {
             <div key={item.name} className="list-none flex flex-col mb-5">
               <Link
                 to={item.path}
-                className={`flex items-center mx-4 px-4 py-3 rounded-lg transition-all duration-300 ${
+                className={`flex items-center mx-4 pl-2 py-3 rounded-lg transition-all duration-300 ${
                   isActive
                     ? "bg-gray-200 text-black font-semibold"
                     : "text-gray-400 hover:bg-gray-800 hover:text-white"
@@ -42,8 +42,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <nav className="ml-5 mt-3 flex-1 text-[#aaa]">
-        Customization
+      {/* <nav className="mr-5 mt-3 flex-1 text-[#aaa]">
         <hr className="mb-2 font-black  rounded-2xl" />
         <div
           className={`mb-2 flex items-center mx-4 px-4 py-3 rounded-lg transition-all duration-300 text-sm cursor-pointer text-gray-400 hover:bg-gray-800 hover:text-white`}
@@ -55,10 +54,11 @@ export const Sidebar = () => {
       <div className="flex-1">
         <div className="*:my-2">
           <Button variant="light">
-            <EyeIcon className="h-5 w-5 inline" /> Invert
+            <EyeIcon className="h-5 w-5 inline" />
+            Invert
           </Button>
         </div>
-      </div>
+      </div> */}
       <div className="p-6 border-t border-gray-700">
         <Button onPress={onOpen} color="primary" variant="light">
           Edit my Info
