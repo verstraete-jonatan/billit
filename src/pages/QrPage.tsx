@@ -71,7 +71,7 @@ export const QrPage = () => {
     <div className="w-full h-full flex flex-wrap">
       <div className="flex flex-wrap items-start flex-2">
         <div className="w-full flex h-fit">
-          {field.map((i) => (
+          {/* {field.map((i) => (
             <Input
               key={i}
               isRequired
@@ -81,7 +81,7 @@ export const QrPage = () => {
               onChange={update(i)}
               className="px-3 py-1"
             />
-          ))}
+          ))} */}
         </div>
 
         <div className="flex justify-center items-center flex-1">
@@ -103,7 +103,7 @@ export const QrPage = () => {
 
       <div className="bg-[#111] py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between">
         <div className="pr-2 *:flex *:flex-col flex-1 overflow-y-scroll">
-          <h3 className="h3 font-black">Customization</h3>
+          <h3 className="text-xl font-black my-5">Customize</h3>
           <div>
             <Select
               label="Qr style"

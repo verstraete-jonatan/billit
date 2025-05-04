@@ -88,11 +88,10 @@ export const CreateBill: React.FC = () => {
     control,
     handleSubmit,
     watch,
-    setFocus,
     formState: { errors, isValid, isDirty },
   } = useForm<BillForm>({
     mode: "onChange",
-    // shouldFocusError: true,
+    shouldFocusError: true,
     defaultValues: {
       contactId: existingBill?.contact?.id || "",
       expirationDate: existingBill?.expirationDate || "",
@@ -124,29 +123,13 @@ export const CreateBill: React.FC = () => {
           ? firstErr.ref
           : (Object.values(firstErr)[0] as any)?.ref;
 
+      console.log("ONERR", ref, firstErr);
+
       ref?.focus();
     } catch (e) {
       console.info(e);
     }
-    // // console.log(document.activeElement);
-    // const a = [...Object.values(errors)].find(Boolean);
-    // console.log({ a, errors });
-
-    // const i = Array.isArray(a) ? a.find(Boolean) : a;
-    // if(!i) return
-    // console.log({
-    //   i,
-    //   valI: (Object.values(i)[0] as any).ref,
-    //   hasREf: "ref" in i,
-    // });
-    // if (!i) return;
-
-    // const name = ("ref" in i ? i.ref : (Object.values(i)[0] as any)?.ref)
-    //   ?.name as string;
-
-    // console.log(name);
-    // name && setFocus(name as any, { shouldSelect: true });
-  }, [errors, setFocus]);
+  }, [errors]);
 
   // Calculate totals for display
   const totalExclBtw = formValues.assignments.reduce(
@@ -344,7 +327,7 @@ export const CreateBill: React.FC = () => {
         ),
       }),
     ],
-    [control, fields, insert, remove]
+    [control, fields, insert, remove, errors]
   );
 
   const table = useReactTable({
@@ -465,11 +448,7 @@ export const CreateBill: React.FC = () => {
                   <div className="font-medium pr-2 text-sm">
                     Te betalen voor:
                   </div>
-                  <div
-                  // className={`text-sm ${
-                  //   isDarkMode ? "text-white" : "text-[#111]"
-                  // }`}
-                  >
+                  <div>
                     {isEditing ? (
                       <Controller
                         name="expirationDate"
