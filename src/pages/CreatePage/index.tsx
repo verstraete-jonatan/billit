@@ -92,7 +92,7 @@ export const CreateBill: React.FC = () => {
     formState: { errors, isValid, isDirty },
   } = useForm<BillForm>({
     mode: "onChange",
-    shouldFocusError: true,
+    // shouldFocusError: true,
     defaultValues: {
       contactId: existingBill?.contact?.id || "",
       expirationDate: existingBill?.expirationDate || "",
@@ -116,13 +116,36 @@ export const CreateBill: React.FC = () => {
   const onSubmit = (fn: () => any) => () => handleSubmit(fn, onError)();
 
   const onError = useCallback(() => {
-    // console.log(document.activeElement);
-    const a = Object.values(errors)[0];
-    const i = Array.isArray(a) ? a[0] : a;
-    const name = ("ref" in i ? i.ref : (Object.values(i)[0] as any)?.ref)
-      ?.name as string;
+    try {
+      const errs = [...Object.values(errors)].find(Boolean);
+      const firstErr = Array.isArray(errs) ? errs.find(Boolean) : errs;
+      const ref =
+        "ref" in firstErr
+          ? firstErr.ref
+          : (Object.values(firstErr)[0] as any)?.ref;
 
-    name && setFocus(name as any, { shouldSelect: true });
+      ref?.focus();
+    } catch (e) {
+      console.info(e);
+    }
+    // // console.log(document.activeElement);
+    // const a = [...Object.values(errors)].find(Boolean);
+    // console.log({ a, errors });
+
+    // const i = Array.isArray(a) ? a.find(Boolean) : a;
+    // if(!i) return
+    // console.log({
+    //   i,
+    //   valI: (Object.values(i)[0] as any).ref,
+    //   hasREf: "ref" in i,
+    // });
+    // if (!i) return;
+
+    // const name = ("ref" in i ? i.ref : (Object.values(i)[0] as any)?.ref)
+    //   ?.name as string;
+
+    // console.log(name);
+    // name && setFocus(name as any, { shouldSelect: true });
   }, [errors, setFocus]);
 
   // Calculate totals for display
@@ -212,12 +235,11 @@ export const CreateBill: React.FC = () => {
             rules={{ required: "Required" }}
             render={({ field }) => (
               <Input
+                {...field}
+                key={`assignments.${row.index}.description`}
                 variant="flat"
                 radius="sm"
                 placeholder="description..."
-                isRequired
-                value={field.value}
-                onChange={field.onChange}
                 isInvalid={!!errors.assignments?.[row.index]?.description}
                 errorMessage={
                   errors.assignments?.[row.index]?.description?.message
@@ -309,21 +331,6 @@ export const CreateBill: React.FC = () => {
         header: "",
         cell: ({ row }) => (
           <div className="flex gap-2">
-            {/* <Button
-              variant="ghost"
-              color="success"
-              size="sm"
-              onPress={() =>
-                insert(
-                  row.index + 1,
-                  { ...row.original },
-                  { shouldFocus: true }
-                )
-              }
-              startContent={<DocumentDuplicateIcon className="h-4 w-4" />}
-            >
-              Copy
-            </Button> */}
             <Button
               variant="ghost"
               color="danger"
@@ -332,12 +339,12 @@ export const CreateBill: React.FC = () => {
               startContent={<TrashIcon className="h-4 w-4" />}
               disabled={!fields.length}
               isIconOnly
-            ></Button>
+            />
           </div>
         ),
       }),
     ],
-    [control, fields, insert, remove, errors.assignments]
+    [control, fields, insert, remove]
   );
 
   const table = useReactTable({
@@ -381,23 +388,6 @@ export const CreateBill: React.FC = () => {
               >
                 {isEditing ? "Preview" : "Edit"}
               </Button>
-              {/* <Button
-                variant="ghost"
-                color="danger"
-                onPress={() => navigate("/bills")}
-                startContent={<XMarkIcon className="h-5 w-5" />}
-                disabled={isExporting}
-              >
-                Close
-              </Button> */}
-              {/* <Button
-                color="primary"
-                onPress={() => handleSubmit(onSave)()}
-                startContent={<CheckIcon className="h-5 w-5" />}
-                isDisabled={!isValid || isExporting}
-              >
-                Save (Draft)
-              </Button> */}
               <Button
                 color="success"
                 onPress={onSubmit(handleExport)}
@@ -436,11 +426,12 @@ export const CreateBill: React.FC = () => {
                     rules={{ required: "Contact is required" }}
                     render={({ field }) => (
                       <Select
+                        {...field}
                         isRequired
                         label="Contact"
                         placeholder="Select a contact"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        // value={field.value}
+                        // onChange={(e) => field.onChange(e.target.value)}
                         isInvalid={!!errors.contactId}
                         errorMessage={errors.contactId?.message}
                         disallowEmptySelection
@@ -486,6 +477,8 @@ export const CreateBill: React.FC = () => {
                         rules={{ required: "Expiration date is required" }}
                         render={({ field }) => (
                           <DatePicker
+                            // {...field}
+                            ref={field.ref}
                             value={field.value ? new Date(field.value) : null}
                             onChange={(value) =>
                               field.onChange(value?.toString())
@@ -700,7 +693,8 @@ export const CreateBill: React.FC = () => {
                         qrStyle="dots"
                         ecLevel="M"
                         logoImage={user.logo}
-                        {...qrCodeSettings}
+                        // {...qrCodeSettings}
+                        // logoPadding={0}
                       />
 
                       {/* {isEditing && (
@@ -750,16 +744,14 @@ export const CreateBill: React.FC = () => {
                   </div>
                 </div>
                 {/* Footer */}
-                <div className="text-grey text-sm w-full text-right">
+                <div className="text-grey text-sm w-full text-right text-gray-900">
                   <p>Algemene voorwaarden:</p>
-                  <a href={user.voorwaardedenUrl} className="text-primary">
-                    {user.voorwaardedenUrl}
-                  </a>
+                  <a href={user.voorwaardedenUrl}>{user.voorwaardedenUrl}</a>
                 </div>
               </Fragment>
             )}
           </Card>
-          <div className="italic text-white text-xs font-mono text-center">
+          <div className="italic text-white text-xs font-mono text-center mt-2">
             {isEditing
               ? "Changes are saved automatically"
               : " True size display A4 (210mm x 297mm)"}
