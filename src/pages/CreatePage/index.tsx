@@ -529,7 +529,7 @@ export const CreateBill: React.FC = () => {
                   {isEditing && (
                     <>
                       <div className="font-medium pr-2 text-sm">
-                        Structurele mededeling
+                        Structurele mededeling:
                       </div>
                       <div
                         className={`text-sm ${

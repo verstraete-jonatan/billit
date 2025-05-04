@@ -48,7 +48,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="2xl" backdrop="blur">
       <ModalContent>
         <div className="bg_modal text-white py-8 px-4 rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold mb-4 text-center">Edit my info</h2>
