@@ -865,10 +865,7 @@ const Totals = ({ rows }: { rows: [string, number][] }) => (
 
 // Utility to generate unique bill ID
 const generateBillId = () =>
-  `${Date.now()}${Math.random().toString(36).slice(2, 9)}`
-    .split("")
-    .sort(() => Math.round(Math.random() * 2) - 1)
-    .join("");
+  btoa(Date.now().toString(10) + Math.random().toString());
 
 // Calculate totals
 const calcSubtotal = (
