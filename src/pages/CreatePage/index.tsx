@@ -395,13 +395,13 @@ export const CreateBill: React.FC = () => {
               >
                 Export PDF
               </Button>
-              {/* {!isEditing && !isValid && (
+              {!isEditing && !isValid && (
                 <p className="text-xs italic text-gray-400 flex justify-end pr-2">
                   Some details are missing
                 </p>
-              )} */}
+              )}
 
-              <Button
+              {/* <Button
                 color="primary"
                 variant="bordered"
                 onPress={onSubmit(() => onSave(false))}
@@ -410,7 +410,7 @@ export const CreateBill: React.FC = () => {
                 preventFocusOnPress
               >
                 Save
-              </Button>
+              </Button> */}
             </div>
           </div>
 

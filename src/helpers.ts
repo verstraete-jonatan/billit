@@ -164,7 +164,7 @@ export const useBeforeLeave = (isDirty: boolean, onSave: () => void) => {
       // Only save if form is dirty at unmount
       if (isDirtyRef.current) {
         console.log("saving..");
-        // onSaveRef.current();
+        onSaveRef.current();
       }
     };
   }, []);
