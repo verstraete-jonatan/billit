@@ -2,7 +2,11 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Modal, ModalContent, Input, Button } from "@heroui/react";
 import { useUserStore } from "../store/userStore";
-import { formatBtwNumber, validationMessage } from "src/helpers";
+import {
+  formatBtwNumber,
+  validationCity,
+  validationMessage,
+} from "src/helpers";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -53,13 +57,12 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Controller
               name="name"
               control={control}
-              rules={{ required: "Bedrijfsnaam is verplicht" }}
+              rules={{ required: "Required" }}
               render={({ field }) => (
                 <Input
                   label="Bedrijfsnaam"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.name}
                   errorMessage={errors.name?.message}
                 />
@@ -71,7 +74,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               name="email"
               control={control}
               rules={{
-                required: "is required",
+                required: "Required",
                 validate: validateEmail,
               }}
               render={({ field }) => (
@@ -80,7 +83,6 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   type="email"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.email}
                   errorMessage={errors.email?.message}
                 />
@@ -91,13 +93,12 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Controller
               name="address.street"
               control={control}
-              rules={{ required: "Straat is verplicht" }}
+              rules={{ required: "Required" }}
               render={({ field }) => (
                 <Input
                   label="Straat"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.address?.street}
                   errorMessage={errors.address?.street?.message}
                 />
@@ -108,13 +109,12 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Controller
               name="address.houseNumber"
               control={control}
-              rules={{ required: "Huisnummer is verplicht" }}
+              rules={{ required: "Required" }}
               render={({ field }) => (
                 <Input
+                  {...field}
+                  type="number"
                   label="Huisnummer"
-                  value={field.value}
-                  onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.address?.houseNumber}
                   errorMessage={errors.address?.houseNumber?.message}
                 />
@@ -125,13 +125,15 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Controller
               name="address.city"
               control={control}
-              rules={{ required: "Stad is verplicht" }}
+              rules={{
+                required: "Required",
+                validate: validationCity.validate,
+              }}
               render={({ field }) => (
                 <Input
+                  {...field}
                   label="Postcode, Stad (bijv. 9000, Gent)"
-                  value={field.value}
-                  onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
+                  onBlur={validationCity.onBlur(field.onChange)}
                   isInvalid={!!errors.address?.city}
                   errorMessage={errors.address?.city?.message}
                 />
@@ -142,13 +144,12 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
             <Controller
               name="address.country"
               control={control}
-              rules={{ required: "Land is verplicht" }}
+              rules={{ required: "Required" }}
               render={({ field }) => (
                 <Input
                   label="Land"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.address?.country}
                   errorMessage={errors.address?.country?.message}
                 />
@@ -160,7 +161,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               name="btw"
               control={control}
               rules={{
-                required: "is required",
+                required: "Required",
                 validate: validateBtw,
               }}
               render={({ field }) => (
@@ -168,11 +169,11 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   label="BTW-nummer"
                   value={field.value}
                   onChange={field.onChange}
-                  onBlur={(e) => {
-                    e.target.value = formatBtwNumber(field.value);
-                    field.onChange(e);
-                  }}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
+                  // onBlur={(e) => {
+                  //   e.target.value = formatBtwNumber(field.value);
+                  //   field.onChange(e);
+                  // }}
+
                   isInvalid={!!errors.btw}
                   errorMessage={errors.btw?.message}
                 />
@@ -184,14 +185,13 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               name="iban"
               control={control}
               rules={{
-                required: "is required",
+                required: "Required",
               }}
               render={({ field }) => (
                 <Input
                   label="IBAN"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.iban}
                   errorMessage={errors.iban?.message}
                 />
@@ -203,7 +203,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               name="structuredMessage"
               control={control}
               rules={{
-                required: "is required",
+                required: "Required",
                 validate: validationMessage.validate,
               }}
               render={({ field }) => (
@@ -212,7 +212,6 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={validationMessage.onBlur(field.onChange)}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.structuredMessage}
                   errorMessage={errors.structuredMessage?.message}
                 />
@@ -221,7 +220,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
 
             {/* Voorwaarden URL */}
             <Controller
-              rules={{ required: "is required" }}
+              rules={{ required: "Required" }}
               name="voorwaardedenUrl"
               control={control}
               render={({ field }) => (
@@ -229,7 +228,6 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
                   label="URL algemene voorwaarden (https://x.com)"
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.voorwaardedenUrl}
                   errorMessage={errors.voorwaardedenUrl?.message}
                 />
@@ -240,12 +238,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
           {/* Logo Upload */}
           <div className="flex flex-col gap-2">
             <label className="text-sm text-gray-400">Logo</label>
-            <input
-              type="file"
-              accept="image/png"
-              onChange={handleLogoChange}
-              className="bg-[#2A2A2A] text-white border-gray-600 p-2 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-white hover:file:bg-gray-600"
-            />
+            <input type="file" accept="image/png" onChange={handleLogoChange} />
             {logo && (
               <img
                 src={logo}

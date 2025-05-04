@@ -8,7 +8,7 @@ import {
   Input,
 } from "@heroui/react";
 import { useContactsStore } from "../../store/contactsStore";
-import { formatBtwNumber, formatIban } from "src/helpers";
+import { formatBtwNumber, formatIban, validationCity } from "src/helpers";
 
 // Form type for the contact
 type ContactForm = {
@@ -75,42 +75,39 @@ export const EditContactModal = ({
           <Controller
             name="name"
             control={control}
-            rules={{ required: "Business name is required" }}
+            rules={{ required: "Required" }}
             render={({ field }) => (
               <Input
                 label="Business Name"
                 {...field}
                 isInvalid={!!errors.name}
                 errorMessage={errors.name?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
           <Controller
             name="street"
             control={control}
-            rules={{ required: "Street is required" }}
+            rules={{ required: "Required" }}
             render={({ field }) => (
               <Input
                 label="Street"
                 {...field}
                 isInvalid={!!errors.street}
                 errorMessage={errors.street?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
           <Controller
             name="houseNumber"
             control={control}
-            rules={{ required: "House number is required" }}
+            rules={{ required: "Required" }}
             render={({ field }) => (
               <Input
                 label="House Number"
                 {...field}
                 isInvalid={!!errors.houseNumber}
                 errorMessage={errors.houseNumber?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
@@ -118,34 +115,30 @@ export const EditContactModal = ({
             name="city"
             control={control}
             rules={{
-              required: "City is required",
-              pattern: {
-                value: /^\d{4},\s*[A-Za-z\s]+$/,
-                message:
-                  "Format must be 'Postal code, City name' (e.g., 9000, Gent)",
-              },
+              required: "Required",
+              validate: validationCity.validate,
             }}
             render={({ field }) => (
               <Input
-                label="Postal code, City name (e.g., 9000, Gent)"
                 {...field}
+                label="Postal code, City name (9000, Gent)"
+                onChange={field.onChange}
+                onBlur={validationCity.onBlur(field.onChange)}
                 isInvalid={!!errors.city}
                 errorMessage={errors.city?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
           <Controller
             name="country"
             control={control}
-            rules={{ required: "Country is required" }}
+            rules={{ required: "Required" }}
             render={({ field }) => (
               <Input
                 label="Country"
                 {...field}
                 isInvalid={!!errors.country}
                 errorMessage={errors.country?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
@@ -153,11 +146,7 @@ export const EditContactModal = ({
             name="btw"
             control={control}
             rules={{
-              required: "BTW number is required",
-              validate: (value) => {
-                const formatted = formatBtwNumber(value);
-                return formatted === value ? true : "Invalid BTW format";
-              },
+              required: "Required",
             }}
             render={({ field }) => (
               <Input
@@ -166,7 +155,6 @@ export const EditContactModal = ({
                 onBlur={() => field.onChange(formatBtwNumber(field.value))}
                 isInvalid={!!errors.btw}
                 errorMessage={errors.btw?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />
@@ -174,20 +162,15 @@ export const EditContactModal = ({
             name="iban"
             control={control}
             rules={{
-              required: "IBAN is required",
-              validate: (value) => {
-                const formatted = formatIban(value);
-                return formatted === value ? true : "Invalid IBAN format";
-              },
+              required: "Required",
             }}
             render={({ field }) => (
               <Input
-                label="IBAN"
                 {...field}
+                label="IBAN"
                 onBlur={() => field.onChange(formatIban(field.value))}
                 isInvalid={!!errors.iban}
                 errorMessage={errors.iban?.message}
-                className="bg-white text-black border-gray-300 rounded-md"
               />
             )}
           />

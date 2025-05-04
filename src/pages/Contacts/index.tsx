@@ -126,13 +126,23 @@ export const ContactsPage = () => {
         </TableBody>
       </Table>
 
-      <Modal isOpen={isAddOpen} onOpenChange={onAddClose} backdrop="blur">
+      <Modal
+        isOpen={isAddOpen}
+        onOpenChange={onAddClose}
+        backdrop="blur"
+        className="bg_modal"
+      >
         <ModalContent>
           <EditContactModal contact={null} onClose={onAddClose} />
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={isEditOpen} onOpenChange={onEditClose} backdrop="blur">
+      <Modal
+        isOpen={isEditOpen}
+        onOpenChange={onEditClose}
+        backdrop="blur"
+        className="bg_modal"
+      >
         <ModalContent>
           {selectedContact && (
             <EditContactModal contact={selectedContact} onClose={onEditClose} />
