@@ -16,8 +16,9 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/20/solid";
-import { useContactsStore, useContacts } from "../store/contactsStore";
+import { useContactsStore, useContacts } from "../../store/contactsStore";
 import { formatBtwNumber, formatIban } from "src/helpers";
+import { EditContactModal } from "./EditContactModal";
 
 export const ContactsPage = () => {
   const {
@@ -127,17 +128,14 @@ export const ContactsPage = () => {
 
       <Modal isOpen={isAddOpen} onOpenChange={onAddClose} backdrop="blur">
         <ModalContent>
-          <UpdateContactModal contact={null} onClose={onAddClose} />
+          <EditContactModal contact={null} onClose={onAddClose} />
         </ModalContent>
       </Modal>
 
       <Modal isOpen={isEditOpen} onOpenChange={onEditClose} backdrop="blur">
         <ModalContent>
           {selectedContact && (
-            <UpdateContactModal
-              contact={selectedContact}
-              onClose={onEditClose}
-            />
+            <EditContactModal contact={selectedContact} onClose={onEditClose} />
           )}
         </ModalContent>
       </Modal>
@@ -157,105 +155,6 @@ export const ContactsPage = () => {
         </ModalContent>
       </Modal>
     </div>
-  );
-};
-
-const UpdateContactModal = ({
-  contact,
-  onClose,
-}: {
-  contact: Contact | null;
-  onClose: () => void;
-}) => {
-  const { addContact, updateContact } = useContactsStore();
-  const [name, setName] = useState(contact?.name || "");
-  const [street, setStreet] = useState(contact?.address?.street || "");
-  const [houseNumber, setHouseNumber] = useState(
-    contact?.address?.houseNumber || ""
-  );
-  const [city, setCity] = useState(contact?.address?.city || "");
-  const [country, setCountry] = useState(contact?.address?.country || "");
-  const [btw, setBtw] = useState(contact?.btw || "");
-  const [iban, setIban] = useState(contact?.iban || "");
-
-  const handleSave = useCallback(() => {
-    const newContact: Contact = {
-      id: contact?.id || Date.now().toString(),
-      name,
-      iban,
-      address: { street, houseNumber, city, country },
-      btw,
-    };
-    contact ? updateContact(newContact) : addContact(newContact);
-    onClose();
-  }, [
-    name,
-    street,
-    houseNumber,
-    city,
-    country,
-    btw,
-    iban,
-    contact,
-    addContact,
-    updateContact,
-    onClose,
-  ]);
-
-  return (
-    <>
-      <ModalHeader>{contact ? "Edit Contact" : "Add Contact"}</ModalHeader>
-      <ModalBody>
-        <div className="grid gap-4">
-          <Input
-            label="Business Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Input
-            label="Street"
-            value={street}
-            onChange={(e) => setStreet(e.target.value)}
-          />
-          <Input
-            label="House Number"
-            value={houseNumber}
-            onChange={(e) => setHouseNumber(e.target.value)}
-          />
-          <Input
-            label="Postal code, City name (eg. 9000, Gent)"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-          <Input
-            label="Country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          />
-          <Input
-            label="BTW Number"
-            value={btw}
-            onBlur={() => setBtw(formatBtwNumber(btw))}
-            onChange={(e) => setBtw(e.target.value)}
-          />
-          <Input
-            label="IBAN"
-            onBlur={(e) => setIban(formatIban(iban))}
-            value={iban}
-            onChange={(e) => setIban(e.target.value)}
-          />
-          <p>note: no validation here, make sure to fill in correctly</p>
-        </div>
-      </ModalBody>
-      <ModalFooter>
-        <Button variant="ghost" onPress={onClose}>
-          Cancel
-        </Button>
-        <Button variant="solid" color="primary" onPress={handleSave}>
-          {contact ? "Update" : "Create"}
-        </Button>
-      </ModalFooter>
-    </>
   );
 };
 

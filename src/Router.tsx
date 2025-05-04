@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Route, Routes, Navigate } from "react-router-dom";
 
-import { ContactsPage } from "./pages/ContactsPage";
+import { ContactsPage } from "./pages/Contacts";
 import { BillsOverview } from "./pages/BillsPage";
 import { CreateBill } from "./pages/CreatePage";
 import { QrPage } from "./pages/QrPage";

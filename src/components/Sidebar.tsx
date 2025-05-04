@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 
 import { Button, useDisclosure } from "@heroui/react"; // Assuming HeroUI components
-import { EditUserModal } from "./EditUser";
+import { EditUserModal } from "./EditUserModal";
 
 import { navItems } from "src/Router";
 import { EyeIcon } from "@heroicons/react/24/outline";

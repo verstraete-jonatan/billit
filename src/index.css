@@ -23,3 +23,12 @@ body,
 html {
   overflow: hidden;
 }
+
+.bg_modal {
+  background: #151321;
+  background: linear-gradient(
+    90deg,
+    rgba(40, 40, 43, 1) 0%,
+    rgba(41, 40, 43, 1) 100%
+  );
+}
