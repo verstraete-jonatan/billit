@@ -275,9 +275,13 @@ export const CreateBill: React.FC = () => {
       columnHelper.display({
         id: "subtotal",
         header: "Subtotaal",
-        cell: ({ row }) => (
-          <span>€{calcSubtotal(row.original).toFixed(2)}</span>
-        ),
+        cell: ({ row }) => {
+          const quantity = watch(`assignments.${row.index}.quantity`);
+          const unitPrice = watch(`assignments.${row.index}.unitPrice`);
+          return (
+            <span>€{calcSubtotal({ unitPrice, quantity }).toFixed(2)}</span>
+          );
+        },
       }),
       columnHelper.accessor("btw", {
         header: "BTW",
@@ -305,9 +309,17 @@ export const CreateBill: React.FC = () => {
       columnHelper.display({
         id: "total",
         header: "Totaal",
-        cell: ({ row }) => (
-          <span>€{totalWithBtw(row.original).toFixed(2)}</span>
-        ),
+        cell: ({ row }) => {
+          const quantity = watch(`assignments.${row.index}.quantity`);
+          const unitPrice = watch(`assignments.${row.index}.unitPrice`);
+          const btw = watch(`assignments.${row.index}.btw`);
+
+          return (
+            <span>
+              €{totalWithBtw({ unitPrice, quantity, btw }).toFixed(2)}
+            </span>
+          );
+        },
       }),
       columnHelper.display({
         id: "actions",
@@ -824,18 +836,21 @@ const Totals = ({ rows }: { rows: [string, number][] }) => (
 const generateBillId = () =>
   `${Date.now()}${Math.random().toString(36).slice(2, 9)}`
     .split("")
-    .sort(() => Math.random())
+    .sort(() => Math.round(Math.random() * 2) - 1)
     .join("");
 
 // Calculate totals
-const calcSubtotal = (assignment: Assignment) =>
-  assignment.quantity * assignment.unitPrice;
+const calcSubtotal = (
+  assignment: Assignment | Pick<Assignment, "quantity" | "unitPrice">
+) => assignment.quantity * assignment.unitPrice;
 
-const calculateBtwAmount = (assignment: Assignment) =>
-  calcSubtotal(assignment) * (assignment.btw / 100);
+const calculateBtwAmount = (
+  assignment: Assignment | Pick<Assignment, "quantity" | "unitPrice" | "btw">
+) => calcSubtotal(assignment) * (assignment.btw / 100);
 
-const totalWithBtw = (assignment: Assignment) =>
-  calcSubtotal(assignment) + calculateBtwAmount(assignment);
+const totalWithBtw = (
+  assignment: Assignment | Pick<Assignment, "quantity" | "unitPrice" | "btw">
+) => calcSubtotal(assignment) + calculateBtwAmount(assignment);
 
 // Format date utility
 const formatDate = (d?: string | Date) =>
