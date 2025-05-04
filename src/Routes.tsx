@@ -17,40 +17,40 @@ import { Help } from "./pages/Help";
 export const navItems = [
   {
     name: "Create",
-    path: "/create",
+    path: "billit/create",
     icon: DocumentPlusIcon,
   },
   {
     name: "Bills",
-    path: "/bills",
+    path: "billit/bills",
     icon: ClipboardDocumentListIcon,
   },
   {
     name: "Contacts",
-    path: "/contacts",
+    path: "billit/contacts",
     icon: UserGroupIcon,
   },
   {
     name: "QR",
-    path: "/qr",
+    path: "billit/qr",
     icon: QrCodeIcon,
   },
   {
     name: "Help",
-    path: "/help",
+    path: "billit/help",
     icon: InformationCircleIcon,
   },
 ];
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/create/:bill_id?" element={<CreateBill />} />
-    <Route path="/bills" element={<BillsOverview />} />
-    <Route path="/contacts" element={<ContactsPage />} />
-    <Route path="/qr" element={<QrPage />} />
-    <Route path="/help" element={<Help />} />
+    <Route path="billit/create/:bill_id?" element={<CreateBill />} />
+    <Route path="billit/bills" element={<BillsOverview />} />
+    <Route path="billit/contacts" element={<ContactsPage />} />
+    <Route path="billit/qr" element={<QrPage />} />
+    <Route path="billit/help" element={<Help />} />
 
-    <Route path="/" element={<Navigate to="/create" />} />
-    <Route path="/billit" element={<Navigate to="/create" />} />
+    <Route path="/" element={<Navigate to="billit/create" />} />
+    <Route path="/billit" element={<Navigate to="billit/create" />} />
   </Routes>
 );

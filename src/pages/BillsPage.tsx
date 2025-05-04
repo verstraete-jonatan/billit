@@ -114,7 +114,7 @@ export const BillsOverview: React.FC = () => {
           variant="solid"
           color="primary"
           startContent={<PlusIcon className="h-5 w-5" />}
-          onPress={() => navigate("/create")}
+          onPress={() => navigate("/billit/create")}
         >
           Create Bill
         </Button>
@@ -179,7 +179,7 @@ export const BillsOverview: React.FC = () => {
                     variant="ghost"
                     color="primary"
                     isDisabled={bill.status !== "DRAFT"}
-                    onPress={() => navigate(`/create/${bill.id}`)}
+                    onPress={() => navigate(`/billit/create/${bill.id}`)}
                   >
                     Edit
                   </Button>
