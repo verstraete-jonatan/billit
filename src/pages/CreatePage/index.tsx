@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import {
   useBeforeUnload,
+  useBlocker,
   useLocation,
   useNavigate,
   useParams,
@@ -48,12 +49,14 @@ import {
   formatBtwNumber,
   formatIban,
   generateQRCodeData,
+  useBeforeLeave,
   validationMessage,
 } from "src/helpers";
 import { ThemeProvider } from "@mui/material";
 
 import { darkTheme, lightTheme } from "src/themes";
-import { exportToPdf } from "./helpers";
+import { exportToPdf, now } from "./helpers";
+import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -108,10 +111,7 @@ export const CreateBill: React.FC = () => {
   });
 
   const onSubmit = (fn: () => any) => () => handleSubmit(fn, onError)();
-  // useBeforeLeave(isDirty, () => onSave(false));
-  useBeforeUnload(() => {
-    isDirty && onSave(false);
-  });
+  useBeforeLeave(isDirty, () => onSave(false));
 
   const onError = useCallback(() => {
     try {
@@ -367,8 +367,16 @@ export const CreateBill: React.FC = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const og_width = ` ${isEditing ? "w-2/3" : "w-[210mm]"}`;
+  const og_width = ` ${isEditing ? "w-[280mm]" : "w-[210mm]"}`;
   const isDarkMode = false && isEditing;
+
+  useEffect(() => {
+    if (isDirty) {
+      return () => {
+        onSave();
+      };
+    }
+  }, [isDirty, onSave]);
 
   if (!user?.iban || !user?.name) {
     return (
@@ -395,23 +403,40 @@ export const CreateBill: React.FC = () => {
                 isDisabled={isExporting}
                 startContent={
                   isEditing ? (
-                    <EyeIcon className="h-5 w-5" />
+                    <EyeIcon className="h-auto w-5" />
                   ) : (
-                    <PencilIcon className="h-5 w-5" />
+                    <PencilIcon className="h-auto w-5" />
                   )
                 }
               >
                 {isEditing ? "Preview" : "Edit"}
               </Button>
+
               <Button
                 color="success"
                 onPress={onSubmit(handleExport)}
-                startContent={<ArrowDownTrayIcon className="h-5 w-5" />}
+                startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
                 isLoading={isExporting}
                 preventFocusOnPress
                 isDisabled={!isValid && !isEditing}
               >
                 Export PDF
+              </Button>
+              {/* {!isEditing && !isValid && (
+                <p className="text-xs italic text-gray-400 flex justify-end pr-2">
+                  Some details are missing
+                </p>
+              )} */}
+
+              <Button
+                color="primary"
+                variant="bordered"
+                onPress={onSubmit(() => onSave(false))}
+                isLoading={isExporting}
+                startContent={<ArrowUpIcon className="h-auto w-5" />}
+                preventFocusOnPress
+              >
+                Save
               </Button>
             </div>
           </div>
@@ -494,6 +519,7 @@ export const CreateBill: React.FC = () => {
                           render={({ field }) => (
                             <DatePicker
                               // {...field}
+                              defaultValue={new Date()}
                               ref={field.ref}
                               value={field.value ? new Date(field.value) : null}
                               onChange={(value) =>

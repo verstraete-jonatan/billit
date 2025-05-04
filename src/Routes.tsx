@@ -50,7 +50,7 @@ export const AppRoutes = () => (
     <Route path="billit/qr" element={<QrPage />} />
     <Route path="billit/help" element={<Help />} />
 
-    <Route path="/" element={<Navigate to="billit/create" />} />
-    <Route path="/billit" element={<Navigate to="billit/create" />} />
+    <Route path="/" element={<Navigate to="/billit/create" />} />
+    <Route path="/billit" element={<Navigate to="/billit/create" />} />
   </Routes>
 );

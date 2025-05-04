@@ -1,5 +1,5 @@
 import { isValid as isIbanValid, toBBAN, printFormat } from "iban-ts";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 // type Fn = {
@@ -148,63 +148,24 @@ type ValidationItem = {
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export const useBeforeLeave = (shouldBlock: boolean, callback: () => void) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [nextPath, setNextPath] = useState<string | null>(null);
+export const useBeforeLeave = (isDirty: boolean, onSave: () => void) => {
+  const isDirtyRef = useRef(false);
+  const onSaveRef = useRef(onSave);
 
-  const handleHashChange = useCallback(
-    (event: HashChangeEvent) => {
-      if (!shouldBlock) return;
-
-      // Prevent the default hash change behavior
-      event.preventDefault();
-
-      // Extract the new hash path
-      const newHash = new URL(event.newURL).hash.replace("#", "");
-      if (newHash === location.pathname) return;
-
-      // Store the intended navigation path
-      setNextPath(newHash);
-      setIsNavigating(true);
-    },
-    [shouldBlock, location.pathname]
-  );
-
+  // Keep refs in sync with props
   useEffect(() => {
-    if (!shouldBlock) return;
+    isDirtyRef.current = isDirty;
+    onSaveRef.current = onSave;
+  }, [isDirty, onSave]);
 
-    // Listen for hash changes (triggered by HashRouter navigation)
-    window.addEventListener("hashchange", handleHashChange);
-
-    // Also handle browser back/forward buttons or manual URL changes
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (shouldBlock) {
-        event.preventDefault();
-        event.returnValue = ""; // Modern browsers require this to show a confirmation dialog
+  // Run on mount/unmount only
+  useEffect(() => {
+    return () => {
+      console.log("dong");
+      // Only save if form is dirty at unmount
+      if (isDirtyRef.current) {
+        onSaveRef.current();
       }
     };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [shouldBlock, handleHashChange]);
-
-  useEffect(() => {
-    if (isNavigating && nextPath) {
-      // Trigger the callback (e.g., show a confirmation dialog)
-      callback();
-
-      // After the callback, decide whether to proceed with navigation
-      // For simplicity, we assume the callback handles user confirmation
-      // If the user confirms, proceed with navigation
-      navigate(nextPath);
-      setIsNavigating(false);
-      setNextPath(null);
-    }
-  }, [isNavigating, nextPath, callback, navigate]);
+  }, []);
 };
