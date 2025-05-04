@@ -1,7 +1,14 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import {
   useBeforeUnload,
   useBlocker,
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
@@ -42,11 +49,11 @@ import {
   formatBtwNumber,
   formatIban,
   generateQRCodeData,
-  structuredMessage,
+  validationMessage,
 } from "src/helpers";
-import { createTheme, ThemeProvider } from "@mui/material";
-import { validation_message } from "./helpers";
-import { darkTheme, lightTheme } from "src/themes";
+import { ThemeProvider } from "@mui/material";
+
+import { darkTheme } from "src/themes";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -58,49 +65,26 @@ const emptyAssignment: Assignment = {
   btw: 21,
 };
 
-// Utility to generate unique bill ID
-const generateBillId = () =>
-  `BILL-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-// Calculate totals
-const calcSubtotal = (assignment: Assignment) =>
-  assignment.quantity * assignment.unitPrice;
-
-const calculateBtwAmount = (assignment: Assignment) =>
-  calcSubtotal(assignment) * (assignment.btw / 100);
-
-const totalWithBtw = (assignment: Assignment) =>
-  calcSubtotal(assignment) + calculateBtwAmount(assignment);
-
-// Format date utility
-const formatDate = (d?: string | Date) =>
-  d ? format(new Date(d), "dd/MM/yyyy", { locale: nl }) : "";
-
-const invertColors = () => {
-  const elm = document.getElementById("bill-content");
-  if (elm) {
-    elm.classList.toggle("invert-100");
-    console.log(elm.classList);
-  }
-};
-
 // TanStack Table column helper
 const columnHelper = createColumnHelper<Assignment & { actions: void }>();
 
 export const CreateBill: React.FC = () => {
+  const [isEditing, setIsEditing] = useState(true);
+  const [isExporting, setExporting] = useState(false);
+
   const { bill_id } = useParams<{ bill_id: string }>();
   const navigate = useNavigate();
+  const loca = useLocation();
 
-  const { addBill, updateBill, bills } = useBillStore();
   const contacts = useContacts();
   const { user } = useUserStore();
   const { settings: qrCodeSettings } = useQrStore();
+  const { addBill, updateBill, bills } = useBillStore();
 
-  const isEditMode = !!bill_id && bills.some((bill) => bill.id === bill_id);
   const existingBill = bills.find((bill) => bill.id === bill_id);
+  const isEditMode = !!existingBill && !!bill_id;
 
-  const [isEditing, setIsEditing] = useState(true);
-  const [isExporting, setExporting] = useState(false);
+  const billId = useRef(bill_id || generateBillId()).current;
 
   const {
     control,
@@ -121,6 +105,16 @@ export const CreateBill: React.FC = () => {
       assignments: existingBill?.assignments || [emptyAssignment],
     },
   });
+  const formValues = watch();
+  const { fields, append, remove, insert } = useFieldArray<BillForm>({
+    control,
+    name: "assignments",
+  });
+
+  useBeforeUnload(() => {
+    console.log("olalla");
+    // onSave();
+  });
 
   const onSubmit = (fn: () => any) => () => handleSubmit(fn, onError)();
 
@@ -134,26 +128,6 @@ export const CreateBill: React.FC = () => {
     name && setFocus(name as any, { shouldSelect: true });
   }, [errors, setFocus]);
 
-  const formValues = watch();
-  const { fields, append, remove, insert } = useFieldArray<BillForm>({
-    control,
-    name: "assignments",
-  });
-
-  useBeforeUnload(() => {
-    onSubmit(onSave)();
-  });
-
-  // useEffect(() => {
-  //   console.log(isDirty);
-  //   const onLoda = () => "Are you sure you want to close leave without saving?";
-
-  //   window.addEventListener("beforeunload", onLoda);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", onLoda);
-  //   };
-  // }, [isDirty]);
-
   // Calculate totals for display
   const totalExclBtw = formValues.assignments.reduce(
     (sum, a) => sum + calcSubtotal(a),
@@ -166,36 +140,35 @@ export const CreateBill: React.FC = () => {
   const totalInclBtw = totalExclBtw + totalBtw;
   const selectedContact = contacts.find((c) => c.id === formValues.contactId);
 
-  const onSave = () => {
-    if (!user || !selectedContact) {
-      addToast({
-        color: "danger",
-        title: "No user or contact.",
-      });
-      return;
-    }
+  const onSave = useCallback(
+    (v = true) => {
+      if (!user || !selectedContact || !isValid) {
+        v &&
+          addToast({
+            color: "danger",
+            title: "No user or missing details.",
+          });
+        return;
+      }
 
-    const billData: Bill = {
-      id: isEditMode ? bill_id : generateBillId(),
-      user,
-      contact: selectedContact,
-      status: "DRAFT",
-      expirationDate: formValues.expirationDate,
-      billingNumber: formValues.billingNumber,
-      structuredMessage: formValues.structuredMessage,
-      assignments: formValues.assignments,
-    };
-
-    if (isEditMode) {
+      const billData: Bill = {
+        id: billId,
+        user,
+        contact: { ...selectedContact },
+        status: "DRAFT",
+        expirationDate: formValues.expirationDate,
+        billingNumber: formValues.billingNumber,
+        structuredMessage: formValues.structuredMessage,
+        assignments: formValues.assignments,
+      };
       updateBill(billData);
-    } else {
-      addBill(billData);
-    }
-
-    navigate("/bills");
-  };
+      v && navigate("/bills");
+    },
+    [billId]
+  );
 
   const handleExport = useCallback(async () => {
+    onSave();
     setExporting(true);
     const element = document.getElementById("bill-content");
 
@@ -235,7 +208,7 @@ export const CreateBill: React.FC = () => {
         })
         .save();
     } catch (error: any) {
-      window.alert(error.message);
+      window.alert("Reload page - " + error.message);
     }
     setExporting(false);
   }, [formValues.billingNumber]);
@@ -249,6 +222,13 @@ export const CreateBill: React.FC = () => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    console.log("saving");
+    return () => {
+      onSave(false);
+    };
+  }, [onSave]);
 
   // TanStack Table columns for edit mode
   const columns = useMemo(
@@ -398,6 +378,15 @@ export const CreateBill: React.FC = () => {
 
   const og_width = ` ${isEditing ? "w-2/3" : "w-[210mm]"}`;
 
+  if (!user?.iban || !user?.name) {
+    return (
+      <div className="text-gray-400 text-center pt-10">
+        Please update your user details first before creating a bill.
+        <p>Required fields: "iban", "name"</p>
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <main className={`${isEditMode ? "dark" : "light"}`}>
@@ -450,7 +439,7 @@ export const CreateBill: React.FC = () => {
                 startContent={<ArrowDownTrayIcon className="h-5 w-5" />}
                 isLoading={isExporting}
                 preventFocusOnPress
-                // isDisabled={!isValid || !user || !selectedContact}
+                isDisabled={!isValid && !isEditing}
               >
                 Export PDF
               </Button>
@@ -461,7 +450,7 @@ export const CreateBill: React.FC = () => {
           {user ? (
             <>
               <Card
-                className={`shadow-2xl h-[297mm] overflow-scroll p-6 ${
+                className={`shadow-2xl h-[297mm] overflow-scroll p-6 shadow-[#102] ${
                   isEditing ? "bg-black text-white" : "bg-white text-black"
                 } ${og_width}`}
                 id="bill-content"
@@ -517,13 +506,21 @@ export const CreateBill: React.FC = () => {
                   <div className="min-w-[300px]">
                     <div className="grid grid-cols-2 gap-0.5">
                       <div className="font-medium pr-2 text-sm">Datum:</div>
-                      <div className="text-[#111] text-sm">
+                      <div
+                        className={`text-sm ${
+                          isEditing ? "text-white" : "text-[#111]"
+                        }`}
+                      >
                         {format(new Date(), "dd/MM/yyyy", { locale: nl })}
                       </div>
                       <div className="font-medium pr-2 text-sm">
                         Te betalen voor:
                       </div>
-                      <div className="text-[#111] text-sm">
+                      <div
+                        className={`text-sm ${
+                          isEditing ? "text-white" : "text-[#111]"
+                        }`}
+                      >
                         {isEditing ? (
                           <Controller
                             name="expirationDate"
@@ -555,23 +552,23 @@ export const CreateBill: React.FC = () => {
                       <div className="font-medium pr-2 text-sm">
                         Factuurnummer:
                       </div>
-                      <div className="text-[#111] text-sm">
+                      <div
+                        className={`text-sm ${
+                          isEditing ? "text-white" : "text-[#111]"
+                        }`}
+                      >
                         {isEditing ? (
                           <Controller
                             name="billingNumber"
                             control={control}
                             rules={{
                               required: "Billing number is required",
-                              validate: validation_message.validate,
                             }}
                             render={({ field }) => (
                               <Input
                                 isRequired
                                 value={field.value}
                                 onChange={field.onChange}
-                                onBlur={validation_message.onBlur(
-                                  field.onChange
-                                )}
                                 isInvalid={!!errors.billingNumber}
                                 errorMessage={errors.billingNumber?.message}
                               />
@@ -581,6 +578,42 @@ export const CreateBill: React.FC = () => {
                           formValues.billingNumber
                         )}
                       </div>
+
+                      {isEditing && (
+                        <>
+                          <div className="font-medium pr-2 text-sm">
+                            Structured reference
+                          </div>
+                          <div
+                            className={`text-sm ${
+                              isEditing ? "text-white" : "text-[#111]"
+                            }`}
+                          >
+                            <Controller
+                              name="structuredMessage"
+                              control={control}
+                              rules={{
+                                required: "Required",
+                                validate: validationMessage.validate,
+                              }}
+                              render={({ field }) => (
+                                <Input
+                                  isRequired
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  onBlur={validationMessage.onBlur(
+                                    field.onChange
+                                  )}
+                                  isInvalid={!!errors.structuredMessage}
+                                  errorMessage={
+                                    errors.structuredMessage?.message
+                                  }
+                                />
+                              )}
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -736,47 +769,31 @@ export const CreateBill: React.FC = () => {
                       <hr className="mb-2" />
                       <div className="grid grid-cols-2 gap-0.5">
                         <div className="font-medium pr-2 text-sm">IBAN:</div>
-                        <div className="text-[#111] text-sm">
+                        <div
+                          className={`text-sm ${
+                            isEditing ? "text-white" : "text-[#111]"
+                          }`}
+                        >
                           {formatIban(user.iban)}
                         </div>
                         <div className="font-medium pr-2 text-sm">
                           Mededeling:
                         </div>
-                        <div className="text-[#111] text-sm">
-                          {isEditing ? (
-                            <Controller
-                              name="structuredMessage"
-                              control={control}
-                              rules={{
-                                required: "Structured message is required",
-                                validate: (value) =>
-                                  structuredMessage.validate(value),
-                              }}
-                              render={({ field }) => (
-                                <Input
-                                  label="structured message"
-                                  isRequired
-                                  max={12 + 2 + 6}
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  onBlur={structuredMessage.onBlur(
-                                    field.onChange
-                                  )}
-                                  isInvalid={!!errors.structuredMessage}
-                                  errorMessage={
-                                    errors.structuredMessage?.message
-                                  }
-                                />
-                              )}
-                            />
-                          ) : (
-                            `+++${formValues.structuredMessage}+++`
-                          )}
+                        <div
+                          className={`text-sm ${
+                            isEditing ? "text-white" : "text-[#111]"
+                          }`}
+                        >
+                          {formValues.structuredMessage}
                         </div>
                         <div className="font-medium pr-2 text-sm">
                           Te betalen voor:
                         </div>
-                        <div className="text-[#111] text-sm">
+                        <div
+                          className={`text-sm ${
+                            isEditing ? "text-white" : "text-[#111]"
+                          }`}
+                        >
                           {formatDate(formValues.expirationDate)}
                         </div>
                       </div>
@@ -891,3 +908,32 @@ const Totals = ({ rows }: { rows: [string, number][] }) => (
     })}
   </div>
 );
+
+// Utility to generate unique bill ID
+const generateBillId = () =>
+  `${Date.now()}${Math.random().toString(36).slice(2, 9)}`
+    .split("")
+    .sort(() => Math.random())
+    .join("");
+
+// Calculate totals
+const calcSubtotal = (assignment: Assignment) =>
+  assignment.quantity * assignment.unitPrice;
+
+const calculateBtwAmount = (assignment: Assignment) =>
+  calcSubtotal(assignment) * (assignment.btw / 100);
+
+const totalWithBtw = (assignment: Assignment) =>
+  calcSubtotal(assignment) + calculateBtwAmount(assignment);
+
+// Format date utility
+const formatDate = (d?: string | Date) =>
+  d ? format(new Date(d), "dd/MM/yyyy", { locale: nl }) : "-";
+
+const invertColors = () => {
+  const elm = document.getElementById("bill-content");
+  if (elm) {
+    elm.classList.toggle("invert-100");
+    console.log(elm.classList);
+  }
+};

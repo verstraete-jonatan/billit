@@ -1,9 +1,3 @@
-import { QRCode } from "react-qrcode-logo";
-import { useUserStore } from "src/store";
-
-import { Input } from "@heroui/react";
-import { ChangeEvent, Suspense, useCallback, useState } from "react";
-
 const infos: [string, string][] = [
   [
     "Export",

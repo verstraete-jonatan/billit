@@ -14,6 +14,7 @@ export const useBillStore = create<BillState>()(
     (set, get) => ({
       bills: [],
       addBill: (bill) => {
+        throw new Error("Depricated, use updateBill");
         set((state) => ({ bills: [...state.bills, bill] }));
       },
       updateBillStatus: (id, status) => {
@@ -24,11 +25,16 @@ export const useBillStore = create<BillState>()(
         }));
       },
       updateBill: (updatedBill: Bill) => {
-        set((state) => ({
-          bills: state.bills.map((bill) =>
-            bill.id === updatedBill.id ? { ...bill, ...updatedBill } : bill
-          ),
-        }));
+        set((state) => {
+          if (!state.bills.some(({ id }) => id === updatedBill.id)) {
+            return { bills: [...state.bills, updatedBill] };
+          }
+          return {
+            bills: state.bills.map((bill) =>
+              bill.id === updatedBill.id ? { ...bill, ...updatedBill } : bill
+            ),
+          };
+        });
       },
       deleteBill: (id) => {
         set((state) => ({

@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Modal, ModalContent, Input, Button } from "@heroui/react";
 import { useUserStore } from "../store/userStore";
-import { formatBtwNumber, structuredMessage } from "src/helpers";
+import { formatBtwNumber, validationMessage } from "src/helpers";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -242,14 +242,14 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               control={control}
               rules={{
                 required: "is required",
-                validate: structuredMessage.validate,
+                validate: validationMessage.validate,
               }}
               render={({ field }) => (
                 <Input
                   label="Gestuctureerde mededeling"
                   value={field.value}
                   onChange={field.onChange}
-                  onBlur={structuredMessage.onBlur(field.onChange)}
+                  onBlur={validationMessage.onBlur(field.onChange)}
                   className="bg-[#2A2A2A] border-gray-600 focus:border-gradient-to-r focus:border-[#4A4A4A] rounded-lg"
                   isInvalid={!!errors.structuredMessage}
                   errorMessage={errors.structuredMessage?.message}
@@ -315,19 +315,12 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const btwRegex = /^([A-Z]{2})[0-9]{2} [0-9]{6}/;
-// Allow formats like +++123/4567/89012+++ (Belgium) or ++12/3456/78901++ (other countries), or raw 12-digit number
-const structuredMessageRegex =
-  /^((\+{2,3}\d{2,3}\/\d{4}\/\d{5}\+{2,3})|\d{12})$/;
 
 // Validation functions
 const validateBtw = (value: string) => {
   return true;
   return btwRegex.test(value) || "Ongeldig BTW-nummer (bijv. BE0123.456.789)";
 };
-
-const validateStructuredMessage = (value: string) =>
-  isNaN(Number(value.replaceAll(" ", ""))) ||
-  "Only use numbers and spaces. Adding things like + or / are done later";
 
 const validateEmail = (value: string) => {
   return emailRegex.test(value) || "invalid email";

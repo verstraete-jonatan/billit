@@ -5,47 +5,41 @@ import { isValid as isIbanValid, toBBAN, printFormat } from "iban-ts";
 //   onBlur: (onChange: (value: string) => void) =>
 //     (event: React.ChangeEvent<HTMLInputElement>) => void
 // }
-export const structuredMessage = {
+export const validationMessage: ValidationItem = {
   validate: (input: string) => {
-    if (input.includes("+")) {
-      return "The '+' are added automatically later.";
+    if (!/[\d\+\\]/g.test(input)) {
+      return "invalid characters (0-9 or / or +++)";
     }
-
     const digits = input.replace(/[^\d]/g, "");
-    if (digits.length !== 11 && digits.length !== 12) {
-      return `Must be 11 or 12 numbers (now: ${digits.length}).`;
+    if (digits.length !== 12) {
+      return `Must be 12 numbers (now: ${digits.length}).`;
     }
-
-    if (!/^[0-9/]+$/.test(input.replace(/[^\d/]/g, ""))) {
-      return "Only numbers or / are allowed";
-    }
-
     return true;
   },
 
   onBlur:
-    (onChange: (value: string) => void) =>
+    (onChange: (value: React.ChangeEvent<HTMLInputElement>) => void) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      let value = event.target.value.replace(/[^\d]/g, "").slice(0, 12); // Remove non-digits
+      let value = event.target.value.replace(/[^\d]/g, "");
 
-      // Format based on digit count
-      if (value.length === 11) {
-        // Format as XX/XXXX/XXXXX
-        value = `${value.slice(0, 2)}/${value.slice(2, 6)}/${value.slice(6)}`;
-      } else if (value.length === 12) {
-        // Format as XXX/XXXX/XXXXX
+      if (value.length === 12) {
+        // Format as +++XXX/XXXX/XXXXX+++
         value = `${value.slice(0, 3)}/${value.slice(3, 7)}/${value.slice(7)}`;
+        value = `+++${value}+++`;
       }
 
-      // Update the form value via react-hook-form's onChange
-      onChange(value);
+      event.target.value = value;
+      onChange(event);
     },
 };
 
 export const formatIban = (iban: string) => {
   return printFormat(iban);
   const [country] = iban.split(/\d+/);
-  return `${country.replaceAll(" ", "")} ${iban.replace(/\D/g, "")}`;
+  return `${country.replaceAll(" ", "")} ${iban.replace(
+    /\D/g,
+    ""
+  )}`.toUpperCase();
 };
 
 export const formatBtwNumber = (btw: string) => {
@@ -103,4 +97,11 @@ export const generateQRCodeData = ({
 
   // const formattedAmount = `EUR${amount.toFixed(2)}`;
   // return `BCD\n001\n1\nSCT\n\n${name}\n${iban}\n${formattedAmount}\n\n\n${structuredMessage}`;
+};
+
+type ValidationItem = {
+  validate: (input: string) => string | true;
+  onBlur: (
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
