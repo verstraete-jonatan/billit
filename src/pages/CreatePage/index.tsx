@@ -4,18 +4,17 @@ import React, {
   useState,
   useEffect,
   useRef,
+  Fragment,
 } from "react";
 import {
   useBeforeUnload,
-  useBlocker,
   useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { nl } from "date-fns/locale";
-// @ts-ignore
-import html2pdf from "html2pdf.js";
+
 import { format } from "date-fns";
 import { QRCode } from "react-qrcode-logo";
 import {
@@ -53,7 +52,8 @@ import {
 } from "src/helpers";
 import { ThemeProvider } from "@mui/material";
 
-import { darkTheme } from "src/themes";
+import { darkTheme, lightTheme } from "src/themes";
+import { exportToPdf } from "./helpers";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -74,15 +74,13 @@ export const CreateBill: React.FC = () => {
 
   const { bill_id } = useParams<{ bill_id: string }>();
   const navigate = useNavigate();
-  const loca = useLocation();
 
   const contacts = useContacts();
   const { user } = useUserStore();
   const { settings: qrCodeSettings } = useQrStore();
-  const { addBill, updateBill, bills } = useBillStore();
+  const { updateBill, bills } = useBillStore();
 
   const existingBill = bills.find((bill) => bill.id === bill_id);
-  const isEditMode = !!existingBill && !!bill_id;
 
   const billId = useRef(bill_id || generateBillId()).current;
 
@@ -90,7 +88,6 @@ export const CreateBill: React.FC = () => {
     control,
     handleSubmit,
     watch,
-    getFieldState,
     setFocus,
     formState: { errors, isValid, isDirty },
   } = useForm<BillForm>({
@@ -170,44 +167,10 @@ export const CreateBill: React.FC = () => {
   const handleExport = useCallback(async () => {
     onSave();
     setExporting(true);
-    const element = document.getElementById("bill-content");
-
-    const opt = {
-      filename: `factuur-${formValues.billingNumber}.pdf`,
-      image: { type: "pdf", quality: 1 },
-      html2canvas: {
-        scale: 2, // Higher resolution for better quality
-        useCORS: true,
-        windowWidth: 794, // A4 width in pixels at 96dpi
-        windowHeight: 1123, // A4 height in pixels at 96dpi
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
-      },
-      pagebreak: {
-        mode: "avoid-all",
-        before: "#bill-content",
-      },
-    };
-
     try {
-      await html2pdf()
-        .set(opt)
-        .from(element)
-        .toPdf()
-        .get("pdf")
-        .then((pdf: any) => {
-          const totalPages = pdf.internal.getNumberOfPages();
-          if (totalPages > 1) {
-            for (let i = totalPages; i > 1; i--) {
-              pdf.deletePage(i);
-            }
-          }
-        })
-        .save();
+      await exportToPdf(formValues.billingNumber);
     } catch (error: any) {
+      console.error(error);
       window.alert("Reload page - " + error.message);
     }
     setExporting(false);
@@ -377,7 +340,7 @@ export const CreateBill: React.FC = () => {
   });
 
   const og_width = ` ${isEditing ? "w-2/3" : "w-[210mm]"}`;
-  const isDarkMode = false && isEditMode;
+  const isDarkMode = false && isEditing;
 
   if (!user?.iban || !user?.name) {
     return (
@@ -389,7 +352,7 @@ export const CreateBill: React.FC = () => {
   }
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <main className={`${isDarkMode ? "dark" : "light"}`}>
         <div className="h-screen p-6 flex flex-col items-center">
           {/* Action Buttons */}
@@ -441,284 +404,270 @@ export const CreateBill: React.FC = () => {
             </div>
           </div>
 
-          {/* Bill Content (A4 Card) */}
-          {user ? (
-            <>
-              <Card
-                className={`shadow-2xl h-[297mm] overflow-scroll p-6 shadow-[#102] ${
-                  isDarkMode ? "bg-black text-white" : "bg-white text-black"
-                } ${og_width}`}
-                id="bill-content"
-              >
-                {/* Header */}
-                <div className="w-full flex justify-between items-end relative mb-5">
-                  <Image
-                    src={user.logo}
-                    alt="Logo"
-                    className="h-24 w-auto mb-5"
-                  />
-                  <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
-                    <h1 className="text-3xl font-black uppercase">Factuur</h1>
-                  </div>
-                </div>
+          <Card
+            className={`shadow-2xl h-[297mm] overflow-scroll p-6 shadow-[#102] ${
+              isDarkMode ? "bg-black text-white" : "bg-white text-black"
+            } ${og_width}`}
+            id="bill-content"
+          >
+            {/* Header */}
+            <div className="w-full flex justify-between items-end relative mb-5">
+              <Image src={user.logo} alt="Logo" className="h-24 w-auto mb-5" />
+              <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
+                <h1 className="text-3xl font-black uppercase">Factuur</h1>
+              </div>
+            </div>
 
-                {/* User and Contact Info */}
-                <div className="flex justify-between my-6">
-                  <TableishUser user={user} />
-                  <div className="w-[300px]">
+            {/* User and Contact Info */}
+            <div className="flex justify-between my-6">
+              <TableishUser user={user} />
+              <div className="w-[300px]">
+                {isEditing ? (
+                  <Controller
+                    name="contactId"
+                    control={control}
+                    rules={{ required: "Contact is required" }}
+                    render={({ field }) => (
+                      <Select
+                        isRequired
+                        label="Contact"
+                        placeholder="Select a contact"
+                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        isInvalid={!!errors.contactId}
+                        errorMessage={errors.contactId?.message}
+                        disallowEmptySelection
+                      >
+                        {contacts.map((contact) => (
+                          <SelectItem key={contact.id}>
+                            {contact.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                ) : (
+                  <TableishUser user={selectedContact} />
+                )}
+              </div>
+            </div>
+
+            {/* Bill Details */}
+            <div className="w-fit mb-10">
+              <div className="min-w-[300px]">
+                <div className="grid grid-cols-2 gap-0.5">
+                  <div className="font-medium pr-2 text-sm">Datum:</div>
+                  <div
+                    className={`text-sm ${
+                      isDarkMode ? "text-white" : "text-[#111]"
+                    }`}
+                  >
+                    {format(new Date(), "dd/MM/yyyy", { locale: nl })}
+                  </div>
+                  <div className="font-medium pr-2 text-sm">
+                    Te betalen voor:
+                  </div>
+                  <div
+                  // className={`text-sm ${
+                  //   isDarkMode ? "text-white" : "text-[#111]"
+                  // }`}
+                  >
                     {isEditing ? (
                       <Controller
-                        name="contactId"
+                        name="expirationDate"
                         control={control}
-                        rules={{ required: "Contact is required" }}
+                        rules={{ required: "Expiration date is required" }}
                         render={({ field }) => (
-                          <Select
-                            isRequired
-                            label="Contact"
-                            placeholder="Select a contact"
-                            value={field.value}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            isInvalid={!!errors.contactId}
-                            errorMessage={errors.contactId?.message}
-                            disallowEmptySelection
-                          >
-                            {contacts.map((contact) => (
-                              <SelectItem key={contact.id}>
-                                {contact.name}
-                              </SelectItem>
-                            ))}
-                          </Select>
+                          <DatePicker
+                            value={field.value ? new Date(field.value) : null}
+                            onChange={(value) =>
+                              field.onChange(value?.toString())
+                            }
+                            minDate={new Date()}
+                            className="w-full"
+                            slotProps={{
+                              textField: {
+                                error: !!errors.expirationDate,
+                                helperText: errors.expirationDate?.message,
+                              },
+                            }}
+                          />
                         )}
                       />
                     ) : (
-                      <TableishUser user={selectedContact} />
+                      formatDate(formValues.expirationDate)
                     )}
                   </div>
-                </div>
-
-                {/* Bill Details */}
-                <div className="w-fit mb-10">
-                  <div className="min-w-[300px]">
-                    <div className="grid grid-cols-2 gap-0.5">
-                      <div className="font-medium pr-2 text-sm">Datum:</div>
-                      <div
-                        className={`text-sm ${
-                          isDarkMode ? "text-white" : "text-[#111]"
-                        }`}
-                      >
-                        {format(new Date(), "dd/MM/yyyy", { locale: nl })}
-                      </div>
-                      <div className="font-medium pr-2 text-sm">
-                        Te betalen voor:
-                      </div>
-                      <div
-                        className={`text-sm ${
-                          isDarkMode ? "text-white" : "text-[#111]"
-                        }`}
-                      >
-                        {isEditing ? (
-                          <Controller
-                            name="expirationDate"
-                            control={control}
-                            rules={{ required: "Expiration date is required" }}
-                            render={({ field }) => (
-                              <DatePicker
-                                value={
-                                  field.value ? new Date(field.value) : null
-                                }
-                                onChange={(value) =>
-                                  field.onChange(value?.toString())
-                                }
-                                minDate={new Date()}
-                                className="w-full"
-                                slotProps={{
-                                  textField: {
-                                    error: !!errors.expirationDate,
-                                    helperText: errors.expirationDate?.message,
-                                  },
-                                }}
-                              />
-                            )}
+                  <div className="font-medium pr-2 text-sm">Factuurnummer:</div>
+                  <div
+                    className={`text-sm ${
+                      isDarkMode ? "text-white" : "text-[#111]"
+                    }`}
+                  >
+                    {isEditing ? (
+                      <Controller
+                        name="billingNumber"
+                        control={control}
+                        rules={{
+                          required: "Billing number is required",
+                        }}
+                        render={({ field }) => (
+                          <Input
+                            isRequired
+                            value={field.value}
+                            onChange={field.onChange}
+                            isInvalid={!!errors.billingNumber}
+                            errorMessage={errors.billingNumber?.message}
                           />
-                        ) : (
-                          formatDate(formValues.expirationDate)
                         )}
-                      </div>
-                      <div className="font-medium pr-2 text-sm">
-                        Factuurnummer:
-                      </div>
-                      <div
-                        className={`text-sm ${
-                          isDarkMode ? "text-white" : "text-[#111]"
-                        }`}
-                      >
-                        {isEditing ? (
-                          <Controller
-                            name="billingNumber"
-                            control={control}
-                            rules={{
-                              required: "Billing number is required",
-                            }}
-                            render={({ field }) => (
-                              <Input
-                                isRequired
-                                value={field.value}
-                                onChange={field.onChange}
-                                isInvalid={!!errors.billingNumber}
-                                errorMessage={errors.billingNumber?.message}
-                              />
-                            )}
-                          />
-                        ) : (
-                          formValues.billingNumber
-                        )}
-                      </div>
-
-                      {isEditing && (
-                        <>
-                          <div className="font-medium pr-2 text-sm">
-                            Structured reference
-                          </div>
-                          <div
-                            className={`text-sm ${
-                              isEditing ? "text-white" : "text-[#111]"
-                            }`}
-                          >
-                            <Controller
-                              name="structuredMessage"
-                              control={control}
-                              rules={{
-                                required: "Required",
-                                validate: validationMessage.validate,
-                              }}
-                              render={({ field }) => (
-                                <Input
-                                  isRequired
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  onBlur={validationMessage.onBlur(
-                                    field.onChange
-                                  )}
-                                  isInvalid={!!errors.structuredMessage}
-                                  errorMessage={
-                                    errors.structuredMessage?.message
-                                  }
-                                />
-                              )}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
+                      />
+                    ) : (
+                      formValues.billingNumber
+                    )}
                   </div>
-                </div>
 
-                {/* Assignments Table */}
-                {isEditing ? (
-                  <>
-                    <table
-                      className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
-                        isDarkMode ? "bg-black" : "bg-white"
+                  {isEditing && (
+                    <>
+                      <div className="font-medium pr-2 text-sm">
+                        Structurele mededeling
+                      </div>
+                      <div
+                        className={`text-sm ${
+                          isEditing ? "text-white" : "text-[#111]"
+                        }`}
+                      >
+                        <Controller
+                          name="structuredMessage"
+                          control={control}
+                          rules={{
+                            required: "Required",
+                            validate: validationMessage.validate,
+                          }}
+                          render={({ field }) => (
+                            <Input
+                              isRequired
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={validationMessage.onBlur(field.onChange)}
+                              isInvalid={!!errors.structuredMessage}
+                              errorMessage={errors.structuredMessage?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Assignments Table */}
+            {isEditing ? (
+              <>
+                <table
+                  className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
+                    isDarkMode ? "bg-black" : "bg-white"
+                  }`}
+                >
+                  <thead>
+                    <tr
+                      className={`border-b border-t  text-sm text-left  uppercase ${
+                        isDarkMode
+                          ? "bg-gray-900 text-gray-100 border-gray-800"
+                          : "bg-gray-100 text-gray-700 border-gray-300"
                       }`}
                     >
-                      <thead>
-                        <tr
-                          className={`border-b border-t  text-sm text-left  uppercase ${
-                            isDarkMode
-                              ? "bg-gray-900 text-gray-100 border-gray-800"
-                              : "bg-gray-100 text-gray-700 border-gray-300"
-                          }`}
-                        >
-                          {table.getHeaderGroups().map((headerGroup) => (
-                            <React.Fragment key={headerGroup.id}>
-                              {headerGroup.headers.map((header) => (
-                                <th key={header.id} className="px-4 py-3">
-                                  {header.isPlaceholder
-                                    ? null
-                                    : flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext()
-                                      )}
-                                </th>
-                              ))}
-                            </React.Fragment>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <React.Fragment key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <th key={header.id} className="px-4 py-3">
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </th>
                           ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                          <tr
-                            key={row.id}
-                            className={`border-b transition-colors ${
-                              isDarkMode
-                                ? "border-gray-900 hover:bg-gray-900"
-                                : "border-gray-200 hover:bg-gray-50"
-                            }`}
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <td key={cell.id} className="px-4 py-3">
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div className="flex justify-center mb-6">
-                      <Button
-                        variant="solid"
-                        color="primary"
-                        startContent={<PlusIcon className="h-5 w-5" />}
-                        onPress={() => append(emptyAssignment)}
-                        size="lg"
-                      >
-                        Add Assignment
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <table className="w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 bg-white">
-                    <thead>
-                      <tr className="border-b border-t border-gray-300 text-sm text-left bg-gray-100 text-gray-700 uppercase">
-                        <th className="px-4 py-3">Omschrijving</th>
-                        <th className="px-4 py-3">Aantal</th>
-                        <th className="px-4 py-3">Eenheidsprijs</th>
-                        <th className="px-4 py-3">Subtotaal</th>
-                        <th className="px-4 py-3">BTW</th>
-                        <th className="px-4 py-3">Totaal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {formValues.assignments.map((a, index) => (
-                        <tr
-                          key={`row-${index}-${a.description}`}
-                          className="border-b border-gray-200 text-sm font-medium font-mono hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-4 py-3">{a.description}</td>
-                          <td className="px-4 py-3">{`${a.quantity} ${
-                            a.unit ? `(${a.unit})` : ""
-                          }`}</td>
-                          <td className="px-4 py-3">{`€${a.unitPrice.toFixed(
-                            2
-                          )}`}</td>
-                          <td className="px-4 py-3">{`€${calcSubtotal(
-                            a
-                          ).toFixed(2)}`}</td>
-                          <td className="px-4 py-3">{`${calculateBtwAmount(
-                            a
-                          ).toFixed(2)} (${a.btw}%)`}</td>
-                          <td className="px-4 py-3">{`€${totalWithBtw(
-                            a
-                          ).toFixed(2)}`}</td>
-                        </tr>
+                        </React.Fragment>
                       ))}
-                    </tbody>
-                  </table>
-                )}
-
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className={`border-b transition-colors ${
+                          isDarkMode
+                            ? "border-gray-900 hover:bg-gray-900"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="px-4 py-3">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="flex justify-center mb-6">
+                  <Button
+                    variant="solid"
+                    color="primary"
+                    startContent={<PlusIcon className="h-5 w-5" />}
+                    onPress={() => append(emptyAssignment)}
+                    size="lg"
+                  >
+                    Add Assignment
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <table className="w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 bg-white">
+                <thead>
+                  <tr className="border-b border-t border-gray-300 text-sm text-left bg-gray-100 text-gray-700 uppercase">
+                    <th className="px-4 py-3">Omschrijving</th>
+                    <th className="px-4 py-3">Aantal</th>
+                    <th className="px-4 py-3">Eenheidsprijs</th>
+                    <th className="px-4 py-3">Subtotaal</th>
+                    <th className="px-4 py-3">BTW</th>
+                    <th className="px-4 py-3">Totaal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formValues.assignments.map((a, index) => (
+                    <tr
+                      key={`row-${index}-${a.description}`}
+                      className="border-b border-gray-200 text-sm font-medium font-mono hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-3">{a.description}</td>
+                      <td className="px-4 py-3">{`${a.quantity} ${
+                        a.unit ? `(${a.unit})` : ""
+                      }`}</td>
+                      <td className="px-4 py-3">{`€${a.unitPrice.toFixed(
+                        2
+                      )}`}</td>
+                      <td className="px-4 py-3">{`€${calcSubtotal(a).toFixed(
+                        2
+                      )}`}</td>
+                      <td className="px-4 py-3">{`${calculateBtwAmount(
+                        a
+                      ).toFixed(2)} (${a.btw}%)`}</td>
+                      <td className="px-4 py-3">{`€${totalWithBtw(a).toFixed(
+                        2
+                      )}`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {!isEditing && (
+              <Fragment>
                 {/* Totals */}
                 <div className="mb-6 flex justify-end w-full">
                   <Totals
@@ -729,7 +678,6 @@ export const CreateBill: React.FC = () => {
                     ]}
                   />
                 </div>
-
                 {/* Payment Info and QR Code */}
                 <div className="flex items-end h-full">
                   <div className="mt-4 flex h-fit">
@@ -794,7 +742,6 @@ export const CreateBill: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Footer */}
                 <div className="text-grey text-sm w-full text-right">
                   <p>Algemene voorwaarden:</p>
@@ -802,18 +749,14 @@ export const CreateBill: React.FC = () => {
                     {user.voorwaardedenUrl}
                   </a>
                 </div>
-              </Card>
-              <div className="italic text-white text-xs font-mono text-center">
-                {isEditing
-                  ? "Changes are saved automatically"
-                  : " True size display A4 (210mm x 297mm)"}
-              </div>
-            </>
-          ) : (
-            <div className="text-gray-400 text-center">
-              Please update user details first.
-            </div>
-          )}
+              </Fragment>
+            )}
+          </Card>
+          <div className="italic text-white text-xs font-mono text-center">
+            {isEditing
+              ? "Changes are saved automatically"
+              : " True size display A4 (210mm x 297mm)"}
+          </div>
         </div>
       </main>
     </ThemeProvider>
