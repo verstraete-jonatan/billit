@@ -4,14 +4,28 @@ import { Button, useDisclosure } from "@heroui/react"; // Assuming HeroUI compon
 import { EditUserModal } from "./EditUserModal";
 
 import { navItems } from "src/Routes";
-import { EyeIcon } from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  MoonIcon,
+  SunIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
+import { useUserStore } from "src/store";
 
 export const Sidebar = () => {
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const { user, setUser } = useUserStore();
+
+  const isDarkMode = user.darkMode;
+
   return (
-    <aside className="w-64 bg-[#0A0A0A] text-white h-full flex flex-col border-r border-gray-700 shadow-xl overflow-y-scroll overflow-x-hidden">
+    <aside
+      className={`w-64 h-full flex flex-col border-r border-gray-700 shadow-xl overflow-y-scroll overflow-x-hidden ${
+        isDarkMode ? "bg-[#0A0A0A] text-white" : "bg-[#fefefe] text-black"
+      }`}
+    >
       <div className="p-6">
         <div className="flex items-center justify-center">
           <img
@@ -25,13 +39,18 @@ export const Sidebar = () => {
         {navItems.map((item) => {
           const isActive = location.pathname.includes(item.path);
           return (
-            <div key={item.name} className="list-none flex flex-col mb-5">
+            <div key={item.name} className="list-none flex flex-col">
               <Link
                 to={item.path}
-                className={`flex items-center mx-4 pl-2 py-3 rounded-lg transition-all duration-300 ${
+                style={{
+                  transformOrigin: "left",
+                }}
+                className={`flex items-center pl-4 py-3 transition-all ${
                   isActive
-                    ? "bg-gray-200 text-black font-semibold"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                    ? "border-l-8 font-black scale-105"
+                    : `hover:font-bold hover:scale-105 ${
+                        isDarkMode ? "text-grey" : "text-black"
+                      }`
                 }`}
               >
                 <item.icon className="h-5 w-5 mr-3 opacity-80" />
@@ -60,10 +79,30 @@ export const Sidebar = () => {
         </div>
       </div> */}
       <div className="p-6 border-t border-gray-700">
-        <Button onPress={onOpen} color="primary" variant="light">
+        <Button
+          onPress={onOpen}
+          color="secondary"
+          variant="solid"
+          startContent={<UserIcon className="h-auto w-5" />}
+        >
           Edit my Info
         </Button>
       </div>
+      <Button
+        onPress={() => setUser({ darkMode: !isDarkMode })}
+        color="primary"
+        variant="light"
+        // isIconOnly
+        // radius="full"
+        className={""}
+      >
+        {isDarkMode ? (
+          <MoonIcon className="h-auto w-5" />
+        ) : (
+          <SunIcon className="h-auto w-5" />
+        )}
+        {isDarkMode ? "Dark" : "Light"} mode
+      </Button>
       <EditUserModal isOpen={isOpen} onClose={onClose} />
     </aside>
   );

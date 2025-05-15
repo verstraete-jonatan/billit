@@ -3,17 +3,14 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UserStore {
   user: User;
-  setUser: (user: User) => void;
+  setUser: (user: Partial<User> | User) => void;
 }
 
-const emptyUser: User = {
+export const emptyUser: User = {
   logo: "",
   voorwaardedenUrl: "",
   structuredMessage: "",
-  settings: {
-    invert: undefined,
-    blackWhite: undefined,
-  },
+  darkMode: true,
   id: "",
   name: "",
   address: {
@@ -30,7 +27,8 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       user: { ...emptyUser },
-      setUser: (updated) => set({ user: { ...emptyUser, ...updated } }),
+      setUser: (updated) =>
+        set(({ user }) => ({ user: { ...user, ...updated } })),
     }),
     {
       name: "user-storage",

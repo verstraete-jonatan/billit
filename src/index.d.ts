@@ -23,10 +23,8 @@ declare global {
     logo: string;
     voorwaardedenUrl: string;
     structuredMessage: string;
-    settings: {
-      invert?: boolean;
-      blackWhite?: boolean;
-    };
+
+    darkMode?: boolean;
   }
 
   export type BillStatus = "DRAFT" | "PENDING" | "PAYED";

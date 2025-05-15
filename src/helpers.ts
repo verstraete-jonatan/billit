@@ -120,8 +120,8 @@ export const generateQRCodeData = ({
     return "";
   }
   const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-  if (isNaN(parsedAmount) || parsedAmount <= 0) {
-    console.error("Amount must be a positive number");
+  if (isNaN(parsedAmount) || parsedAmount < 0) {
+    console.error("Amount must be a positive number", parsedAmount);
     return "";
   }
   const formattedAmount = `EUR${parsedAmount.toFixed(2)}`;
@@ -142,7 +142,6 @@ export const generateQRCodeData = ({
     "", // Beneficiary to Originator Information (optional)
   ];
 
-  console.log(lines);
   // Join lines with newline separator and ensure no trailing newline
   return lines.join("\n").trim();
 };

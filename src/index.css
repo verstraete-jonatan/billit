@@ -11,6 +11,9 @@
 
 * {
   font-family: Helvetica, sans-serif;
+  outline: none;
+  /* border-style: dotted; */
+  animation: bg_move alternate 5s;
 }
 
 /* @config "../tailwind.config.ts"; */
@@ -31,6 +34,33 @@ html {
     rgba(40, 40, 43, 1) 0%,
     rgba(41, 40, 43, 1) 100%
   );
+}
+
+.gd_fade {
+  background: #151321;
+  background: linear-gradient(0deg, rgb(25, 25, 25) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.animate_move_bg {
+  animation: bg_move alternate 5s;
+}
+
+@keyframes bg_move {
+  0% {
+    background-position: 50% 50%;
+  }
+  25% {
+    background-position: 20% 60%;
+  }
+  50% {
+    background-position: 40% 90%;
+  }
+  75% {
+    background-position: 80% 60%;
+  }
+  100% {
+    background-position: 60% 40%;
+  }
 }
 
 /* "linear-gradient(90deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 15, 1) 13%, rgba(2, 0, 10, 1) 35%, rgba(0, 0, 10, 1) 67%, rgba(4, 0, 10, 1) 85%, rgba(0, 0, 0, 1) 100%)", */

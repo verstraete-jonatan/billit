@@ -37,7 +37,7 @@ import {
 } from "@heroui/react";
 
 import { useBillStore, useContacts } from "../../store";
-import { useUserStore } from "../../store/userStore";
+import { emptyUser, useUserStore } from "../../store/userStore";
 import { useQrStore } from "src/store/qrCode";
 import {
   formatBtwNumber,
@@ -46,11 +46,9 @@ import {
   useBeforeLeave,
   validationMessage,
 } from "src/helpers";
-import { ThemeProvider } from "@mui/material";
 
-import { darkTheme, lightTheme } from "src/themes";
-import { exportToPdf, now } from "./helpers";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Theme } from "src/themes";
+import { exportToPdf } from "./helpers";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -354,7 +352,7 @@ export const CreateBill: React.FC = () => {
   });
 
   const og_width = ` ${isEditing ? "w-[280mm]" : "w-[210mm]"}`;
-  const isDarkMode = false && isEditing;
+  const isDarkMode = isEditing ? user.darkMode : false;
 
   if (!user?.iban || !user?.name) {
     return (
@@ -366,47 +364,46 @@ export const CreateBill: React.FC = () => {
   }
 
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-      <main className={`${isDarkMode ? "dark" : "light"}`}>
-        <div className="h-screen p-6 flex flex-col items-center">
-          {/* Action Buttons */}
-          <div className={"w-[210mm] flex justify-between mb-4"}>
-            <h2 className="text-2xl font-bold text-white">
-              {isDarkMode ? "Edit Bill" : "New Bill"}
-            </h2>
-            <div className="space-x-2">
-              <Button
-                color={isEditing ? "primary" : "secondary"}
-                onPress={() => setIsEditing(!isEditing)}
-                isDisabled={isExporting}
-                startContent={
-                  isEditing ? (
-                    <EyeIcon className="h-auto w-5" />
-                  ) : (
-                    <PencilIcon className="h-auto w-5" />
-                  )
-                }
-              >
-                {isEditing ? "Preview" : "Edit"}
-              </Button>
+    <Theme>
+      <div className="h-screen p-6 flex flex-col items-center">
+        {/* Action Buttons */}
+        <div className="w-[210mm] flex justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white">
+            {isDarkMode ? "Edit Bill" : "New Bill"}
+          </h2>
+          <div className="space-x-2">
+            <Button
+              color={isEditing ? "primary" : "secondary"}
+              onPress={() => setIsEditing(!isEditing)}
+              isDisabled={isExporting}
+              startContent={
+                isEditing ? (
+                  <EyeIcon className="h-auto w-5" />
+                ) : (
+                  <PencilIcon className="h-auto w-5" />
+                )
+              }
+            >
+              {isEditing ? "Preview" : "Edit"}
+            </Button>
 
-              <Button
-                color="success"
-                onPress={onSubmit(handleExport)}
-                startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
-                isLoading={isExporting}
-                preventFocusOnPress
-                isDisabled={!isValid && !isEditing}
-              >
-                Export PDF
-              </Button>
-              {!isEditing && !isValid && (
-                <p className="text-xs italic text-gray-400 flex justify-end pr-2">
-                  Some details are missing
-                </p>
-              )}
+            <Button
+              color="success"
+              onPress={onSubmit(handleExport)}
+              startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
+              isLoading={isExporting}
+              preventFocusOnPress
+              isDisabled={!isValid && !isEditing}
+            >
+              Export PDF
+            </Button>
+            {!isEditing && !isValid && (
+              <p className="text-xs italic text-gray-400 flex justify-end pr-2">
+                Some details are missing
+              </p>
+            )}
 
-              {/* <Button
+            {/* <Button
                 color="primary"
                 variant="bordered"
                 onPress={onSubmit(() => onSave(false))}
@@ -416,15 +413,17 @@ export const CreateBill: React.FC = () => {
               >
                 Save
               </Button> */}
-            </div>
           </div>
-
-          <Card
-            className={`shadow-2xl m-0 w-fit h-fit overflow-scroll shadow-[#102] ${
-              isDarkMode ? "bg-black text-white" : "bg-white text-black"
-            }`}
-            id="bill-content"
-          >
+        </div>
+        <Card
+          id="bill-content"
+          className={`shadow-2xl m-0 w-fit h-fit overflow-scroll ${
+            isDarkMode
+              ? "bg-black text-white shadow-[#102]"
+              : "bg-white text-black shadow-[#dde0ff]"
+          }`}
+        >
+          <Theme isDarkMode={isDarkMode}>
             <div className={`p-6 h-[297mm] ${og_width}`}>
               {/* Header */}
               <div className="w-full flex justify-between items-end relative mb-5">
@@ -706,15 +705,19 @@ export const CreateBill: React.FC = () => {
                   <div className="flex items-end flex-1">
                     <div className="mt-4 flex h-fit">
                       <div className="relative">
-                        <QRCode
-                          value={qrData}
-                          size={130}
-                          qrStyle="dots"
-                          ecLevel="Q"
-                          logoImage={user.logo}
-                          // {...qrCodeSettings}
-                          // logoPadding={0}
-                        />
+                        {qrData && (
+                          <QRCode
+                            qrStyle="dots"
+                            ecLevel="Q"
+                            {...qrCodeSettings}
+                            size={130}
+                            value={qrData}
+                            logoImage={
+                              qrCodeSettings.enableLogo ? user.logo : undefined
+                            }
+                            logoPadding={0}
+                          />
+                        )}
 
                         {/* {isEditing && (
                         <div className="absolute top-[35%] left-0 bg-[#ffffff33] backdrop-blur shadow text-center py-1 w-full opacity-90">
@@ -772,39 +775,21 @@ export const CreateBill: React.FC = () => {
                 </Fragment>
               )}
             </div>
-          </Card>
-          <div className="italic text-white text-xs font-mono text-center mt-2">
-            {isEditing
-              ? "Changes are saved automatically"
-              : " True size display A4 (210mm x 297mm)"}
-          </div>
+          </Theme>
+        </Card>
+
+        <div className="italic text-white text-xs font-mono text-center mt-2">
+          {isEditing
+            ? "Changes are saved automatically"
+            : " True size display A4 (210mm x 297mm)"}
         </div>
-      </main>
-    </ThemeProvider>
+      </div>
+    </Theme>
   );
 };
 
 // Helper components (TableishUser, Totals)
-const TableishUser = ({ user }: { user?: User | Contact }) => {
-  user =
-    user ??
-    ({
-      logo: "",
-      voorwaardedenUrl: "",
-      structuredMessage: "",
-      id: "",
-      name: "",
-      address: {
-        street: "",
-        houseNumber: "",
-        city: "",
-        country: "",
-      },
-      btw: "",
-      iban: "",
-      settings: {},
-    } satisfies User);
-
+const TableishUser = ({ user = emptyUser }: { user?: User | Contact }) => {
   const details = [
     `${user.address.street} ${user.address.houseNumber}`,
     user.address.city,
