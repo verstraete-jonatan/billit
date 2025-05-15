@@ -19,8 +19,6 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   const {
     control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<User>({
     mode: "onChange",
@@ -29,20 +27,18 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
     },
   });
 
-  const logo = watch("logo");
-
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setValue("logo", reader.result as string);
+        setUser({ ...user, logo: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const onSubmit = (data: User) => {
+  const onSubmit = ({ logo, ...data }: User) => {
     setUser({ ...user, ...data });
     onClose();
   };
@@ -237,15 +233,19 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
 
           {/* Logo Upload */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-400">Logo</label>
-            <input type="file" accept="image/png" onChange={handleLogoChange} />
-            {logo && (
-              <img
-                src={logo}
-                alt="Logo Preview"
-                className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
-              />
-            )}
+            <label className="text-sm text-gray-400">Update logo</label>
+            <Input
+              placeholder="Update logo"
+              type="file"
+              accept="image/png"
+              onChange={handleLogoChange}
+              color="secondary"
+            />
+            <img
+              src={user?.logo}
+              alt="Logo Preview"
+              className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
+            />
           </div>
 
           {/* Buttons */}

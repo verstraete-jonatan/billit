@@ -23,7 +23,7 @@ export const Sidebar = () => {
       </div>
       <nav className="mt-10 flex-1">
         {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
+          const isActive = location.pathname.includes(item.path);
           return (
             <div key={item.name} className="list-none flex flex-col mb-5">
               <Link

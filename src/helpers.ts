@@ -94,51 +94,57 @@ export const formatBtwNumber = (btw: string) => {
   // console.log(btw, btw.match(/^(\w{2}\d{4})-(\d{3})-(\d)$/));
   // return /^(\d{4})-(\d{3})-(\d)$/.exec(btw);
 };
-
 export const generateQRCodeData = ({
   iban,
   message,
   amount,
   name,
+  bic = "", // Optional BIC, default to empty for EU IBANs
 }: {
   iban: string;
   message: string;
   amount: number | string;
   name: string;
+  bic?: string;
 }): string => {
-  // if (!iban.match(/^\D{2}\d{14}$/) || !message.trim() || amount <= 0) {
-  //   throw new Error("Invalid input");
+  // Input validation
+  const cleanIban = iban.replace(/\s/g, ""); // Remove spaces from IBAN
+  // if (!cleanIban.match(/^BE\d{14}$/)) {
+  //   console.error(
+  //     "Invalid Belgian IBAN. Expected format: BEkk BBBB CCCC DDDD EE"
+  //   );
+  //   return "";
   // }
-  // see https://github.com/smhg/sepa-qr-js/blob/master/test/index.js
-  const serviceTag = "BCD",
-    version = "002",
-    characterSet = 1,
-    identification = "SCT",
-    bic = "",
-    purpose = "",
-    remittance = message,
-    information = "";
-
-  if (!isNaN(Number(amount))) {
-    amount = Number(amount).toFixed(2);
+  if (!name.trim()) {
+    console.error("Recipient name is required");
+    return "";
   }
+  const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    console.error("Amount must be a positive number");
+    return "";
+  }
+  const formattedAmount = `EUR${parsedAmount.toFixed(2)}`;
+  const cleanMessage = message.trim() || ""; // Ensure message is not null
 
-  return [
-    serviceTag,
-    version,
-    characterSet,
-    identification,
-    bic,
-    name,
-    iban,
-    `EUR${amount}`,
-    purpose,
-    remittance,
-    information,
-  ].join("\n");
+  // EPC069-12 SEPA QR code format (SCT)
+  const lines = [
+    "BCD", // Service Tag
+    "002", // Version
+    "1", // Character Set (1 = UTF-8)
+    "SCT", // Identification Code
+    bic, // BIC (optional, empty for EU IBANs if not provided)
+    name.trim(), // Recipient Name (max 70 chars)
+    cleanIban, // IBAN
+    formattedAmount, // Amount (EUR + value with 2 decimals)
+    "", // Purpose Code (optional, empty)
+    cleanMessage, // Remittance Information (max 140 chars)
+    "", // Beneficiary to Originator Information (optional)
+  ];
 
-  // const formattedAmount = `EUR${amount.toFixed(2)}`;
-  // return `BCD\n001\n1\nSCT\n\n${name}\n${iban}\n${formattedAmount}\n\n\n${structuredMessage}`;
+  console.log(lines);
+  // Join lines with newline separator and ensure no trailing newline
+  return lines.join("\n").trim();
 };
 
 type ValidationItem = {

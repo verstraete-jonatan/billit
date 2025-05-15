@@ -6,13 +6,7 @@ import React, {
   useRef,
   Fragment,
 } from "react";
-import {
-  useBeforeUnload,
-  useBlocker,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router";
+import { useParams } from "react-router";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { nl } from "date-fns/locale";
 
@@ -194,6 +188,17 @@ export const CreateBill: React.FC = () => {
     }
     setExporting(false);
   }, [formValues.billingNumber, isEditing, onSave]);
+
+  const qrData = useMemo(
+    () =>
+      generateQRCodeData({
+        iban: formatIban(user.iban),
+        message: formValues.structuredMessage,
+        amount: totalInclBtw,
+        name: user.name,
+      }),
+    [formValues.structuredMessage, totalInclBtw, user.iban, user.name]
+  );
 
   useEffect(() => {
     if (!user?.iban) {
@@ -702,15 +707,10 @@ export const CreateBill: React.FC = () => {
                     <div className="mt-4 flex h-fit">
                       <div className="relative">
                         <QRCode
-                          value={generateQRCodeData({
-                            iban: formatIban(user.iban),
-                            message: formValues.structuredMessage,
-                            amount: totalInclBtw,
-                            name: user.name,
-                          })}
+                          value={qrData}
                           size={130}
                           qrStyle="dots"
-                          ecLevel="M"
+                          ecLevel="Q"
                           logoImage={user.logo}
                           // {...qrCodeSettings}
                           // logoPadding={0}

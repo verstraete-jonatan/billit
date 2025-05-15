@@ -31,7 +31,7 @@ export const navItems = [
     icon: UserGroupIcon,
   },
   {
-    name: "QR",
+    name: "Custom QR",
     path: "billit/qr",
     icon: QrCodeIcon,
   },

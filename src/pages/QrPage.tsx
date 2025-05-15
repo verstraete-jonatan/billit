@@ -2,58 +2,46 @@ import { QRCode } from "react-qrcode-logo";
 
 import { useUserStore } from "src/store";
 
-import { Button, Input, Select, SelectItem } from "@heroui/react";
-import {
-  ChangeEvent,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { Input, Select, SelectItem, Switch } from "@heroui/react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { generateQRCodeData } from "src/helpers";
 import { useQrStore } from "src/store/qrCode";
-import { debounce } from "@mui/material";
-
-type FormType = Pick<User, "iban" | "name"> & {
-  amount: string;
-  message: string;
-};
 
 const qrStyles: Array<QrCodeSettings["qrStyle"]> = ["dots", "fluid", "squares"];
 
-const field: (keyof FormType)[] = ["iban", "message", "amount", "name"];
-
 export const QrPage = () => {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const { settings, updateSettings } = useQrStore();
 
   const [qrProps, setQrProps] = useState<QrCodeSettings>({
     ...settings,
   });
 
-  const [form, setForm] = useState<FormType>({
-    iban: user?.iban ?? "AB 000000000000000000",
-    message: user?.structuredMessage ?? "",
-    amount: "0",
-    name: user?.name ?? "Test",
-  });
+  const qrData = useMemo(
+    () =>
+      generateQRCodeData({
+        iban: user?.iban ?? "AB 000000000000000000",
+        message: user?.structuredMessage ?? "",
+        amount: "0",
+        name: user?.name ?? "Test",
+      }),
+    []
+  );
 
   useEffect(() => {
     updateSettings(qrProps);
   }, [qrProps]);
 
-  const update = useCallback(
-    (key: keyof FormType, asBool?: boolean) => (e: ChangeEvent) => {
-      const v = (e.target as HTMLInputElement).value;
-
-      setForm((prev) => ({
-        ...prev,
-        [key]: asBool ? !Boolean(JSON.parse(v)) : v,
-      }));
-    },
-    []
-  );
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUser({ ...(user ?? {}), logo: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const updateQr = useCallback(
     (key: keyof QrCodeSettings, asBool?: boolean) => (e: ChangeEvent) => {
@@ -69,39 +57,24 @@ export const QrPage = () => {
 
   return (
     <div className="w-full h-full flex flex-wrap">
-      <div className="flex flex-wrap items-start flex-2">
-        <div className="w-full flex h-fit">
-          {/* {field.map((i) => (
-            <Input
-              key={i}
-              isRequired
-              label={i}
-              type={i === "amount" ? "number" : undefined}
-              value={form[i]?.toString()}
-              onChange={update(i)}
-              className="px-3 py-1"
-            />
-          ))} */}
-        </div>
-
-        <div className="flex justify-center items-center flex-1">
-          <QRCode
-            value={generateQRCodeData(form)}
-            qrStyle="dots"
-            fgColor="grey"
-            bgColor="black"
-            {...qrProps}
-            logoImage={!Boolean(qrProps.enableLogo) ? undefined : user?.logo}
-            size={300}
-            ecLevel="L"
-            style={{
-              boxShadow: "0px 0px 20px 0px #fff5",
-            }}
-          />
-        </div>
+      <div className="flex justify-center items-center flex-2 bg-modal">
+        <QRCode
+          value={qrData}
+          qrStyle="dots"
+          fgColor="grey"
+          bgColor="black"
+          {...qrProps}
+          logoImage={!Boolean(qrProps.enableLogo) ? undefined : user?.logo}
+          size={300}
+          ecLevel="L"
+          style={{
+            boxShadow: "0px 0px 200px 200px #fff2",
+            borderRadius: 10,
+          }}
+        />
       </div>
 
-      <div className="bg-[#111] py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between">
+      <div className="bg-[#111] py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between shadow-xl">
         <div className="pr-2 *:flex *:flex-col flex-1 overflow-y-scroll">
           <h3 className="text-xl font-black my-5">Customize</h3>
           <div>
@@ -146,20 +119,29 @@ export const QrPage = () => {
                 <SelectItem key={i}>{i}</SelectItem>
               ))}
             </Select>
-            <Select
-              label="Enable/disable logo"
-              value={String(!!qrProps.enableLogo)}
-              defaultSelectedKeys={[String(qrProps.enableLogo)]}
+            <Switch
+              isSelected={!!qrProps.enableLogo}
+              value={String(!qrProps.enableLogo)}
               onChange={updateQr("enableLogo", true)}
-              className="mb-4"
-              disallowEmptySelection
             >
-              {[true, false].map((i) => (
-                <SelectItem key={String(i)}>
-                  {!i ? "Disable" : "Enable"}
-                </SelectItem>
-              ))}
-            </Select>
+              {qrProps.enableLogo ? "Logo enabled" : "Logo disabled"}
+            </Switch>
+
+            {/* Logo Upload */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-400">Update logo</label>
+              <Input
+                placeholder="Update logo"
+                type="file"
+                accept="image/png"
+                onChange={handleLogoChange}
+              />
+              <img
+                src={user?.logo}
+                alt="Logo Preview"
+                className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
+              />
+            </div>
           </div>
         </div>
 
@@ -174,7 +156,7 @@ export const QrPage = () => {
               Save
             </Button> */}
             <p className="text-md text-[#555] italic pt-1">
-              Changes are saved automatically when updating.
+              Changes are saved automatically
             </p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, HashRouter } from "react-router";
 
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -12,7 +12,7 @@ import { darkTheme } from "./themes";
 
 export const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ThemeProvider theme={darkTheme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <HeroUIProvider locale="en-US">
@@ -33,6 +33,6 @@ export const App = () => {
           </HeroUIProvider>
         </LocalizationProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 };

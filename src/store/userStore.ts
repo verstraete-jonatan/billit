@@ -1,19 +1,36 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-// import { dummy_user } from "./_dummy";
 
 interface UserStore {
-  user: User | null;
+  user: User;
   setUser: (user: User) => void;
-  clearUser: () => void;
 }
+
+const emptyUser: User = {
+  logo: "",
+  voorwaardedenUrl: "",
+  structuredMessage: "",
+  settings: {
+    invert: undefined,
+    blackWhite: undefined,
+  },
+  id: "",
+  name: "",
+  address: {
+    street: "",
+    houseNumber: "",
+    city: "",
+    country: "",
+  },
+  btw: "",
+  iban: "",
+};
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-      clearUser: () => set({ user: null }),
+      user: { ...emptyUser },
+      setUser: (updated) => set({ user: { ...emptyUser, ...updated } }),
     }),
     {
       name: "user-storage",
