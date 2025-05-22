@@ -8,14 +8,13 @@ import { generateQRCodeData } from "src/helpers";
 import { useQrStore } from "src/store/qrCode";
 
 const qrStyles: Array<QrCodeSettings["qrStyle"]> = ["dots", "fluid", "squares"];
+const colors = ["black", "white", "grey"];
 
-export const QrPage = () => {
+export const CustomQr = () => {
   const { user, setUser } = useUserStore();
   const { settings, updateSettings } = useQrStore();
 
-  const [qrProps, setQrProps] = useState<QrCodeSettings>({
-    ...settings,
-  });
+  const [qrProps, setQrProps] = useState<QrCodeSettings>(settings);
 
   const qrData = useMemo(
     () =>
@@ -28,20 +27,19 @@ export const QrPage = () => {
     []
   );
 
-  useEffect(() => {
-    updateSettings(qrProps);
-  }, [qrProps]);
-
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUser({ ...(user ?? {}), logo: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleLogoChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setUser({ ...(user ?? {}), logo: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    []
+  );
 
   const updateQr = useCallback(
     (key: keyof QrCodeSettings, asBool?: boolean) => (e: ChangeEvent) => {
@@ -54,6 +52,12 @@ export const QrPage = () => {
     },
     []
   );
+
+  useEffect(() => {
+    if (settings !== qrProps) {
+      updateSettings(qrProps);
+    }
+  }, [qrProps]);
 
   return (
     <div className="w-full h-full flex flex-wrap">
@@ -74,7 +78,7 @@ export const QrPage = () => {
         />
       </div>
 
-      <div className="bg-[#111] py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between shadow-xl">
+      <div className="bg-modal py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between shadow-xl">
         <div className="pr-2 *:flex *:flex-col flex-1 overflow-y-scroll">
           <h3 className="text-xl font-black my-5">Customize</h3>
           <div>
@@ -102,7 +106,7 @@ export const QrPage = () => {
               className="mb-4"
               disallowEmptySelection
             >
-              {["black", "white", "grey"].map((i) => (
+              {colors.map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
               ))}
             </Select>
@@ -115,7 +119,7 @@ export const QrPage = () => {
               onChange={updateQr("bgColor")}
               className="mb-4"
             >
-              {["black", "white", "grey"].map((i) => (
+              {colors.map((i) => (
                 <SelectItem key={i}>{i}</SelectItem>
               ))}
             </Select>

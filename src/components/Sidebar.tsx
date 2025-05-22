@@ -96,7 +96,7 @@ export const Sidebar = () => {
         // radius="full"
         className={""}
       >
-        {isDarkMode ? (
+        {!isDarkMode ? (
           <MoonIcon className="h-auto w-5" />
         ) : (
           <SunIcon className="h-auto w-5" />

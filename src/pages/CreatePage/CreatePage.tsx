@@ -369,7 +369,7 @@ export const CreateBill: React.FC = () => {
         {/* Action Buttons */}
         <div className="w-[210mm] flex justify-between mb-4">
           <h2 className="text-2xl font-bold text-white">
-            {isDarkMode ? "Edit Bill" : "New Bill"}
+            {isEditing ? "Edit Bill" : "Preview Bill"}
           </h2>
           <div className="space-x-2">
             <Button

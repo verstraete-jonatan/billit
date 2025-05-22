@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -36,14 +36,28 @@ export const ContactsPage = () => {
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
+
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const contacts = useContacts();
 
-  const filteredContacts = contacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.address.city.toLowerCase().includes(searchTerm.toLowerCase())
+  const contactSearchIndexes = useMemo(
+    () =>
+      Object.fromEntries(
+        contacts.map((contact) => [
+          contact.id,
+          Object.values(contact).join("").toLowerCase(),
+        ])
+      ),
+    [contacts]
+  );
+
+  const filteredContacts = useMemo(
+    () =>
+      contacts.filter(({ id }) =>
+        contactSearchIndexes[id]?.includes(searchTerm)
+      ),
+    [contacts, contactSearchIndexes, searchTerm]
   );
 
   const handleEditClick = useCallback(
@@ -64,7 +78,7 @@ export const ContactsPage = () => {
 
   return (
     <div className="flex w-full flex-col p-5">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between px-6 py-4">
         <h1 className="text-2xl font-bold">Contacts</h1>
         <Button
           color="primary"

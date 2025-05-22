@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router";
 import {
   Table,
@@ -20,7 +20,8 @@ import {
   useBills,
   useDeleteBill,
   useUpdateBillStatus,
-} from "../store/billStore";
+} from "../../store/billStore";
+import { Theme } from "src/themes";
 
 type BillStatus = "DRAFT" | "PENDING" | "PAYED";
 
@@ -30,7 +31,7 @@ const statusColors: Record<BillStatus, string> = {
   PAYED: "text-green-500 bg-green-100",
 };
 
-export const BillsOverview: React.FC = () => {
+export const BillsOverview: React.FC = memo(() => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [billToDelete, setBillToDelete] = useState<string | null>(null);
@@ -64,71 +65,74 @@ export const BillsOverview: React.FC = () => {
     setShowConfirmation(false);
   }, []);
 
-  const getStatusAction = (bill: { id: string; status: BillStatus }) => {
-    switch (bill.status) {
-      case "DRAFT":
-        return (
-          <Button
-            size="sm"
-            variant="ghost"
-            color="warning"
-            className="w-[100px]"
-            onPress={() => updateBillStatus(bill.id, "PENDING")}
-          >
-            mark Pending
-          </Button>
-        );
-      case "PENDING":
-        return (
-          <Button
-            size="sm"
-            variant="ghost"
-            color="success"
-            className="w-[100px]"
-            onPress={() => updateBillStatus(bill.id, "PAYED")}
-          >
-            mark Payed
-          </Button>
-        );
-      case "PAYED":
-        return (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="w-[100px]"
-            onPress={() => updateBillStatus(bill.id, "DRAFT")}
-          >
-            mark Draft
-          </Button>
-        );
-      default:
-        return null;
-    }
-  };
+  const getStatusAction = useCallback(
+    (bill: { id: string; status: BillStatus }) => {
+      switch (bill.status) {
+        case "DRAFT":
+          return (
+            <Button
+              size="sm"
+              variant="ghost"
+              color="warning"
+              className="w-[100px]"
+              onPress={() => updateBillStatus(bill.id, "PENDING")}
+            >
+              mark Pending
+            </Button>
+          );
+        case "PENDING":
+          return (
+            <Button
+              size="sm"
+              variant="ghost"
+              color="success"
+              className="w-[100px]"
+              onPress={() => updateBillStatus(bill.id, "PAYED")}
+            >
+              mark Payed
+            </Button>
+          );
+        case "PAYED":
+          return (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-[100px]"
+              onPress={() => updateBillStatus(bill.id, "DRAFT")}
+            >
+              mark Draft
+            </Button>
+          );
+        default:
+          return null;
+      }
+    },
+    [updateBillStatus]
+  );
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex items-center justify-between px-6 py-4">
-        <h2>Bills</h2>
-        <Button
-          variant="solid"
-          color="primary"
-          startContent={<PlusIcon className="h-5 w-5" />}
-          onPress={() => navigate("/billit/create")}
-        >
-          Create Bill
-        </Button>
-      </div>
+    <Theme>
+      <div className="flex flex-col p-5 h-[100vh]">
+        <div className="flex items-center justify-between mb-5 px-6 py-4">
+          <h1 className="text-2xl font-bold">Bills overview</h1>
+          <Button
+            variant="solid"
+            color="primary"
+            startContent={<PlusIcon className="h-5 w-5" />}
+            onPress={() => navigate("/billit/create")}
+          >
+            Create Bill
+          </Button>
+        </div>
 
-      <div className="flex-1 p-6">
         <Input
           placeholder="Search bills by number or contact"
           startContent={
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
           }
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-6 max-w-md"
+          onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+          className="mb-5 max-w-md"
         />
 
         <Table
@@ -139,7 +143,7 @@ export const BillsOverview: React.FC = () => {
           }}
           classNames={{
             table: "min-w-full",
-            wrapper: "rounded-lg border border-gray-200",
+            wrapper: "rounded-lg",
           }}
         >
           <TableHeader>
@@ -196,24 +200,24 @@ export const BillsOverview: React.FC = () => {
             )}
           </TableBody>
         </Table>
-      </div>
 
-      <Modal isOpen={showConfirmation} onClose={cancelDelete} size="sm">
-        <ModalContent>
-          <ModalHeader>Confirm Deletion</ModalHeader>
-          <ModalBody>
-            <p>Are you sure you want to delete this bill?</p>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onPress={cancelDelete}>
-              Cancel
-            </Button>
-            <Button color="danger" onPress={confirmDelete}>
-              Delete
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+        <Modal isOpen={showConfirmation} onClose={cancelDelete} size="sm">
+          <ModalContent>
+            <ModalHeader>Confirm Deletion</ModalHeader>
+            <ModalBody>
+              <p>Are you sure you want to delete this bill?</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="flat" onPress={cancelDelete}>
+                Cancel
+              </Button>
+              <Button color="danger" onPress={confirmDelete}>
+                Delete
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </div>
+    </Theme>
   );
-};
+});

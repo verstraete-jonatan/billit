@@ -20,16 +20,17 @@ declare global {
   }
 
   interface User extends Contact {
-    logo: string;
+    logo: string; // Base64 string for the logo image
+
     voorwaardedenUrl: string;
     structuredMessage: string;
 
     darkMode?: boolean;
   }
 
-  export type BillStatus = "DRAFT" | "PENDING" | "PAYED";
+  type BillStatus = "DRAFT" | "PENDING" | "PAYED";
 
-  export type Bill = {
+  type Bill = {
     user: User;
     contact: Contact;
     status: BillStatus;
@@ -40,7 +41,7 @@ declare global {
     structuredMessage?: string;
   };
 
-  export interface Assignment {
+  interface Assignment {
     description: string;
     startDate: string;
     endDate: string;
@@ -52,16 +53,7 @@ declare global {
     btw: 6 | 12 | 21;
   }
 
-  export type User = {
-    name: string;
-    address: Address;
-    btwNumber: string;
-    email: string;
-    iban: string;
-    logo: string | null; // Base64 string for the logo image
-  };
-
-  export type QrCodeSettings = QRCode["props"] & { enableLogo: boolean };
+  type QrCodeSettings = QRCode["props"] & { enableLogo: boolean };
 
   type BillForm = {
     contactId: string;
@@ -71,6 +63,6 @@ declare global {
     assignments: Assignment[];
   };
 
-  type Defined<A> = A extends UnDef ? never : A;
+  type Defined<A> = A extends null | undefined ? never : A;
 }
 export {};
