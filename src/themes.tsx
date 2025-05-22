@@ -19,7 +19,12 @@ export const Theme = ({
   isDarkMode,
   showGradient,
   children,
-}: PropsWithChildren<{ isDarkMode?: boolean; showGradient?: boolean }>) => {
+  className,
+}: PropsWithChildren<{
+  isDarkMode?: boolean;
+  showGradient?: boolean;
+  className?: HTMLElement["className"];
+}>) => {
   const userDarkMode = useUserStore().user.darkMode;
   isDarkMode ??= userDarkMode;
 
@@ -32,7 +37,7 @@ export const Theme = ({
       <main
         className={`${isDarkMode ? "dark" : "light"} ${
           showGradient ? gradient : ""
-        } text-foreground bg-background`}
+        } ${className ?? ""} text-foreground bg-background bg-transparent`}
       >
         {children}
       </main>

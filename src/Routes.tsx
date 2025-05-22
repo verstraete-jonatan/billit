@@ -9,12 +9,21 @@ import {
 import { Navigate, Routes, Route } from "react-router";
 
 import { ContactsPage } from "./pages/Contacts/ContactsPage";
-import { BillsOverview } from "./pages/BillsOverview";
+import { BillsOverview } from "./pages/BillsOverview/BillsOverview";
 import { CreateBill } from "./pages/CreatePage/CreatePage";
 import { CustomQr } from "./pages/CustomQR/CustomQr";
 import { Help } from "./pages/Help/Help";
+import { Home } from "./pages/Home";
 
-export const navItems = [
+export type AppType = "create" | "bills" | "contacts" | "qr" | "help" | "home";
+export type AppRoute = `billit/${AppType}`;
+export type AppPath = `${"/" | ""}${AppRoute}${`/${string}` | ""}`;
+
+export const navItems: Array<{
+  name: string;
+  path: AppRoute;
+  icon: typeof InformationCircleIcon;
+}> = [
   {
     name: "Create",
     path: "billit/create",
@@ -44,13 +53,13 @@ export const navItems = [
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path="billit/create/:bill_id?" element={<CreateBill />} />
-    <Route path="billit/bills" element={<BillsOverview />} />
-    <Route path="billit/contacts" element={<ContactsPage />} />
-    <Route path="billit/qr" element={<CustomQr />} />
-    <Route path="billit/help" element={<Help />} />
+    <Route path={"billit/create/:bill_id?"} element={<CreateBill />} />
+    <Route path={"billit/bills"} element={<BillsOverview />} />
+    <Route path={"billit/contacts"} element={<ContactsPage />} />
+    <Route path={"billit/qr"} element={<CustomQr />} />
+    <Route path={"billit/help"} element={<Help />} />
+    <Route path={"billit/home"} element={<Home />} />
 
-    <Route path="/" element={<Navigate to="/billit/create" />} />
-    <Route path="/billit" element={<Navigate to="/billit/create" />} />
+    <Route path="*" element={<Navigate to="/billit/home" />} />
   </Routes>
 );

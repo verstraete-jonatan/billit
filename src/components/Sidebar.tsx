@@ -11,9 +11,11 @@ import {
   UserIcon,
 } from "@heroicons/react/24/outline";
 import { useUserStore } from "src/store";
+import { useNav } from "src/utils/useNav";
 
 export const Sidebar = () => {
   const location = useLocation();
+  const nav = useNav();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { user, setUser } = useUserStore();
@@ -22,12 +24,17 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`w-64 h-full flex flex-col border-r border-gray-700 shadow-xl overflow-y-scroll overflow-x-hidden ${
-        isDarkMode ? "bg-[#0A0A0A] text-white" : "bg-[#fefefe] text-black"
+      className={`w-64 h-full flex flex-col border-gray-100 shadow-lg overflow-y-scroll overflow-x-hidden ${
+        isDarkMode
+          ? "bg-[#0A0A0A] text-white shadow-[#444]"
+          : "bg-[#fefefe] text-black shadow-[#aaa]"
       }`}
     >
       <div className="p-6">
-        <div className="flex items-center justify-center">
+        <div
+          className="flex items-center justify-center cursor-pointer"
+          onClick={() => nav("home")}
+        >
           <img
             src="/logo.png"
             alt="App Logo"
@@ -78,11 +85,13 @@ export const Sidebar = () => {
           </Button>
         </div>
       </div> */}
-      <div className="p-6 border-t border-gray-700">
+      <div className="border-t border-gray-700">
         <Button
           onPress={onOpen}
           color="secondary"
           variant="solid"
+          radius="none"
+          className="w-full"
           startContent={<UserIcon className="h-auto w-5" />}
         >
           Edit my Info
@@ -90,10 +99,9 @@ export const Sidebar = () => {
       </div>
       <Button
         onPress={() => setUser({ darkMode: !isDarkMode })}
-        color="primary"
         variant="light"
         // isIconOnly
-        // radius="full"
+        radius="none"
         className={""}
       >
         {!isDarkMode ? (
@@ -101,7 +109,7 @@ export const Sidebar = () => {
         ) : (
           <SunIcon className="h-auto w-5" />
         )}
-        {isDarkMode ? "Dark" : "Light"} mode
+        {isDarkMode ? "Dark mode" : "Light mode"}
       </Button>
       <EditUserModal isOpen={isOpen} onClose={onClose} />
     </aside>

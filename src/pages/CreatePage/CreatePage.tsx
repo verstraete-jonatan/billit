@@ -351,7 +351,6 @@ export const CreateBill: React.FC = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const og_width = ` ${isEditing ? "w-[280mm]" : "w-[210mm]"}`;
   const isDarkMode = isEditing ? user.darkMode : false;
 
   if (!user?.iban || !user?.name) {
@@ -368,7 +367,7 @@ export const CreateBill: React.FC = () => {
       <div className="h-screen p-6 flex flex-col items-center">
         {/* Action Buttons */}
         <div className="w-[210mm] flex justify-between mb-4">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold">
             {isEditing ? "Edit Bill" : "Preview Bill"}
           </h2>
           <div className="space-x-2">
@@ -417,14 +416,18 @@ export const CreateBill: React.FC = () => {
         </div>
         <Card
           id="bill-content"
-          className={`shadow-2xl m-0 w-fit h-fit overflow-scroll ${
+          className={`shadow-md m-0 w-fit h-fit overflow-scroll ${
             isDarkMode
               ? "bg-black text-white shadow-[#102]"
               : "bg-white text-black shadow-[#dde0ff]"
           }`}
         >
           <Theme isDarkMode={isDarkMode}>
-            <div className={`p-6 h-[297mm] ${og_width}`}>
+            <div
+              className={`p-6 h-[297mm] ${
+                isEditing ? "w-[280mm]" : "w-[210mm]"
+              }`}
+            >
               {/* Header */}
               <div className="w-full flex justify-between items-end relative mb-5">
                 <Image

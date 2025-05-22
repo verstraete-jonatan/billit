@@ -112,7 +112,7 @@ export const BillsOverview: React.FC = memo(() => {
 
   return (
     <Theme>
-      <div className="flex flex-col p-5 h-[100vh]">
+      <div className="flex flex-col p-5">
         <div className="flex items-center justify-between mb-5 px-6 py-4">
           <h1 className="text-2xl font-bold">Bills overview</h1>
           <Button
