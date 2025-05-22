@@ -12,7 +12,7 @@ import { ContactsPage } from "./pages/Contacts/ContactsPage";
 import { BillsOverview } from "./pages/BillsOverview";
 import { CreateBill } from "./pages/CreatePage/CreatePage";
 import { CustomQr } from "./pages/CustomQR/CustomQr";
-import { Help } from "./pages/Help";
+import { Help } from "./pages/Help/Help";
 
 export const navItems = [
   {
