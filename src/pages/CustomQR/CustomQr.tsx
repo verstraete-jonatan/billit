@@ -4,28 +4,15 @@ import { useUserStore } from "src/store";
 
 import { Input, Select, SelectItem, Switch } from "@heroui/react";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { generateQRCodeData } from "src/helpers";
 import { useQrStore } from "src/store/qrCode";
+import { StyledQrCode } from "src/components/StyledQrCode";
 
 const qrStyles: Array<QrCodeSettings["qrStyle"]> = ["dots", "fluid", "squares"];
-const colors = ["black", "white", "grey"];
+const colors = ["black", "white", "grey", "transparent"];
 
 export const CustomQr = () => {
   const { user, setUser } = useUserStore();
   const { settings, updateSettings } = useQrStore();
-
-  const [qrProps, setQrProps] = useState<QrCodeSettings>(settings);
-
-  const qrData = useMemo(
-    () =>
-      generateQRCodeData({
-        iban: user?.iban ?? "AB 000000000000000000",
-        message: user?.structuredMessage ?? "",
-        amount: "0",
-        name: user?.name ?? "Test",
-      }),
-    []
-  );
 
   const handleLogoChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,37 +32,17 @@ export const CustomQr = () => {
     (key: keyof QrCodeSettings, asBool?: boolean) => (e: ChangeEvent) => {
       const v = (e.target as HTMLInputElement).value;
 
-      setQrProps((prev) => ({
-        ...prev,
+      updateSettings({
         [key]: asBool ? Boolean(JSON.parse(v)) : v,
-      }));
+      });
     },
     []
   );
 
-  useEffect(() => {
-    if (settings !== qrProps) {
-      updateSettings(qrProps);
-    }
-  }, [qrProps]);
-
   return (
     <div className="w-full h-full flex flex-wrap">
       <div className="flex justify-center items-center flex-2 bg-modal">
-        <QRCode
-          value={qrData}
-          qrStyle="dots"
-          fgColor="grey"
-          bgColor="black"
-          {...qrProps}
-          logoImage={!Boolean(qrProps.enableLogo) ? undefined : user?.logo}
-          size={300}
-          ecLevel="L"
-          style={{
-            boxShadow: "0px 0px 200px 200px #fff2",
-            borderRadius: 10,
-          }}
-        />
+        <StyledQrCode message={""} amount={0} size={350} />
       </div>
 
       <div className="bg-modal py-3 pl-2 flex flex-col flex-1 h-[100vh] justify-between shadow-xl">
@@ -84,9 +51,9 @@ export const CustomQr = () => {
           <div>
             <Select
               label="Qr style"
-              value={qrProps.qrStyle}
+              value={settings.qrStyle}
               defaultSelectedKeys={
-                qrProps.qrStyle ? [qrProps.qrStyle] : undefined
+                settings.qrStyle ? [settings.qrStyle] : undefined
               }
               onChange={updateQr("qrStyle")}
               className="mb-4"
@@ -98,9 +65,9 @@ export const CustomQr = () => {
             </Select>
             <Select
               label="Foreground"
-              value={qrProps.fgColor}
+              value={settings.fgColor}
               defaultSelectedKeys={
-                qrProps.fgColor ? [qrProps.fgColor] : undefined
+                settings.fgColor ? [settings.fgColor] : undefined
               }
               onChange={updateQr("fgColor")}
               className="mb-4"
@@ -112,9 +79,9 @@ export const CustomQr = () => {
             </Select>
             <Select
               label="Background"
-              value={qrProps.bgColor}
+              value={settings.bgColor}
               defaultSelectedKeys={
-                qrProps.bgColor ? [qrProps.bgColor] : undefined
+                settings.bgColor ? [settings.bgColor] : undefined
               }
               onChange={updateQr("bgColor")}
               className="mb-4"
@@ -124,11 +91,11 @@ export const CustomQr = () => {
               ))}
             </Select>
             <Switch
-              isSelected={!!qrProps.enableLogo}
-              value={String(!qrProps.enableLogo)}
+              isSelected={!!settings.enableLogo}
+              value={String(!settings.enableLogo)}
               onChange={updateQr("enableLogo", true)}
             >
-              {qrProps.enableLogo ? "Logo enabled" : "Logo disabled"}
+              {settings.enableLogo ? "Logo enabled" : "Logo disabled"}
             </Switch>
 
             {/* Logo Upload */}

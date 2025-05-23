@@ -19,7 +19,7 @@ export const Help = () => {
           <CardBody className="text-grey italic">{v}</CardBody>
         </Card>
       ))}
-      <p style={{ fontSize: 2, color: "white" }}>versioning: {0.5}</p>
+      <p style={{ fontSize: 2, color: "white" }}>versioning: {0.7}</p>
     </div>
   );
 };

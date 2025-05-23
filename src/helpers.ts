@@ -94,58 +94,6 @@ export const formatBtwNumber = (btw: string) => {
   // console.log(btw, btw.match(/^(\w{2}\d{4})-(\d{3})-(\d)$/));
   // return /^(\d{4})-(\d{3})-(\d)$/.exec(btw);
 };
-export const generateQRCodeData = ({
-  iban,
-  message,
-  amount,
-  name,
-  bic = "", // Optional BIC, default to empty for EU IBANs
-}: {
-  iban: string;
-  message: string;
-  amount: number | string;
-  name: string;
-  bic?: string;
-}): string => {
-  // Input validation
-  const cleanIban = iban.replace(/\s/g, ""); // Remove spaces from IBAN
-  // if (!cleanIban.match(/^BE\d{14}$/)) {
-  //   console.error(
-  //     "Invalid Belgian IBAN. Expected format: BEkk BBBB CCCC DDDD EE"
-  //   );
-  //   return "";
-  // }
-  if (!name.trim()) {
-    console.error("Recipient name is required");
-    return "";
-  }
-  const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-  if (isNaN(parsedAmount) || parsedAmount < 0) {
-    console.error("Amount must be a positive number", parsedAmount);
-    return "";
-  }
-  const formattedAmount = `EUR${parsedAmount.toFixed(2)}`;
-  const cleanMessage = message.trim() || ""; // Ensure message is not null
-
-  // EPC069-12 SEPA QR code format (SCT)
-  const lines = [
-    "BCD", // Service Tag
-    "002", // Version
-    "1", // Character Set (1 = UTF-8)
-    "SCT", // Identification Code
-    bic, // BIC (optional, empty for EU IBANs if not provided)
-    name.trim(), // Recipient Name (max 70 chars)
-    cleanIban, // IBAN
-    formattedAmount, // Amount (EUR + value with 2 decimals)
-    "", // Purpose Code (optional, empty)
-    cleanMessage, // Remittance Information (max 140 chars)
-    "", // Beneficiary to Originator Information (optional)
-  ];
-
-  // Join lines with newline separator and ensure no trailing newline
-  return lines.join("\n").trim();
-};
-
 type ValidationItem = {
   validate: (input: string) => string | true;
   onBlur: (
@@ -174,3 +122,19 @@ export const useBeforeLeave = (isDirty: boolean, onSave: () => void) => {
     };
   }, []);
 };
+
+export function useDebounce<T>(value: T, delay: number = 350) {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}

@@ -4,16 +4,16 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 interface QrStore {
   settings: QrCodeSettings;
-  updateSettings: (settings: QrCodeSettings) => void;
+  updateSettings: (settings: Partial<QrCodeSettings>) => void;
 }
 
 export const useQrStore = create<QrStore>()(
   persist(
     (set) => ({
       settings: { enableLogo: true },
-      updateSettings: (settings: QrCodeSettings) => {
+      updateSettings: (settings) => {
         set((state) => ({
-          settings: { ...state.settings, ...settings } as QrCodeSettings,
+          settings: { ...state.settings, ...settings } satisfies QrCodeSettings,
         }));
       },
     }),
@@ -23,3 +23,5 @@ export const useQrStore = create<QrStore>()(
     }
   )
 );
+
+export const useQrCodeSettings = () => useQrStore().settings;

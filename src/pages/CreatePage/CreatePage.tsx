@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useRef,
   Fragment,
+  memo,
 } from "react";
 import { useParams } from "react-router";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -42,13 +43,13 @@ import { useQrStore } from "src/store/qrCode";
 import {
   formatBtwNumber,
   formatIban,
-  generateQRCodeData,
   useBeforeLeave,
   validationMessage,
 } from "src/helpers";
 
 import { Theme } from "src/themes";
 import { exportToPdf } from "./helpers";
+import { StyledQrCode } from "src/components/StyledQrCode";
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
@@ -71,12 +72,13 @@ export const CreateBill: React.FC = () => {
 
   const contacts = useContacts();
   const { user } = useUserStore();
-  const { settings: qrCodeSettings } = useQrStore();
   const { updateBill, bills } = useBillStore();
 
-  const existingBill = bills.find((bill) => bill.id === bill_id);
-
-  const billId = useRef(bill_id || generateBillId()).current;
+  const billId = useRef(bill_id || generateBillId());
+  const existingBill = useMemo(
+    () => bills.find((bill) => bill.id === bill_id),
+    []
+  );
 
   const {
     control,
@@ -154,7 +156,7 @@ export const CreateBill: React.FC = () => {
       }
 
       updateBill({
-        id: billId,
+        id: billId.current,
         user,
         contact: { ...selectedContact },
         status: "DRAFT",
@@ -186,17 +188,6 @@ export const CreateBill: React.FC = () => {
     }
     setExporting(false);
   }, [formValues.billingNumber, isEditing, onSave]);
-
-  const qrData = useMemo(
-    () =>
-      generateQRCodeData({
-        iban: formatIban(user.iban),
-        message: formValues.structuredMessage,
-        amount: totalInclBtw,
-        name: user.name,
-      }),
-    [formValues.structuredMessage, totalInclBtw, user.iban, user.name]
-  );
 
   useEffect(() => {
     if (!user?.iban) {
@@ -708,19 +699,11 @@ export const CreateBill: React.FC = () => {
                   <div className="flex items-end flex-1">
                     <div className="mt-4 flex h-fit">
                       <div className="relative">
-                        {qrData && (
-                          <QRCode
-                            qrStyle="dots"
-                            ecLevel="Q"
-                            {...qrCodeSettings}
-                            size={130}
-                            value={qrData}
-                            logoImage={
-                              qrCodeSettings.enableLogo ? user.logo : undefined
-                            }
-                            logoPadding={0}
-                          />
-                        )}
+                        <StyledQrCode
+                          amount={totalInclBtw}
+                          message={formValues.structuredMessage}
+                          size={120}
+                        />
 
                         {/* {isEditing && (
                         <div className="absolute top-[35%] left-0 bg-[#ffffff33] backdrop-blur shadow text-center py-1 w-full opacity-90">
@@ -781,7 +764,7 @@ export const CreateBill: React.FC = () => {
           </Theme>
         </Card>
 
-        <div className="italic text-white text-xs font-mono text-center mt-2">
+        <div className="italic text-xs font-mono text-center mt-2">
           {isEditing
             ? "Changes are saved automatically"
             : " True size display A4 (210mm x 297mm)"}
@@ -792,7 +775,7 @@ export const CreateBill: React.FC = () => {
 };
 
 // Helper components (TableishUser, Totals)
-const TableishUser = ({ user = emptyUser }: { user?: User | Contact }) => {
+const TableishUser = memo(({ user = emptyUser }: { user?: User | Contact }) => {
   const details = [
     `${user.address.street} ${user.address.houseNumber}`,
     user.address.city,
@@ -824,9 +807,9 @@ const TableishUser = ({ user = emptyUser }: { user?: User | Contact }) => {
       )}
     </div>
   );
-};
+});
 
-const Totals = ({ rows }: { rows: [string, number][] }) => (
+const Totals = memo(({ rows }: { rows: [string, number][] }) => (
   <div className="w-[300px]">
     {rows.map(([label, value], index) => {
       const isLastRow = index === rows.length - 1;
@@ -849,7 +832,7 @@ const Totals = ({ rows }: { rows: [string, number][] }) => (
       );
     })}
   </div>
-);
+));
 
 // Utility to generate unique bill ID
 const generateBillId = () =>
