@@ -22,6 +22,7 @@ import {
   useUpdateBillStatus,
 } from "../../store/billStore";
 import { Theme } from "src/themes";
+import { useNav } from "src/utils/useNav";
 
 type BillStatus = "DRAFT" | "PENDING" | "PAYED";
 
@@ -37,7 +38,7 @@ export const BillsOverview: React.FC = memo(() => {
   const [billToDelete, setBillToDelete] = useState<string | null>(null);
 
   const bills = useBills();
-  const navigate = useNavigate();
+  const navigate = useNav();
   const deleteBill = useDeleteBill();
   const updateBillStatus = useUpdateBillStatus();
 
@@ -119,7 +120,7 @@ export const BillsOverview: React.FC = memo(() => {
             variant="solid"
             color="primary"
             startContent={<PlusIcon className="h-5 w-5" />}
-            onPress={() => navigate("/billit/create")}
+            onPress={() => navigate("create")}
           >
             Create Bill
           </Button>
@@ -183,7 +184,7 @@ export const BillsOverview: React.FC = memo(() => {
                     variant="ghost"
                     color="primary"
                     isDisabled={bill.status !== "DRAFT"}
-                    onPress={() => navigate(`/billit/create/${bill.id}`)}
+                    onPress={() => navigate(`/create/${bill.id}`)}
                   >
                     Edit
                   </Button>
