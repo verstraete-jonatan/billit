@@ -11,8 +11,7 @@ import { useParams } from "react-router";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { nl } from "date-fns/locale";
 
-import { format } from "date-fns";
-import { QRCode } from "react-qrcode-logo";
+import { endOfMonth, format } from "date-fns";
 import {
   createColumnHelper,
   flexRender,
@@ -39,7 +38,6 @@ import {
 
 import { useBillStore, useContacts } from "../../store";
 import { emptyUser, useUserStore } from "../../store/userStore";
-import { useQrStore } from "src/store/qrCode";
 import {
   formatBtwNumber,
   formatIban,
@@ -50,12 +48,15 @@ import {
 import { Theme } from "src/themes";
 import { exportToPdf } from "./helpers";
 import { StyledQrCode } from "src/components/StyledQrCode";
+import { ArrowUpIcon } from "@heroicons/react/24/outline";
+
+const now = new Date();
 
 // Placeholder for empty assignment
 const emptyAssignment: Assignment = {
   description: "",
-  startDate: new Date().toString(),
-  endDate: new Date().toString(),
+  startDate: now.toString(),
+  endDate: now.toString(),
   quantity: 1,
   unitPrice: 0,
   btw: 21,
@@ -74,7 +75,7 @@ export const CreateBill: React.FC = () => {
   const { user } = useUserStore();
   const { updateBill, bills } = useBillStore();
 
-  const billId = useRef(bill_id || generateBillId());
+  const billId = useRef(generateBillId());
   const existingBill = useMemo(
     () => bills.find((bill) => bill.id === bill_id),
     []
@@ -86,20 +87,25 @@ export const CreateBill: React.FC = () => {
     watch,
     setFocus,
     formState: { errors, isValid, isDirty },
-  } = useForm<BillForm>({
+  } = useForm<Bill>({
     mode: "onChange",
     shouldFocusError: true,
     defaultValues: {
-      contactId: existingBill?.contact?.id || "",
+      contact: existingBill?.contact,
       expirationDate: existingBill?.expirationDate || "",
-      billingNumber: existingBill?.billingNumber || "0",
+      billingNumber: existingBill?.billingNumber || "",
       structuredMessage:
-        existingBill?.structuredMessage ?? user?.structuredMessage ?? "",
+        (existingBill?.structuredMessage ?? user?.structuredMessage) || "",
       assignments: existingBill?.assignments || [emptyAssignment],
-    },
+      user: existingBill?.user ?? user,
+      status: existingBill?.status ?? "DRAFT",
+      id: existingBill?.id ?? billId.current,
+      date: existingBill?.date ?? endOfMonth(now).toString(),
+    } satisfies BillForm,
   });
+
   const formValues = watch();
-  const { fields, append, remove, insert } = useFieldArray<BillForm>({
+  const { fields, append, remove, insert } = useFieldArray<Bill>({
     control,
     name: "assignments",
   });
@@ -139,7 +145,9 @@ export const CreateBill: React.FC = () => {
     0
   );
   const totalInclBtw = totalExclBtw + totalBtw;
-  const selectedContact = contacts.find((c) => c.id === formValues.contactId);
+  const selectedContact = formValues.contact
+    ? contacts.find((c) => c.id === formValues.contact?.id)
+    : undefined;
 
   const onSave = useCallback(
     (verboseAndNav = true): boolean => {
@@ -156,14 +164,8 @@ export const CreateBill: React.FC = () => {
       }
 
       updateBill({
-        id: billId.current,
-        user,
-        contact: { ...selectedContact },
-        status: "DRAFT",
-        expirationDate: formValues.expirationDate,
-        billingNumber: formValues.billingNumber,
-        structuredMessage: formValues.structuredMessage,
-        assignments: formValues.assignments,
+        ...formValues,
+        // contact: { ...selectedContact },
       });
 
       return true;
@@ -360,6 +362,7 @@ export const CreateBill: React.FC = () => {
         <div className="w-[210mm] flex justify-between mb-4">
           <h2 className="text-2xl font-bold">
             {isEditing ? "Edit Bill" : "Preview Bill"}
+            {formValues.date ? " - " + formatDate(formValues.date) : ""}
           </h2>
           <div className="space-x-2">
             <Button
@@ -393,16 +396,16 @@ export const CreateBill: React.FC = () => {
               </p>
             )}
 
-            {/* <Button
-                color="primary"
-                variant="bordered"
-                onPress={onSubmit(() => onSave(false))}
-                isLoading={isExporting}
-                startContent={<ArrowUpIcon className="h-auto w-5" />}
-                preventFocusOnPress
-              >
-                Save
-              </Button> */}
+            <Button
+              color="primary"
+              variant="bordered"
+              onPress={onSubmit(() => onSave(false))}
+              isLoading={isExporting}
+              startContent={<ArrowUpIcon className="h-auto w-5" />}
+              preventFocusOnPress
+            >
+              Save
+            </Button>
           </div>
         </div>
         <Card
@@ -437,19 +440,24 @@ export const CreateBill: React.FC = () => {
                 <div className="w-[300px]">
                   {isEditing ? (
                     <Controller
-                      name="contactId"
+                      name="contact"
                       control={control}
                       rules={{ required: "Contact is required" }}
                       render={({ field }) => (
                         <Select
                           {...field}
+                          value={field.value?.id}
                           isRequired
                           label="Contact"
                           placeholder="Select a contact"
                           // value={field.value}
-                          // onChange={(e) => field.onChange(e.target.value)}
-                          isInvalid={!!errors.contactId}
-                          errorMessage={errors.contactId?.message}
+                          onChange={(e) =>
+                            field.onChange(
+                              contacts.find((i) => i.id === e.target.value)
+                            )
+                          }
+                          isInvalid={!!errors.contact}
+                          errorMessage={errors.contact?.message}
                           disallowEmptySelection
                         >
                           {contacts.map((contact) => (
@@ -476,7 +484,33 @@ export const CreateBill: React.FC = () => {
                         isDarkMode ? "text-white" : "text-[#111]"
                       }`}
                     >
-                      {format(new Date(), "dd/MM/yyyy", { locale: nl })}
+                      {isEditing ? (
+                        <Controller
+                          name="date"
+                          control={control}
+                          rules={{ required: "Date is required" }}
+                          render={({ field }) => (
+                            <DatePicker
+                              defaultValue={now}
+                              ref={field.ref}
+                              value={field.value ? new Date(field.value) : null}
+                              onChange={(value) =>
+                                field.onChange(value?.toString())
+                              }
+                              minDate={now}
+                              className="w-full"
+                              slotProps={{
+                                textField: {
+                                  error: !!errors.date,
+                                  helperText: errors.date?.message,
+                                },
+                              }}
+                            />
+                          )}
+                        />
+                      ) : (
+                        formatDate(formValues.date)
+                      )}
                     </div>
                     <div className="font-medium pr-2 text-sm">
                       Te betalen voor:
@@ -490,13 +524,13 @@ export const CreateBill: React.FC = () => {
                           render={({ field }) => (
                             <DatePicker
                               // {...field}
-                              defaultValue={new Date()}
+                              defaultValue={now}
                               ref={field.ref}
                               value={field.value ? new Date(field.value) : null}
                               onChange={(value) =>
                                 field.onChange(value?.toString())
                               }
-                              minDate={new Date()}
+                              minDate={now}
                               className="w-full"
                               slotProps={{
                                 textField: {

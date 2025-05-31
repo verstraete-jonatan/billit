@@ -31,14 +31,15 @@ declare global {
   type BillStatus = "DRAFT" | "PENDING" | "PAYED";
 
   type Bill = {
-    user: User;
-    contact: Contact;
-    status: BillStatus;
-    expirationDate: string;
-    billingNumber: string;
-    id: string;
     assignments: Assignment[];
+    billingNumber: string;
+    contact: Contact;
+    date: string;
+    expirationDate: string;
+    id: string;
+    status: BillStatus;
     structuredMessage?: string;
+    user: User;
   };
 
   interface Assignment {
@@ -55,14 +56,12 @@ declare global {
 
   type QrCodeSettings = QRCode["props"] & { enableLogo: boolean };
 
-  type BillForm = {
-    contactId: string;
-    expirationDate: string;
-    billingNumber: string;
-    structuredMessage: string;
-    assignments: Assignment[];
-  };
+  type BillForm = PartialWithUndefined<Bill>;
 
   type Defined<A> = A extends null | undefined ? never : A;
+
+  type PartialWithUndefined<T> = {
+    [K in keyof T]: T[K] | undefined;
+  };
 }
 export {};

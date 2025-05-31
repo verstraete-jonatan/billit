@@ -199,12 +199,11 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               name="structuredMessage"
               control={control}
               rules={{
-                required: "Required",
                 validate: validationMessage.validate,
               }}
               render={({ field }) => (
                 <Input
-                  label="Gestuctureerde mededeling"
+                  label="Gestructureerde mededeling"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={validationMessage.onBlur(field.onChange)}

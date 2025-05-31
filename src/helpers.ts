@@ -8,7 +8,10 @@ import { useNavigate, useLocation } from "react-router";
 //     (event: React.ChangeEvent<HTMLInputElement>) => void
 // }
 export const validationMessage: ValidationItem = {
-  validate: (input: string) => {
+  validate: (input) => {
+    if (!input) {
+      return true;
+    }
     if (!/^[\d\+\/]+$/.test(input)) {
       return "invalid characters (only 0-9, +, or / allowed)";
     }
@@ -36,7 +39,10 @@ export const validationMessage: ValidationItem = {
 };
 
 export const validationCity: ValidationItem = {
-  validate: (input: string) => {
+  validate: (input) => {
+    if (!input) {
+      return true;
+    }
     // Regex: one or more digits, optional spaces, a comma, optional spaces, one or more letters
     if (!/^\d+\s*,\s*[a-zA-Z]+$/.test(input)) {
       return "Invalid format (eg. 9000, Gent)";
@@ -95,7 +101,7 @@ export const formatBtwNumber = (btw: string) => {
   // return /^(\d{4})-(\d{3})-(\d)$/.exec(btw);
 };
 type ValidationItem = {
-  validate: (input: string) => string | true;
+  validate: (input?: string) => string | true;
   onBlur: (
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void;

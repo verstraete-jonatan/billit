@@ -6,7 +6,7 @@ import { useQrCodeSettings } from "src/store/qrCode";
 
 type QrCodeData = {
   iban: string;
-  message: string;
+  message?: string;
   amount: number | string;
   name: string;
   bic?: string;
@@ -63,7 +63,7 @@ export const generateQRCodeData = ({
   bic = "", // Optional BIC, default to empty for EU IBANs
 }: {
   iban: string;
-  message: string;
+  message?: string;
   amount: number | string;
   name: string;
   bic?: string;
@@ -86,7 +86,7 @@ export const generateQRCodeData = ({
     return "";
   }
   const formattedAmount = `EUR${parsedAmount.toFixed(2)}`;
-  const cleanMessage = message.trim() || ""; // Ensure message is not null
+  const cleanMessage = message?.trim() || ""; // Ensure message is not null
 
   // EPC069-12 SEPA QR code format (SCT)
   const lines = [
