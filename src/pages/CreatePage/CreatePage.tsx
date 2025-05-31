@@ -523,7 +523,6 @@ export const CreateBill: React.FC = () => {
                       <Controller
                         name="expirationDate"
                         control={control}
-                        rules={{ required: "Expiration date is required" }}
                         render={({ field }) => (
                           <DatePicker
                             // {...field}
@@ -535,12 +534,6 @@ export const CreateBill: React.FC = () => {
                             }
                             minDate={now}
                             className="w-full"
-                            slotProps={{
-                              textField: {
-                                error: !!errors.expirationDate,
-                                helperText: errors.expirationDate?.message,
-                              },
-                            }}
                           />
                         )}
                       />
