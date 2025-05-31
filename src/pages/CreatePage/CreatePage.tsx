@@ -396,7 +396,7 @@ export const CreateBill: React.FC = () => {
               </p>
             )}
 
-            <Button
+            {/* <Button
               color="primary"
               variant="bordered"
               onPress={onSubmit(() => onSave(false))}
@@ -405,7 +405,7 @@ export const CreateBill: React.FC = () => {
               preventFocusOnPress
             >
               Save
-            </Button>
+            </Button> */}
           </div>
         </div>
         <Card
@@ -512,39 +512,42 @@ export const CreateBill: React.FC = () => {
                         formatDate(formValues.date)
                       )}
                     </div>
-                    <div className="font-medium pr-2 text-sm">
-                      Te betalen voor:
-                    </div>
-                    <div>
-                      {isEditing ? (
-                        <Controller
-                          name="expirationDate"
-                          control={control}
-                          rules={{ required: "Expiration date is required" }}
-                          render={({ field }) => (
-                            <DatePicker
-                              // {...field}
-                              defaultValue={now}
-                              ref={field.ref}
-                              value={field.value ? new Date(field.value) : null}
-                              onChange={(value) =>
-                                field.onChange(value?.toString())
-                              }
-                              minDate={now}
-                              className="w-full"
-                              slotProps={{
-                                textField: {
-                                  error: !!errors.expirationDate,
-                                  helperText: errors.expirationDate?.message,
-                                },
-                              }}
-                            />
-                          )}
-                        />
-                      ) : (
-                        formatDate(formValues.expirationDate)
-                      )}
-                    </div>
+                    {formValues.expirationDate ||
+                      (isEditing && (
+                        <div className="font-medium pr-2 text-sm">
+                          Te betalen voor:
+                        </div>
+                      ))}
+
+                    {isEditing ? (
+                      <Controller
+                        name="expirationDate"
+                        control={control}
+                        rules={{ required: "Expiration date is required" }}
+                        render={({ field }) => (
+                          <DatePicker
+                            // {...field}
+                            defaultValue={now}
+                            ref={field.ref}
+                            value={field.value ? new Date(field.value) : null}
+                            onChange={(value) =>
+                              field.onChange(value?.toString())
+                            }
+                            minDate={now}
+                            className="w-full"
+                            slotProps={{
+                              textField: {
+                                error: !!errors.expirationDate,
+                                helperText: errors.expirationDate?.message,
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    ) : (
+                      formatDate(formValues.expirationDate)
+                    )}
+
                     <div className="font-medium pr-2 text-sm">
                       Factuurnummer:
                     </div>
@@ -887,4 +890,4 @@ const totalWithBtw = (
 
 // Format date utility
 const formatDate = (d?: string | Date) =>
-  d ? format(new Date(d), "dd/MM/yyyy", { locale: nl }) : "-";
+  d ? format(new Date(d), "dd/MM/yyyy", { locale: nl }) : "";

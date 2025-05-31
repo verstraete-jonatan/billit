@@ -35,7 +35,7 @@ declare global {
     billingNumber: string;
     contact: Contact;
     date: string;
-    expirationDate: string;
+    expirationDate?: string;
     id: string;
     status: BillStatus;
     structuredMessage?: string;
