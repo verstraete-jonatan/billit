@@ -99,7 +99,7 @@ export const CustomQr = () => {
             </Switch>
 
             {/* Logo Upload */}
-            <div className="flex flex-col gap-2">
+            {/* <div className="flex flex-col gap-2">
               <label className="text-sm text-gray-400">Update logo</label>
               <Input
                 placeholder="Update logo"
@@ -112,7 +112,7 @@ export const CustomQr = () => {
                 alt="Logo Preview"
                 className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
               />
-            </div>
+            </div> */}
           </div>
         </div>
 

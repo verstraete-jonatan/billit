@@ -41,7 +41,7 @@ export const StyledQrCode = memo(
         bgColor="black"
         {...qrCodeSettings}
         value={qrData}
-        logoImage={qrCodeSettings.enableLogo ? user.logo : undefined}
+        // logoImage={qrCodeSettings.enableLogo ? user.logo : undefined}
         size={size}
         ecLevel="L"
         logoPadding={0}

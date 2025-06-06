@@ -78,7 +78,9 @@ export const Assignments = ({
                       isRequired
                       type="number"
                       value={field.value.toString()}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
                     />
                   )}
                 />

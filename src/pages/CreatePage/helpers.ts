@@ -22,7 +22,7 @@ export const exportToPdf = async (billingNumber: string) => {
 
   const opt = {
     filename: `factuur-${billingNumber}.pdf`,
-    image: { type: "png", quality: 1 },
+    image: { type: "png", quality: 0 },
     html2canvas: {
       // scale: 2,
       // useCORS: true,
@@ -30,7 +30,7 @@ export const exportToPdf = async (billingNumber: string) => {
       // windowHeight: 1123,
 
       scale: 2,
-      useCORS: true,
+      useCORS: false,
       windowWidth: 1588, // 210mm at 96 DPI * 2
       windowHeight: 2246, // 297mm at 96 DPI * 2
     },

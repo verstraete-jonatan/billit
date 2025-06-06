@@ -241,7 +241,7 @@ export const CreateBill: React.FC = () => {
                 isRequired
                 type="number"
                 value={field.value.toString()}
-                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                onChange={(e) => field.onChange(parseFloat(e.target.value))}
               />
             )}
           />
@@ -424,11 +424,9 @@ export const CreateBill: React.FC = () => {
             >
               {/* Header */}
               <div className="w-full flex justify-between items-end relative mb-5">
-                <Image
-                  src={user.logo}
-                  alt="Logo"
-                  className="h-24 w-auto mb-5"
-                />
+                <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center">
+                  <Image src={user.logo} alt="Logo" className="h-full w-auto" />
+                </div>
                 <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
                   <h1 className="text-3xl font-black uppercase">Factuur</h1>
                 </div>
@@ -512,12 +510,11 @@ export const CreateBill: React.FC = () => {
                         formatDate(formValues.date)
                       )}
                     </div>
-                    {formValues.expirationDate ||
-                      (isEditing && (
-                        <div className="font-medium pr-2 text-sm">
-                          Te betalen voor:
-                        </div>
-                      ))}
+                    {(!!formValues.expirationDate || isEditing) && (
+                      <div className="font-medium pr-2 text-sm">
+                        Te betalen voor:
+                      </div>
+                    )}
 
                     {isEditing ? (
                       <Controller
@@ -526,6 +523,7 @@ export const CreateBill: React.FC = () => {
                         render={({ field }) => (
                           <DatePicker
                             // {...field}
+
                             defaultValue={now}
                             ref={field.ref}
                             value={field.value ? new Date(field.value) : null}
@@ -571,11 +569,13 @@ export const CreateBill: React.FC = () => {
                       )}
                     </div>
 
-                    {isEditing && (
+                    {(isEditing || formValues.structuredMessage) && (
+                      <div className="font-medium pr-2 text-sm">
+                        Structurele mededeling:
+                      </div>
+                    )}
+                    {isEditing ? (
                       <>
-                        <div className="font-medium pr-2 text-sm">
-                          Structurele mededeling:
-                        </div>
                         <div
                           className={`text-sm ${
                             isEditing ? "text-white" : "text-[#111]"
@@ -603,6 +603,8 @@ export const CreateBill: React.FC = () => {
                           />
                         </div>
                       </>
+                    ) : (
+                      formValues.structuredMessage || ""
                     )}
                   </div>
                 </div>
