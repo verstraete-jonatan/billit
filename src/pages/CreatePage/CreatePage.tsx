@@ -569,7 +569,7 @@ export const CreateBill: React.FC = () => {
                       )}
                     </div>
 
-                    {(isEditing || formValues.structuredMessage) && (
+                    {/* {(isEditing || formValues.structuredMessage) && (
                       <div className="font-medium pr-2 text-sm">
                         Structurele mededeling:
                       </div>
@@ -605,7 +605,7 @@ export const CreateBill: React.FC = () => {
                       </>
                     ) : (
                       formValues.structuredMessage || ""
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
