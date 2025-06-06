@@ -20,17 +20,17 @@
     // normally they are ignored as source files
     "allowJs": true,
     // Generate d.ts files
-    "declaration": true,
+    // "declaration": true,
     // This compiler run should
     // only output d.ts files
-    "emitDeclarationOnly": true,
+    // "emitDeclarationOnly": true,
     // Types should go into this directory.
     // Removing this would place the .d.ts files
     // next to the .js files
     "outDir": "dist",
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": true,
+    // "declarationMap": true,
     "types": ["@types/react", "./src/index.d.ts"]
   },
   "include": ["src"]
