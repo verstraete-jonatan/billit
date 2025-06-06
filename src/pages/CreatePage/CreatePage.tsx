@@ -424,9 +424,14 @@ export const CreateBill: React.FC = () => {
             >
               {/* Header */}
               <div className="w-full flex justify-between items-end relative mb-5">
-                <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center">
-                  <Image src={user.logo} alt="Logo" className="h-full w-auto" />
-                </div>
+                {/* <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center"> */}
+                <Image
+                  src={user.logo}
+                  alt="Logo"
+                  className="w-auto mb-5 h-24"
+                  // className="h-full w-auto mb-5 h-24 "
+                />
+                {/* </div> */}
                 <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
                   <h1 className="text-3xl font-black uppercase">Factuur</h1>
                 </div>

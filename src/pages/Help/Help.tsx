@@ -39,7 +39,7 @@ export const Help = () => {
           <CardBody className="text-grey">{v}</CardBody>
         </Card>
       ))}
-      <p style={{ fontSize: 2, color: "white" }}>versioning: {0.8}</p>
+      <p style={{ fontSize: 8, color: "white" }}>versioning: {0.14}</p>
     </div>
   );
 };
