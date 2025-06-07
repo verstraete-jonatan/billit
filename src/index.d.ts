@@ -39,7 +39,6 @@ declare global {
     id: string;
     status: BillStatus;
     structuredMessage?: string;
-    user: User;
   };
 
   interface Assignment {

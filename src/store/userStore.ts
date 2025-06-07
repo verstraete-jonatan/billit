@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import createIndexedDBStorage from "./_indexedDBStorage";
 
 interface UserStore {
   user: User;
@@ -32,7 +33,8 @@ export const useUserStore = create<UserStore>()(
     }),
     {
       name: "user-storage",
-      storage: createJSONStorage(() => localStorage),
+      // storage: createJSONStorage(() => localStorage),
+      storage: createIndexedDBStorage<UserStore>(),
     }
   )
 );

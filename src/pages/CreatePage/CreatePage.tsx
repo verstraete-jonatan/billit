@@ -46,7 +46,7 @@ import {
 } from "src/helpers";
 
 import { Theme } from "src/themes";
-import { exportToPdf } from "./helpers";
+import { export2PDF } from "./helpers";
 import { StyledQrCode } from "src/components/StyledQrCode";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
@@ -97,7 +97,6 @@ export const CreateBill: React.FC = () => {
       structuredMessage:
         (existingBill?.structuredMessage ?? user?.structuredMessage) || "",
       assignments: existingBill?.assignments || [emptyAssignment],
-      user: existingBill?.user ?? user,
       status: existingBill?.status ?? "DRAFT",
       id: existingBill?.id ?? billId.current,
       date: existingBill?.date ?? endOfMonth(now).toString(),
@@ -110,7 +109,6 @@ export const CreateBill: React.FC = () => {
     name: "assignments",
   });
 
-  const onSubmit = (fn: () => any) => () => handleSubmit(fn, onError)();
   useBeforeLeave(isDirty, () => onSave(false));
 
   const onError = useCallback(() => {
@@ -163,10 +161,17 @@ export const CreateBill: React.FC = () => {
         return false;
       }
 
-      updateBill({
-        ...formValues,
-        // contact: { ...selectedContact },
-      });
+      try {
+        updateBill({
+          ...formValues,
+          // contact: { ...selectedContact },
+        });
+      } catch (error: any) {
+        addToast({
+          color: "danger",
+          title: error.message ?? "Failed to save bill",
+        });
+      }
 
       return true;
       // verboseAndNav && navigate("/bills");
@@ -175,21 +180,33 @@ export const CreateBill: React.FC = () => {
   );
 
   const handleExport = useCallback(async () => {
-    if (isEditing) {
-      setIsEditing(false);
-    }
-    if (!onSave(true)) {
-      return;
-    }
+    setIsEditing(false);
+
     setExporting(true);
-    try {
-      await exportToPdf(formValues.billingNumber);
-    } catch (error: any) {
-      console.error(error);
-      window.alert("Reload page - " + error.message);
-    }
-    setExporting(false);
-  }, [formValues.billingNumber, isEditing, onSave]);
+    document.getElementById("bill-content")?.scrollTo({ top: 0 });
+
+    setTimeout(async () => {
+      try {
+        await export2PDF(formValues.billingNumber);
+      } catch (error: any) {
+        addToast({
+          color: "danger",
+          title: error.message ?? "Failed to export bill",
+        });
+        console.error(error);
+      }
+      setExporting(false);
+    }, 500);
+
+    onSave(true);
+  }, [formValues.billingNumber, onSave]);
+
+  const onSubmit = useCallback(
+    (fn: () => any = handleExport) =>
+      () =>
+        handleSubmit(fn, onError)(),
+    [onError, handleExport]
+  );
 
   useEffect(() => {
     if (!user?.iban) {
@@ -199,7 +216,7 @@ export const CreateBill: React.FC = () => {
           "We need your details for these bills. Please update your details in the sidebar first.",
       });
     }
-  }, [user]);
+  }, [!!user]);
 
   // TanStack Table columns for edit mode
   const columns = useMemo(
@@ -357,143 +374,134 @@ export const CreateBill: React.FC = () => {
 
   return (
     <Theme>
-      <div className="h-screen p-6 flex flex-col items-center">
-        {/* Action Buttons */}
-        <div className="w-[210mm] flex justify-between mb-4">
-          <h2 className="text-2xl font-bold">
-            {isEditing ? "Edit Bill" : "Preview Bill"}
-            {formValues.date ? " - " + formatDate(formValues.date) : ""}
-          </h2>
-          <div className="space-x-2">
-            <Button
-              color={isEditing ? "primary" : "secondary"}
-              onPress={() => setIsEditing(!isEditing)}
-              isDisabled={isExporting}
-              startContent={
-                isEditing ? (
-                  <EyeIcon className="h-auto w-5" />
-                ) : (
-                  <PencilIcon className="h-auto w-5" />
-                )
-              }
-            >
-              {isEditing ? "Preview" : "Edit"}
-            </Button>
-
-            <Button
-              color="success"
-              onPress={onSubmit(handleExport)}
-              startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
-              isLoading={isExporting}
-              preventFocusOnPress
-              isDisabled={!isValid && !isEditing}
-            >
-              Export PDF
-            </Button>
-            {!isEditing && !isValid && (
-              <p className="text-xs italic text-gray-400 flex justify-end pr-2">
-                Some details are missing
-              </p>
-            )}
-
-            {/* <Button
-              color="primary"
-              variant="bordered"
-              onPress={onSubmit(() => onSave(false))}
-              isLoading={isExporting}
-              startContent={<ArrowUpIcon className="h-auto w-5" />}
-              preventFocusOnPress
-            >
-              Save
-            </Button> */}
-          </div>
-        </div>
-        <Card
-          id="bill-content"
-          className={`shadow-md m-0 w-fit h-fit overflow-scroll ${
-            isDarkMode
-              ? "bg-black text-white shadow-[#102]"
-              : "bg-white text-black shadow-[#dde0ff]"
-          }`}
-        >
-          <Theme isDarkMode={isDarkMode}>
-            <div
-              className={`p-6 h-[297mm] ${
-                isEditing ? "w-[280mm]" : "w-[210mm]"
-              }`}
-            >
-              {/* Header */}
-              <div className="w-full flex justify-between items-end relative mb-5">
-                {/* <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center"> */}
-                <Image
-                  src={user.logo}
-                  alt="Logo"
-                  className="w-auto mb-5 h-24"
-                  // className="h-full w-auto mb-5 h-24 "
-                />
-                {/* </div> */}
-                <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
-                  <h1 className="text-3xl font-black uppercase">Factuur</h1>
+      <div className="h-screen p-6 flex justify-between ">
+        <div className="flex-1 flex justify-center">
+          <Card
+            id="bill-content"
+            className={`m-0 w-fit h-[calc(100vh - 5rem)] rounded-none! ${
+              isDarkMode ? "bg-black text-white" : "bg-white text-black"
+            } ${isEditing ? "overflow-y-auto" : ""}`}
+          >
+            <Theme isDarkMode={isDarkMode}>
+              <div
+                className={`p-6 ${isEditing ? "w-[280mm]" : "w-[210mm]"}`}
+                style={{
+                  transform: "scale(0.9) translateY(-50px)",
+                  // scale: 0.9,
+                }}
+              >
+                {/* Header */}
+                <div className="w-full flex justify-between items-end relative mb-5">
+                  {/* <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center"> */}
+                  <Image
+                    src={user.logo}
+                    alt="Logo"
+                    className="w-auto mb-5 h-24"
+                    // className="h-full w-auto mb-5 h-24 "
+                  />
+                  {/* </div> */}
+                  <div className="top-0 left-0 absolute flex items-center justify-center w-full h-full mr-3">
+                    <h1 className="text-3xl font-black uppercase">Factuur</h1>
+                  </div>
                 </div>
-              </div>
 
-              {/* User and Contact Info */}
-              <div className="flex justify-between my-6">
-                <TableishUser user={user} />
-                <div className="w-[300px]">
-                  {isEditing ? (
-                    <Controller
-                      name="contact"
-                      control={control}
-                      rules={{ required: "Contact is required" }}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          value={field.value?.id}
-                          isRequired
-                          label="Contact"
-                          placeholder="Select a contact"
-                          // value={field.value}
-                          onChange={(e) =>
-                            field.onChange(
-                              contacts.find((i) => i.id === e.target.value)
-                            )
-                          }
-                          isInvalid={!!errors.contact}
-                          errorMessage={errors.contact?.message}
-                          disallowEmptySelection
-                        >
-                          {contacts.map((contact) => (
-                            <SelectItem key={contact.id}>
-                              {contact.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
+                {/* User and Contact Info */}
+                <div className="flex justify-between my-6">
+                  <TableishUser user={user} />
+                  <div className="w-[300px]">
+                    {isEditing ? (
+                      <Controller
+                        name="contact"
+                        control={control}
+                        rules={{ required: "Contact is required" }}
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                            value={field.value?.id}
+                            defaultSelectedKeys={[
+                              field.value ? field.value?.id.toString() : "",
+                            ]}
+                            isRequired
+                            label="Contact"
+                            placeholder="Select a contact"
+                            // value={field.value}
+                            onChange={(e) =>
+                              field.onChange(
+                                contacts.find((i) => i.id === e.target.value)
+                              )
+                            }
+                            isInvalid={!!errors.contact}
+                            errorMessage={errors.contact?.message}
+                            disallowEmptySelection
+                          >
+                            {contacts.map((contact) => (
+                              <SelectItem key={contact.id}>
+                                {contact.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    ) : (
+                      <TableishUser user={selectedContact} />
+                    )}
+                  </div>
+                </div>
+
+                {/* Bill Details */}
+                <div className="w-fit mb-10">
+                  <div className="min-w-[300px]">
+                    <div className="grid grid-cols-2 gap-0.5">
+                      <div className="font-medium pr-2 text-sm">Datum:</div>
+                      <div
+                        className={`text-sm ${
+                          isDarkMode ? "text-white" : "text-[#111]"
+                        }`}
+                      >
+                        {isEditing ? (
+                          <Controller
+                            name="date"
+                            control={control}
+                            rules={{ required: "Date is required" }}
+                            render={({ field }) => (
+                              <DatePicker
+                                defaultValue={now}
+                                ref={field.ref}
+                                value={
+                                  field.value ? new Date(field.value) : null
+                                }
+                                onChange={(value) =>
+                                  field.onChange(value?.toString())
+                                }
+                                minDate={now}
+                                className="w-full"
+                                slotProps={{
+                                  textField: {
+                                    error: !!errors.date,
+                                    helperText: errors.date?.message,
+                                  },
+                                }}
+                              />
+                            )}
+                          />
+                        ) : (
+                          formatDate(formValues.date)
+                        )}
+                      </div>
+                      {(!!formValues.expirationDate || isEditing) && (
+                        <div className="font-medium pr-2 text-sm">
+                          Te betalen voor:
+                        </div>
                       )}
-                    />
-                  ) : (
-                    <TableishUser user={selectedContact} />
-                  )}
-                </div>
-              </div>
 
-              {/* Bill Details */}
-              <div className="w-fit mb-10">
-                <div className="min-w-[300px]">
-                  <div className="grid grid-cols-2 gap-0.5">
-                    <div className="font-medium pr-2 text-sm">Datum:</div>
-                    <div
-                      className={`text-sm ${
-                        isDarkMode ? "text-white" : "text-[#111]"
-                      }`}
-                    >
                       {isEditing ? (
                         <Controller
-                          name="date"
+                          name="expirationDate"
                           control={control}
-                          rules={{ required: "Date is required" }}
                           render={({ field }) => (
                             <DatePicker
+                              // {...field}
+
                               defaultValue={now}
                               ref={field.ref}
                               value={field.value ? new Date(field.value) : null}
@@ -502,79 +510,44 @@ export const CreateBill: React.FC = () => {
                               }
                               minDate={now}
                               className="w-full"
-                              slotProps={{
-                                textField: {
-                                  error: !!errors.date,
-                                  helperText: errors.date?.message,
-                                },
-                              }}
                             />
                           )}
                         />
                       ) : (
-                        formatDate(formValues.date)
+                        formatDate(formValues.expirationDate)
                       )}
-                    </div>
-                    {(!!formValues.expirationDate || isEditing) && (
+
                       <div className="font-medium pr-2 text-sm">
-                        Te betalen voor:
+                        Factuurnummer:
                       </div>
-                    )}
-
-                    {isEditing ? (
-                      <Controller
-                        name="expirationDate"
-                        control={control}
-                        render={({ field }) => (
-                          <DatePicker
-                            // {...field}
-
-                            defaultValue={now}
-                            ref={field.ref}
-                            value={field.value ? new Date(field.value) : null}
-                            onChange={(value) =>
-                              field.onChange(value?.toString())
-                            }
-                            minDate={now}
-                            className="w-full"
+                      <div
+                        className={`text-sm ${
+                          isDarkMode ? "text-white" : "text-[#111]"
+                        }`}
+                      >
+                        {isEditing ? (
+                          <Controller
+                            name="billingNumber"
+                            control={control}
+                            rules={{
+                              required: "Billing number is required",
+                            }}
+                            render={({ field }) => (
+                              <Input
+                                isRequired
+                                value={field.value}
+                                onChange={field.onChange}
+                                isInvalid={!!errors.billingNumber}
+                                errorMessage={errors.billingNumber?.message}
+                              />
+                            )}
                           />
+                        ) : (
+                          formValues.billingNumber
                         )}
-                      />
-                    ) : (
-                      formatDate(formValues.expirationDate)
-                    )}
+                      </div>
 
-                    <div className="font-medium pr-2 text-sm">
-                      Factuurnummer:
-                    </div>
-                    <div
-                      className={`text-sm ${
-                        isDarkMode ? "text-white" : "text-[#111]"
-                      }`}
-                    >
-                      {isEditing ? (
-                        <Controller
-                          name="billingNumber"
-                          control={control}
-                          rules={{
-                            required: "Billing number is required",
-                          }}
-                          render={({ field }) => (
-                            <Input
-                              isRequired
-                              value={field.value}
-                              onChange={field.onChange}
-                              isInvalid={!!errors.billingNumber}
-                              errorMessage={errors.billingNumber?.message}
-                            />
-                          )}
-                        />
-                      ) : (
-                        formValues.billingNumber
-                      )}
-                    </div>
-
-                    {/* {(isEditing || formValues.structuredMessage) && (
+                      {/* {(isEditing || formValues.structuredMessage) && (
                       <div className="font-medium pr-2 text-sm">
                         Structurele mededeling:
                       </div>
@@ -611,138 +584,138 @@ export const CreateBill: React.FC = () => {
                     ) : (
                       formValues.structuredMessage || ""
                     )} */}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Assignments Table */}
-              {isEditing ? (
-                <>
-                  <table
-                    className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
-                      isDarkMode ? "bg-black" : "bg-white"
-                    }`}
-                  >
-                    <thead>
-                      <tr
-                        className={`border-b border-t  text-sm text-left  uppercase ${
-                          isDarkMode
-                            ? "bg-gray-900 text-gray-100 border-gray-800"
-                            : "bg-gray-100 text-gray-700 border-gray-300"
-                        }`}
-                      >
-                        {table.getHeaderGroups().map((headerGroup) => (
-                          <React.Fragment key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                              <th key={header.id} className="px-4 py-3">
-                                {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext()
-                                    )}
-                              </th>
+                {/* Assignments Table */}
+                {isEditing ? (
+                  <>
+                    <table
+                      className={`w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 ${
+                        isDarkMode ? "bg-black" : "bg-white"
+                      }`}
+                    >
+                      <thead>
+                        <tr
+                          className={`border-b border-t  text-sm text-left  uppercase ${
+                            isDarkMode
+                              ? "bg-gray-900 text-gray-100 border-gray-800"
+                              : "bg-gray-100 text-gray-700 border-gray-300"
+                          }`}
+                        >
+                          {table.getHeaderGroups().map((headerGroup) => (
+                            <React.Fragment key={headerGroup.id}>
+                              {headerGroup.headers.map((header) => (
+                                <th key={header.id} className="px-4 py-3">
+                                  {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                      )}
+                                </th>
+                              ))}
+                            </React.Fragment>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                          <tr
+                            key={row.id}
+                            className={`border-b transition-colors ${
+                              isDarkMode
+                                ? "border-gray-900 hover:bg-gray-900"
+                                : "border-gray-200 hover:bg-gray-50"
+                            }`}
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <td key={cell.id} className="px-4 py-3">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </td>
                             ))}
-                          </React.Fragment>
+                          </tr>
                         ))}
+                      </tbody>
+                    </table>
+                    <div className="flex justify-center mb-6">
+                      <Button
+                        variant="solid"
+                        color="primary"
+                        startContent={<PlusIcon className="h-5 w-5" />}
+                        onPress={() => append(emptyAssignment)}
+                        size="lg"
+                      >
+                        Add Assignment
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <table className="w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 bg-white">
+                    <thead>
+                      <tr className="border-b border-t border-gray-300 text-sm text-left bg-gray-100 text-gray-700 uppercase">
+                        <th className="px-4 py-3">Omschrijving</th>
+                        <th className="px-4 py-3">Aantal</th>
+                        <th className="px-4 py-3">Eenheidsprijs</th>
+                        <th className="px-4 py-3">Subtotaal</th>
+                        <th className="px-4 py-3">BTW</th>
+                        <th className="px-4 py-3">Totaal</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {table.getRowModel().rows.map((row) => (
+                      {formValues.assignments.map((a, index) => (
                         <tr
-                          key={row.id}
-                          className={`border-b transition-colors ${
-                            isDarkMode
-                              ? "border-gray-900 hover:bg-gray-900"
-                              : "border-gray-200 hover:bg-gray-50"
-                          }`}
+                          key={`row-${index}-${a.description}`}
+                          className="border-b border-gray-200 text-sm font-medium font-mono hover:bg-gray-50 transition-colors"
                         >
-                          {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-4 py-3">
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </td>
-                          ))}
+                          <td className="px-4 py-3">{a.description}</td>
+                          <td className="px-4 py-3">{`${a.quantity} ${
+                            a.unit ? `(${a.unit})` : ""
+                          }`}</td>
+                          <td className="px-4 py-3">{`€${a.unitPrice.toFixed(
+                            2
+                          )}`}</td>
+                          <td className="px-4 py-3">{`€${calcSubtotal(
+                            a
+                          ).toFixed(2)}`}</td>
+                          <td className="px-4 py-3">{`${calculateBtwAmount(
+                            a
+                          ).toFixed(2)} (${a.btw}%)`}</td>
+                          <td className="px-4 py-3">{`€${totalWithBtw(
+                            a
+                          ).toFixed(2)}`}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  <div className="flex justify-center mb-6">
-                    <Button
-                      variant="solid"
-                      color="primary"
-                      startContent={<PlusIcon className="h-5 w-5" />}
-                      onPress={() => append(emptyAssignment)}
-                      size="lg"
-                    >
-                      Add Assignment
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <table className="w-full border-collapse mb-6 rounded-lg shadow-lg border border-gray-300 bg-white">
-                  <thead>
-                    <tr className="border-b border-t border-gray-300 text-sm text-left bg-gray-100 text-gray-700 uppercase">
-                      <th className="px-4 py-3">Omschrijving</th>
-                      <th className="px-4 py-3">Aantal</th>
-                      <th className="px-4 py-3">Eenheidsprijs</th>
-                      <th className="px-4 py-3">Subtotaal</th>
-                      <th className="px-4 py-3">BTW</th>
-                      <th className="px-4 py-3">Totaal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formValues.assignments.map((a, index) => (
-                      <tr
-                        key={`row-${index}-${a.description}`}
-                        className="border-b border-gray-200 text-sm font-medium font-mono hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-4 py-3">{a.description}</td>
-                        <td className="px-4 py-3">{`${a.quantity} ${
-                          a.unit ? `(${a.unit})` : ""
-                        }`}</td>
-                        <td className="px-4 py-3">{`€${a.unitPrice.toFixed(
-                          2
-                        )}`}</td>
-                        <td className="px-4 py-3">{`€${calcSubtotal(a).toFixed(
-                          2
-                        )}`}</td>
-                        <td className="px-4 py-3">{`${calculateBtwAmount(
-                          a
-                        ).toFixed(2)} (${a.btw}%)`}</td>
-                        <td className="px-4 py-3">{`€${totalWithBtw(a).toFixed(
-                          2
-                        )}`}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              {!isEditing && (
-                <Fragment>
-                  {/* Totals */}
-                  <div className="mb-6 flex justify-end w-full">
-                    <Totals
-                      rows={[
-                        ["Subtotaal", totalExclBtw],
-                        ["BTW", totalBtw],
-                        ["Totaal", totalInclBtw],
-                      ]}
-                    />
-                  </div>
-                  {/* Payment Info and QR Code */}
-                  <div className="flex items-end flex-1">
-                    <div className="mt-4 flex h-fit">
-                      <div className="relative">
-                        <StyledQrCode
-                          amount={totalInclBtw}
-                          message={formValues.structuredMessage}
-                          size={120}
-                        />
+                )}
+                {!isEditing && (
+                  <Fragment>
+                    {/* Totals */}
+                    <div className="mb-6 flex justify-end w-full">
+                      <Totals
+                        rows={[
+                          ["Subtotaal", totalExclBtw],
+                          ["BTW", totalBtw],
+                          ["Totaal", totalInclBtw],
+                        ]}
+                      />
+                    </div>
+                    {/* Payment Info and QR Code */}
+                    <div className="flex items-end flex-1">
+                      <div className="mt-4 flex h-fit">
+                        <div className="relative">
+                          <StyledQrCode
+                            amount={totalInclBtw}
+                            message={formValues.structuredMessage}
+                            size={120}
+                          />
 
-                        {/* {isEditing && (
+                          {/* {isEditing && (
                         <div className="absolute top-[35%] left-0 bg-[#ffffff33] backdrop-blur shadow text-center py-1 w-full opacity-90">
                           Modify{" "}
                           <a href="#qr" className="link">
@@ -750,61 +723,113 @@ export const CreateBill: React.FC = () => {
                           </a>
                         </div>
                       )} */}
-                      </div>
+                        </div>
 
-                      <div className="min-w-[300px]">
-                        <div className="font-black">Betalingsinformatie</div>
-                        <hr className="mb-2" />
-                        <div className="grid grid-cols-2 gap-0.5">
-                          <div className="font-medium pr-2 text-sm">IBAN:</div>
-                          <div
-                            className={`text-sm ${
-                              isDarkMode ? "text-white" : "text-[#111]"
-                            }`}
-                          >
-                            {formatIban(user.iban)}
-                          </div>
-                          <div className="font-medium pr-2 text-sm">
-                            Mededeling:
-                          </div>
-                          <div
-                            className={`text-sm ${
-                              isDarkMode ? "text-white" : "text-[#111]"
-                            }`}
-                          >
-                            {formValues.structuredMessage}
-                          </div>
-                          <div className="font-medium pr-2 text-sm">
-                            Te betalen voor:
-                          </div>
-                          <div
-                            className={`text-sm ${
-                              isDarkMode ? "text-white" : "text-[#111]"
-                            }`}
-                          >
-                            {formatDate(formValues.expirationDate)}
+                        <div className="min-w-[300px]">
+                          <div className="font-black">Betalingsinformatie</div>
+                          <hr className="mb-2" />
+                          <div className="grid grid-cols-2 gap-0.5">
+                            <div className="font-medium pr-2 text-sm">
+                              IBAN:
+                            </div>
+                            <div
+                              className={`text-sm ${
+                                isDarkMode ? "text-white" : "text-[#111]"
+                              }`}
+                            >
+                              {formatIban(user.iban)}
+                            </div>
+                            <div className="font-medium pr-2 text-sm">
+                              Mededeling:
+                            </div>
+                            <div
+                              className={`text-sm ${
+                                isDarkMode ? "text-white" : "text-[#111]"
+                              }`}
+                            >
+                              {formValues.structuredMessage}
+                            </div>
+                            <div className="font-medium pr-2 text-sm">
+                              Te betalen voor:
+                            </div>
+                            <div
+                              className={`text-sm ${
+                                isDarkMode ? "text-white" : "text-[#111]"
+                              }`}
+                            >
+                              {formatDate(formValues.expirationDate)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="text-grey text-sm w-full text-right text-gray-900">
-                      <p>Algemene voorwaarden:</p>
-                      <a href={user.voorwaardedenUrl}>
-                        {user.voorwaardedenUrl}
-                      </a>
+                      <div className="text-grey text-sm w-full text-right text-gray-900">
+                        <p>Algemene voorwaarden:</p>
+                        <a href={user.voorwaardedenUrl}>
+                          {user.voorwaardedenUrl}
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                </Fragment>
-              )}
-            </div>
-          </Theme>
-        </Card>
+                  </Fragment>
+                )}
+              </div>
+            </Theme>
+          </Card>
+        </div>
 
-        <div className="italic text-xs font-mono text-center mt-2">
-          {isEditing
-            ? "Changes are saved automatically"
-            : " True size display A4 (210mm x 297mm)"}
+        {/* Action bar */}
+        <div className="flex flex-col justify-between mb-4">
+          <div className="space-x-2">
+            <h2 className="text-2xl font-bold">
+              Bill {formValues.date ? " - " + formatDate(formValues.date) : ""}
+            </h2>
+            <Button
+              color="primary"
+              onPress={() => setIsEditing(!isEditing)}
+              isDisabled={isExporting}
+              startContent={
+                isEditing ? (
+                  <EyeIcon className="h-auto w-5" />
+                ) : (
+                  <PencilIcon className="h-auto w-5" />
+                )
+              }
+            >
+              {isEditing ? "Preview" : "Edit"}
+            </Button>
+
+            <Button
+              color="success"
+              onPress={onSubmit(handleExport)}
+              startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
+              isLoading={isExporting}
+              preventFocusOnPress
+              isDisabled={!isValid && !isEditing}
+            >
+              Export PDF
+            </Button>
+            {!isEditing && !isValid && (
+              <p className="text-xs italic text-[#f33] py-2">
+                Can't export - some details are missing
+              </p>
+            )}
+
+            {/* <Button
+              color="primary"
+              variant="bordered"
+              onPress={onSubmit(() => onSave(false))}
+              isLoading={isExporting}
+              startContent={<ArrowUpIcon className="h-auto w-5" />}
+              preventFocusOnPress
+            >
+              Save
+            </Button> */}
+          </div>
+          <div className="italic text-xs font-mono text-center mt-2">
+            {isEditing
+              ? "Changes are saved automatically"
+              : " True size display A4 (210mm x 297mm)"}
+          </div>
         </div>
       </div>
     </Theme>

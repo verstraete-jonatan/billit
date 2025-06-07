@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import { useUserStore } from "../store/userStore";
 import { formatIban, useDebounce } from "src/helpers";
 import { QRCode } from "react-qrcode-logo";
-import { useQrCodeSettings } from "src/store/qrCode";
+import { useQrStore } from "src/store/qrCode";
 
 type QrCodeData = {
   iban: string;
@@ -18,7 +18,7 @@ type StyledQrCodeProps = Pick<QrCodeData, "amount" | "message"> &
 export const StyledQrCode = memo(
   ({ message, amount, size = 130 }: StyledQrCodeProps) => {
     const { user } = useUserStore();
-    const qrCodeSettings = useQrCodeSettings();
+    const { settings: qrCodeSettings } = useQrStore();
 
     const debMessage = useDebounce(message);
     const debAmount = useDebounce(amount);
@@ -41,7 +41,7 @@ export const StyledQrCode = memo(
         bgColor="black"
         {...qrCodeSettings}
         value={qrData}
-        // logoImage={qrCodeSettings.enableLogo ? user.logo : undefined}
+        logoImage={qrCodeSettings.enableLogo ? user.logo : undefined}
         size={size}
         ecLevel="L"
         logoPadding={0}

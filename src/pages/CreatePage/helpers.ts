@@ -1,5 +1,4 @@
-// @ts-ignore
-import html2pdf from "html2pdf.js";
+import reactToPdf, { type Options as ReactPdfOptions } from "react-to-pdf";
 
 export const now = new Date().toString();
 export const emptyAssignment: Assignment = {
@@ -12,78 +11,47 @@ export const emptyAssignment: Assignment = {
 };
 
 // Update the PDF generation logic
-export const exportToPdf = async (billingNumber: string) => {
-  const element = document.getElementById("bill-content");
+export const export2PDF = async (billingNumber: string) => {
+  const element = () => document.getElementById("bill-content");
 
-  if (!element) {
-    window.alert('Opps, contact dev. Message: no element "bill-content" found');
-    return;
-  }
-
-  const opt = {
+  const options: ReactPdfOptions = {
     filename: `factuur-${billingNumber}.pdf`,
-    image: { type: "png", quality: 0 },
-    html2canvas: {
-      // scale: 2,
-      // useCORS: true,
-      // windowWidth: 794,
-      // windowHeight: 1123,
-
-      scale: 2,
-      useCORS: false,
-      windowWidth: 1588, // 210mm at 96 DPI * 2
-      windowHeight: 2246, // 297mm at 96 DPI * 2
+    // default is `save`
+    method: "save",
+    // default is Resolution.MEDIUM = 3, which should be enough, higher values
+    // increases the image quality but also the size of the PDF, so be careful
+    // using values higher than 10 when having multiple pages generated, it
+    // might cause the page to crash or hang.
+    resolution: 3,
+    page: {
+      // margin is in MM, default is Margin.NONE = 0
+      margin: 0,
+      // default is 'A4'
+      format: "A4",
+      // default is 'portrait'
+      // orientation: "landscape",
     },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
+    canvas: {
+      // default is 'image/jpeg' for better size performance
+      mimeType: "image/png",
+      qualityRatio: 1,
     },
-    pagebreak: {
-      mode: "avoid-all",
-      before: "#bill-content",
+    // Customize any value passed to the jsPDF instance and html2canvas
+    // function. You probably will not need this and things can break,
+    // so use with caution.
+    overrides: {
+      // see https://artskydj.github.io/jsPDF/docs/jsPDF.html for more options
+      pdf: {
+        compress: true,
+      },
+      // see https://html2canvas.hertzen.com/configuration for more options
+      canvas: {
+        useCORS: true,
+        // windowWidth: 1588, // 210mm at 96 DPI * 2
+        // windowHeight: 2246, // 297mm at 96 DPI * 2
+      },
     },
   };
 
-  await html2pdf()
-    .set(opt)
-    .from(element)
-    .toPdf()
-    .get("pdf")
-
-    /** REMOVE FIRST PAGE **/
-    .then((pdf: any) => {
-      const totalPages = pdf.internal.getNumberOfPages();
-      if (totalPages > 1) {
-        for (let i = 0; i < totalPages; i++) {
-          if (i) pdf.deletePage(i);
-        }
-      }
-    })
-    // .then((pdf: any) => {
-    //   console.log({ pdf });
-    //   return pdf;
-    //   // Get total pages and iterate in reverse order
-    //   const totalPages = pdf.internal.getNumberOfPages();
-    //   Array.from({ length: totalPages }, (_, i) => totalPages - i).forEach(
-    //     (pageNum) => {
-    //       pdf.setPage(pageNum);
-    //       const pageData = pdf.internal.getCurrentPageInfo();
-    //       const pageContent = pageData.pageContext?.text || [];
-    //       const hasContent = pageContent.length > 0;
-    //       const hasImages = pageData.pageContext?.images?.length > 0;
-    //       const isEmpty = !hasContent && !hasImages;
-
-    //       if (isEmpty) {
-    //         pdf.deletePage(pageNum);
-    //       }
-    //     }
-    //   );
-
-    //   // Ensure at least one page remains
-    //   if (pdf.internal.getNumberOfPages() === 0) {
-    //     pdf.addPage();
-    //   }
-    // })
-    .save();
+  await reactToPdf(element, options);
 };

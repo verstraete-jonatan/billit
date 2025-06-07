@@ -3,24 +3,6 @@ import { ReactNode } from "react";
 
 const infos: [string, string | ReactNode][] = [
   [
-    "File Size & Compression",
-    <>
-      <p>
-        Currently the file is is too large (blame pdf-js). Use online
-        converters.
-      </p>
-      <p>
-        Or if you want to be fast, secure and don't mind using a terminal. Us
-        the python package.
-      </p>
-
-      <code color="green">
-        gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 \ -dPDFSETTINGS=/ebook \
-        -dNOPAUSE -dQUIET -dBATCH \ -sOutputFile=output.pdf input.pdf
-      </code>
-    </>,
-  ],
-  [
     "Export",
     `go to "Create". Fill in all details. Press "Preview". Press "Export PDF".`,
   ],

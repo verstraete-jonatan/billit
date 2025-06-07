@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import createIndexedDBStorage from "./_indexedDBStorage";
 
-interface BillState {
+interface BillStore {
   bills: Bill[];
   addBill: (bill: Bill) => void;
   updateBillStatus: (id: string, status: Bill["status"]) => void;
@@ -9,7 +10,7 @@ interface BillState {
   updateBill: (bill: Bill) => void;
 }
 
-export const useBillStore = create<BillState>()(
+export const useBillStore = create<BillStore>()(
   persist(
     (set, get) => ({
       bills: [],
@@ -44,7 +45,8 @@ export const useBillStore = create<BillState>()(
     }),
     {
       name: "bill-storage",
-      storage: createJSONStorage(() => localStorage),
+      // storage: createJSONStorage(() => localStorage),
+      storage: createIndexedDBStorage<BillStore>(),
     }
   )
 );

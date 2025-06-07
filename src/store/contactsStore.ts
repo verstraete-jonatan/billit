@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import createIndexedDBStorage from "./_indexedDBStorage";
 
 interface ContactsState {
   contacts: Contact[];
@@ -37,7 +38,8 @@ export const useContactsStore = create<ContactsState>()(
     }),
     {
       name: "contacts-storage",
-      storage: createJSONStorage(() => localStorage),
+      // storage: createJSONStorage(() => localStorage),
+      storage: createIndexedDBStorage<ContactsState>(),
     }
   )
 );
