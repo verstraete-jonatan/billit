@@ -8,7 +8,7 @@ import { type Plugin } from "vite";
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
-  base: mode === "production" ? "/" : "/",
+  base: mode === "production" ? "/billit" : "/",
   resolve: {
     alias: {
       html2canvas: path.resolve(__dirname, "node_modules/html2canvas-pro"),
