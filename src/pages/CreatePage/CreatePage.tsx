@@ -38,17 +38,11 @@ import {
 
 import { useBillStore, useContacts } from "../../store";
 import { emptyUser, useUserStore } from "../../store/userStore";
-import {
-  formatBtwNumber,
-  formatIban,
-  useBeforeLeave,
-  validationMessage,
-} from "src/helpers";
+import { formatBtwNumber, formatIban, useBeforeLeave } from "src/helpers";
 
 import { Theme } from "src/themes";
 import { export2PDF } from "./helpers";
 import { StyledQrCode } from "src/components/StyledQrCode";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 const now = new Date();
 
