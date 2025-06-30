@@ -1,8 +1,8 @@
 {
   "name": "billit",
   "private": true,
-  "version": "0.1.16",
-  "homepage": "https://verstraete-jonatan.github.io/billit",
+  "version": "0.1.17",
+  "homepage": "https://verstraete-jonatan.github.io",
   "type": "module",
   "scripts": {
     "dev": "vite",
