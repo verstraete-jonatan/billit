@@ -467,7 +467,7 @@ export const CreateBill: React.FC = () => {
                                 onChange={(value) =>
                                   field.onChange(value?.toString())
                                 }
-                                minDate={now}
+                                // minDate={now}
                                 className="w-full"
                                 slotProps={{
                                   textField: {

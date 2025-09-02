@@ -1,7 +1,7 @@
 {
   "name": "billit",
   "private": true,
-  "version": "0.1.16",
+  "version": "0.1.17",
   "homepage": "https://verstraete-jonatan.github.io/billit",
   "type": "module",
   "scripts": {
