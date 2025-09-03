@@ -45,7 +45,7 @@ export const ContactsPage = () => {
     () =>
       Object.fromEntries(
         contacts.map((contact) => [
-          contact.id,
+          contact.email,
           Object.values(contact).join("").toLowerCase(),
         ])
       ),
@@ -54,8 +54,8 @@ export const ContactsPage = () => {
 
   const filteredContacts = useMemo(
     () =>
-      contacts.filter(({ id }) =>
-        contactSearchIndexes[id]?.includes(searchTerm)
+      contacts.filter(({ email }) =>
+        contactSearchIndexes[email]?.includes(searchTerm)
       ),
     [contacts, contactSearchIndexes, searchTerm]
   );
@@ -111,7 +111,7 @@ export const ContactsPage = () => {
         </TableHeader>
         <TableBody items={filteredContacts}>
           {(contact) => (
-            <TableRow key={contact.id}>
+            <TableRow key={contact.email}>
               <TableCell>{contact.name}</TableCell>
               <TableCell>{contact.address.city}</TableCell>
               <TableCell>{contact.btw}</TableCell>
@@ -171,7 +171,9 @@ export const ContactsPage = () => {
               contact={selectedContact}
               onCancel={onDeleteClose}
               onDelete={() => {
-                useContactsStore.getState().deleteContact(selectedContact.id);
+                useContactsStore
+                  .getState()
+                  .deleteContact(selectedContact.email);
                 onDeleteClose();
               }}
             />

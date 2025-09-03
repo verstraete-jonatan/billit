@@ -1,48 +1,38 @@
-import React, {
-  useState,
+import {
   useCallback,
-  memo,
   useRef,
-  useMemo,
   useEffect,
   MouseEventHandler,
+  PropsWithChildren,
+  useMemo,
 } from "react";
-import { useNavigate } from "react-router";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Button,
-  Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/react";
-import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
 import { Theme } from "src/themes";
-import { AppRoutes } from "src/Routes";
 
 type Coord = [number, number];
 
-const title = " Billit";
 const smoothingFactor = 0.9;
+let idleEventId = 0;
 
-const renderedTitle = title.split("").map((char, index) => (
-  <span key={`char-${index}-${char}`} className="char-shade">
-    {char}
-  </span>
-));
-
-export const Home: React.FC = () => {
+export const Home = ({
+  children,
+  title = "Billit",
+}: PropsWithChildren<{ title?: string }>) => {
   const titleRef = useRef<HTMLDivElement>(null);
 
-  const mousePositions = useRef<Coord[]>([[0, 0]]);
+  const renderedTitle = useMemo(
+    () =>
+      title.split("").map((char, index) => (
+        <span key={`char-${index}-${char}`} className="char-shade">
+          {char}
+        </span>
+      )),
+    []
+  );
+
+  const mousePositions = useRef<Coord[]>([
+    [window.outerWidth / 2, window.outerHeight / 2],
+  ]);
   const toBeShadedOrNotToBeShaded = useRef<Array<[Element, DOMRect]>>([]);
 
   const smoothMousePosition = useCallback((): Coord => {
@@ -112,9 +102,56 @@ export const Home: React.FC = () => {
     [mousePositions, toBeShadedOrNotToBeShaded, drawShadows]
   );
 
+  const onTextHover: MouseEventHandler<any> = useCallback(
+    (e) => {
+      window.clearTimeout(idleEventId);
+      window.cancelAnimationFrame(idleEventId);
+
+      onDraw(e);
+      startIdle();
+    },
+    [toBeShadedOrNotToBeShaded.current]
+  );
+
+  const idleHover = useCallback(() => {
+    if (!toBeShadedOrNotToBeShaded.current.length || !titleRef.current) {
+      return;
+    }
+    let i = 0;
+    const rect = titleRef.current.getBoundingClientRect();
+    const loopSpeed = 0.001;
+    const radiusX = rect.width / 2;
+    const radiusY = rect.height / 2;
+
+    let [cx, cy] = smoothMousePosition();
+    if (!cx) {
+      cx = rect.x + radiusX;
+      cy = rect.y + radiusY;
+    }
+
+    const loop = () => {
+      const angle = performance.now() * loopSpeed;
+      const angle2 = performance.now() * (loopSpeed / 100);
+
+      const x = cx + radiusX * Math.cos(angle) * Math.sin(angle2);
+      const y = cy + radiusY * Math.sin(angle) * Math.cos(angle2);
+
+      onDraw({ clientX: x, clientY: y } as any);
+      idleEventId = requestAnimationFrame(loop);
+    };
+
+    idleEventId = requestAnimationFrame(loop);
+  }, [titleRef.current, smoothMousePosition]);
+
+  const startIdle = () => {
+    window.clearTimeout(idleEventId);
+    window.cancelAnimationFrame(idleEventId);
+    idleEventId = window.setTimeout(idleHover, 500);
+  };
+
   useEffect(() => {
     if (titleRef.current) {
-      // get all the exact coordinates of the char element
+      // get all the exact coordinates of the char elementzz
       toBeShadedOrNotToBeShaded.current = [
         ...titleRef.current.getElementsByClassName("char-shade"),
       ].map<[Element, DOMRect]>(
@@ -122,23 +159,28 @@ export const Home: React.FC = () => {
           [charElm, charElm.getBoundingClientRect()] as [Element, DOMRect]
       );
     }
-  }, []);
+    startIdle();
+  }, [renderedTitle]);
 
   return (
     <Theme className="h-full w-full" isDarkMode={true}>
       <div
         className="w-ful h-full items-center flex justify-center"
-        onMouseMove={onDraw}
+        onMouseEnter={startIdle}
+        onMouseMove={onTextHover}
       >
-        <div
-          ref={titleRef}
-          className="font-black font-title"
-          style={{
-            letterSpacing: 18,
-            fontSize: 160,
-          }}
-        >
-          {renderedTitle}
+        <div className="flex flex-col justify-center items-center">
+          <div
+            ref={titleRef}
+            className="font-black font-title text-[#fff9] stroke-2 stroke-red"
+            style={{
+              letterSpacing: 18,
+              fontSize: 160,
+            }}
+          >
+            {renderedTitle}
+          </div>
+          {children}
         </div>
       </div>
     </Theme>

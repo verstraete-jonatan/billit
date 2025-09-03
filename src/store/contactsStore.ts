@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import createIndexedDBStorage from "./_indexedDBStorage";
+import { createSyncStorage } from "./_storageSync";
 
 interface ContactsState {
   contacts: Contact[];
@@ -25,21 +25,21 @@ export const useContactsStore = create<ContactsState>()(
         set((state) => ({
           contacts: sorted(
             state.contacts.map((contact) =>
-              contact.id === updatedContact.id ? updatedContact : contact
+              contact.email === updatedContact.email ? updatedContact : contact
             )
           ),
         }));
       },
       deleteContact: (id) => {
         set((state) => ({
-          contacts: state.contacts.filter((contact) => contact.id !== id),
+          contacts: state.contacts.filter((contact) => contact.email !== id),
         }));
       },
     }),
     {
       name: "contacts-storage",
       // storage: createJSONStorage(() => localStorage),
-      storage: createIndexedDBStorage<ContactsState>(),
+      storage: createSyncStorage<ContactsState>(),
     }
   )
 );

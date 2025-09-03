@@ -4,6 +4,10 @@
   "version": "0.1.17",
   "homepage": "https://verstraete-jonatan.github.io/billit",
   "type": "module",
+  "hosting": {
+    "site": "billit247",
+    "public": "public"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -15,6 +19,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@firebase/firestore": "^4.9.1",
     "@headlessui/react": "^2.2.2",
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.8.0-beta.2",
@@ -24,6 +29,8 @@
     "@types/culori": "^4.0.0",
     "culori": "^4.0.1",
     "date-fns": "^4.1.0",
+    "firebase": "^12.2.1",
+    "firebase-tools": "^14.15.1",
     "framer-motion": "^12.16.0",
     "html2canvas-pro": "^1.5.11",
     "iban-ts": "^0.10.0",

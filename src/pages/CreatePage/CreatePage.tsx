@@ -138,7 +138,7 @@ export const CreateBill: React.FC = () => {
   );
   const totalInclBtw = totalExclBtw + totalBtw;
   const selectedContact = formValues.contact
-    ? contacts.find((c) => c.id === formValues.contact?.id)
+    ? contacts.find((c) => c.email === formValues.contact.email)
     : undefined;
 
   const onSave = useCallback(
@@ -411,17 +411,15 @@ export const CreateBill: React.FC = () => {
                         render={({ field }) => (
                           <Select
                             {...field}
-                            value={field.value?.id}
-                            defaultSelectedKeys={[
-                              field.value ? field.value?.id.toString() : "",
-                            ]}
+                            value={field.value?.email ?? ""}
+                            defaultSelectedKeys={[field.value?.email ?? ""]}
                             isRequired
                             label="Contact"
                             placeholder="Select a contact"
                             // value={field.value}
                             onChange={(e) =>
                               field.onChange(
-                                contacts.find((i) => i.id === e.target.value)
+                                contacts.find((i) => i.email === e.target.value)
                               )
                             }
                             isInvalid={!!errors.contact}
@@ -429,7 +427,7 @@ export const CreateBill: React.FC = () => {
                             disallowEmptySelection
                           >
                             {contacts.map((contact) => (
-                              <SelectItem key={contact.id}>
+                              <SelectItem key={contact.email}>
                                 {contact.name}
                               </SelectItem>
                             ))}

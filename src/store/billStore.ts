@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import createIndexedDBStorage from "./_indexedDBStorage";
+import { createSyncStorage } from "./_storageSync";
 
 interface BillStore {
   bills: Bill[];
@@ -46,7 +46,7 @@ export const useBillStore = create<BillStore>()(
     {
       name: "bill-storage",
       // storage: createJSONStorage(() => localStorage),
-      storage: createIndexedDBStorage<BillStore>(),
+      storage: createSyncStorage<BillStore>(),
     }
   )
 );

@@ -12,6 +12,8 @@ import { AppRoutes } from "./Routes";
 import { Theme } from "./themes";
 
 import "./index.css";
+import { AuthProvider } from "./providers/AuthProvider";
+import { SyncStorageProvider } from "./providers/StorageSyncProvider";
 
 const App = () => {
   return (
@@ -19,20 +21,24 @@ const App = () => {
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <HeroUIProvider locale="en-US">
           <ToastProvider />
-          <Theme showGradient>
-            <div
-              className={`flex h-screen w-screen ${
-                // "bg-radial-[at_25%_25%] from-[#010002] to-[#222] to-75%"
-                // "bg-radial-[at_95%_25%] to-[#050108] from-[#121417] to-70%"
-                ""
-              }`}
-            >
-              <Sidebar />
-              <div className="flex-grow">
-                <AppRoutes />
-              </div>
-            </div>
-          </Theme>
+          <AuthProvider>
+            <SyncStorageProvider>
+              <Theme showGradient>
+                <div
+                  className={`flex h-screen w-screen ${
+                    // "bg-radial-[at_25%_25%] from-[#010002] to-[#222] to-75%"
+                    // "bg-radial-[at_95%_25%] to-[#050108] from-[#121417] to-70%"
+                    ""
+                  }`}
+                >
+                  <Sidebar />
+                  <div className="flex-grow">
+                    <AppRoutes />
+                  </div>
+                </div>
+              </Theme>
+            </SyncStorageProvider>
+          </AuthProvider>
         </HeroUIProvider>
       </LocalizationProvider>
     </HashRouter>

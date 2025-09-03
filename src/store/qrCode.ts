@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { createIndexedDBStorage } from "./_indexedDBStorage";
-// import { dummy_settings } from "./_dummy";
+import { createSyncStorage } from "./_storageSync";
 
 interface QrStore {
   settings: QrCodeSettings;
@@ -21,7 +20,7 @@ export const useQrStore = create<QrStore>()(
     {
       name: "qr-code-storage",
       // storage: createJSONStorage(() => localStorage),
-      storage: createIndexedDBStorage<QrStore>(),
+      storage: createSyncStorage<QrStore>(),
     }
   )
 );

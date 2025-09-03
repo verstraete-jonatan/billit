@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import createIndexedDBStorage from "./_indexedDBStorage";
+import { createSyncStorage } from "./_storageSync";
 
 interface UserStore {
   user: User;
@@ -8,11 +8,11 @@ interface UserStore {
 }
 
 export const emptyUser: User = {
+  email: "",
   logo: "",
   voorwaardedenUrl: "",
   structuredMessage: "",
   darkMode: true,
-  id: "",
   name: "",
   address: {
     street: "",
@@ -34,7 +34,7 @@ export const useUserStore = create<UserStore>()(
     {
       name: "user-storage",
       // storage: createJSONStorage(() => localStorage),
-      storage: createIndexedDBStorage<UserStore>(),
+      storage: createSyncStorage<UserStore>(),
     }
   )
 );

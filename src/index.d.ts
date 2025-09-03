@@ -11,20 +11,17 @@ declare global {
   };
 
   interface Contact {
-    id: string;
     name: string;
     address: Address;
     btw: string;
     iban: string;
-    email?: string;
+    email: string;
   }
 
   interface User extends Contact {
     logo: string; // Base64 string for the logo image
-
     voorwaardedenUrl: string;
     structuredMessage: string;
-
     darkMode?: boolean;
   }
 

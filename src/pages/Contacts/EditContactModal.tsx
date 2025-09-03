@@ -11,15 +11,7 @@ import { useContactsStore } from "../../store/contactsStore";
 import { formatBtwNumber, formatIban, validationCity } from "src/helpers";
 
 // Form type for the contact
-type ContactForm = {
-  name: string;
-  street: string;
-  houseNumber: string;
-  city: string;
-  country: string;
-  btw: string;
-  iban: string;
-};
+type ContactForm = Omit<Contact, "address"> & Contact["address"];
 
 export const EditContactModal = ({
   contact,
@@ -28,7 +20,7 @@ export const EditContactModal = ({
   contact: Contact | null;
   onClose: () => void;
 }) => {
-  const { addContact, updateContact } = useContactsStore();
+  const { addContact, updateContact, contacts } = useContactsStore();
 
   const {
     control,
@@ -36,6 +28,7 @@ export const EditContactModal = ({
     formState: { errors },
   } = useForm<ContactForm>({
     defaultValues: {
+      email: contact?.email ?? "",
       name: contact?.name || "",
       street: contact?.address?.street || "",
       houseNumber: contact?.address?.houseNumber || "",
@@ -50,7 +43,7 @@ export const EditContactModal = ({
   const onSubmit = useCallback(
     (data: ContactForm) => {
       const formattedData: Contact = {
-        id: contact?.id || Date.now().toString(),
+        email: data.email,
         name: data.name,
         iban: formatIban(data.iban),
         address: {
@@ -67,11 +60,32 @@ export const EditContactModal = ({
     [contact, addContact, updateContact, onClose]
   );
 
+  const validateUniqueEmail = (n?: string): string | true => {
+    if (contacts.find(({ email }) => email === n)) {
+      return "Email already in use, try another (can be anything really).";
+    }
+
+    return true;
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="text-white bg_modal">
       <ModalHeader>{contact ? "Edit Contact" : "Add Contact"}</ModalHeader>
       <ModalBody className="p-6">
         <div className="grid gap-4">
+          <Controller
+            name="email"
+            control={control}
+            rules={{ required: "Required", validate: validateUniqueEmail }}
+            render={({ field }) => (
+              <Input
+                label="Email (unique)"
+                {...field}
+                isInvalid={!!errors.email}
+                errorMessage={errors.email?.message}
+              />
+            )}
+          />
           <Controller
             name="name"
             control={control}
