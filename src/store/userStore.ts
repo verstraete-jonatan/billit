@@ -9,7 +9,6 @@ interface UserStore {
 
 export const emptyUser: User = {
   email: "",
-  logo: "",
   voorwaardedenUrl: "",
   structuredMessage: "",
   darkMode: true,
