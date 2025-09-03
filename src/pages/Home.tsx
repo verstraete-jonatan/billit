@@ -117,9 +117,8 @@ export const Home = ({
     if (!toBeShadedOrNotToBeShaded.current.length || !titleRef.current) {
       return;
     }
-    let i = 0;
     const rect = titleRef.current.getBoundingClientRect();
-    const loopSpeed = 0.001;
+    const loopSpeed = 0.01;
     const radiusX = rect.width / 2;
     const radiusY = rect.height / 2;
 
@@ -129,15 +128,17 @@ export const Home = ({
       cy = rect.y + radiusY;
     }
 
+    let i = 0;
     const loop = () => {
-      const angle = performance.now() * loopSpeed;
-      const angle2 = performance.now() * (loopSpeed / 100);
+      const angle = i * loopSpeed;
+      const angle2 = (i * loopSpeed) / 100;
 
-      const x = cx + radiusX * Math.cos(angle) * Math.sin(angle2);
-      const y = cy + radiusY * Math.sin(angle) * Math.cos(angle2);
+      const x = cx + radiusX * Math.cos(angle) * Math.sinh(angle2);
+      const y = cy + radiusY * Math.sin(angle) * Math.cosh(angle2);
 
       onDraw({ clientX: x, clientY: y } as any);
       idleEventId = requestAnimationFrame(loop);
+      i++;
     };
 
     idleEventId = requestAnimationFrame(loop);
@@ -146,7 +147,7 @@ export const Home = ({
   const startIdle = () => {
     window.clearTimeout(idleEventId);
     window.cancelAnimationFrame(idleEventId);
-    idleEventId = window.setTimeout(idleHover, 500);
+    idleEventId = window.setTimeout(idleHover, 100);
   };
 
   useEffect(() => {
@@ -166,7 +167,6 @@ export const Home = ({
     <Theme className="h-full w-full" isDarkMode={true}>
       <div
         className="w-ful h-full items-center flex justify-center"
-        onMouseEnter={startIdle}
         onMouseMove={onTextHover}
       >
         <div className="flex flex-col justify-center items-center">

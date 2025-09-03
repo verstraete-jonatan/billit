@@ -7,6 +7,7 @@ import {
   validationCity,
   validationMessage,
 } from "src/helpers";
+import { useImagine } from "src/utils/useImagine";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface EditUserModalProps {
 
 export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   const { user, setUser } = useUserStore();
+  const { images, uploadImg } = useImagine();
 
   const {
     control,
@@ -30,15 +32,11 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUser({ ...user, logo: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      uploadImg(file, "logo");
     }
   };
 
-  const onSubmit = ({ logo, ...data }: User) => {
+  const onSubmit = (data: User) => {
     setUser({ ...user, ...data });
     onClose();
   };
@@ -241,7 +239,7 @@ export const EditUserModal = ({ isOpen, onClose }: EditUserModalProps) => {
               color="secondary"
             />
             <img
-              src={user?.logo}
+              src={images["logo"] || undefined}
               alt="Logo Preview"
               className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
             />

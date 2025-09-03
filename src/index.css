@@ -91,3 +91,93 @@ html {
 }
 
 /* "linear-gradient(90deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 15, 1) 13%, rgba(2, 0, 10, 1) 35%, rgba(0, 0, 10, 1) 67%, rgba(4, 0, 10, 1) 85%, rgba(0, 0, 0, 1) 100%)", */
+
+.circle_effect {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 0 20px 20px rgba(0, 0, 0, 0.192);
+}
+
+.circle_effect img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: top;
+  border-radius: inherit;
+}
+
+.circle_effect::before,
+.circle_effect::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  inset: -5px;
+  border-radius: inherit;
+  background-image: conic-gradient(#03669c, #03286d, #020029, #03669c);
+  /* animation-timing-function: ease-out; */
+}
+
+.circle_effect::after {
+  filter: blur(1rem);
+  opacity: 0.7;
+}
+
+/* .circle_effect:hover::before,
+.circle_effect:hover::after {
+  animation-play-state: paused;
+} */
+
+@keyframes circle_effect_rotate {
+  0% {
+    rotate: 0deg;
+    background-image: conic-gradient(#00fbff, #b723b9, #180c43);
+  }
+  /* 50% {
+    rotate: 720deg;
+    background-image: conic-gradient(#32fcff, #fc50ff, #43ecee);
+  } */
+  100% {
+    rotate: 360deg;
+    background-image: conic-gradient(#00fbff, #b723b9, #180c43);
+  }
+}
+
+@keyframes circle_effect_idle {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes circle_splash {
+  0% {
+    filter: brightness(1);
+  }
+  80% {
+    filter: brightness(5);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.circle_effect.effect_idle.has_changes::before,
+.circle_effect.effect_idle.has_changes::after {
+  background-image: conic-gradient(#9c0312, #62036d, #640d4b, #9c0312);
+  inset: -8px;
+}
+
+.circle_effect.effect_idle::before,
+.circle_effect.effect_idle::after {
+  animation: circle_effect_idle 8s linear infinite;
+}
+
+.circle_effect.effect_loading:before,
+.circle_effect.effect_loading::after {
+  animation: circle_effect_rotate 0.5s linear infinite;
+}
+
+.circle_effect.effect_idle {
+  animation: circle_splash 1.5s ease-out forwards;
+}

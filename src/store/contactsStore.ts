@@ -4,7 +4,6 @@ import { createSyncStorage } from "./_storageSync";
 
 interface ContactsState {
   contacts: Contact[];
-  loading: boolean;
   addContact: (contact: Contact) => void;
   updateContact: (contact: Contact) => void;
   deleteContact: (id: string) => void;
@@ -17,7 +16,6 @@ export const useContactsStore = create<ContactsState>()(
   persist(
     (set, get) => ({
       contacts: [],
-      loading: false,
       addContact: (contact) => {
         set((state) => ({ contacts: [...state.contacts, contact] }));
       },

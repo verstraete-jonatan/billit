@@ -6,26 +6,27 @@ import { EditUserModal } from "./EditUserModal";
 import { navItems } from "src/Routes";
 import {
   ArrowLeftStartOnRectangleIcon,
-  EyeIcon,
   MoonIcon,
   SunIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
 import { useUserStore } from "src/store";
 import { useNav } from "src/utils/useNav";
-import logo from "../assets/logo.png";
+import logoSrc from "../assets/logo.png";
 import { useContext } from "react";
 import { AuthContext } from "src/providers/AuthProvider";
+import { useSyncStorage } from "src/providers/StorageSyncProvider";
 
 export const Sidebar = () => {
   const location = useLocation();
-  const nav = useNav();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { logOut } = useContext(AuthContext);
 
   const { user, setUser } = useUserStore();
 
-  const isDarkMode = user.darkMode;
+  const isDarkMode = !!user.darkMode;
+
+  const logoClick = () => {};
 
   return (
     <aside
@@ -37,19 +38,7 @@ export const Sidebar = () => {
     >
       <nav>
         <div className="p-6 mb-10">
-          <div
-            className="flex items-center justify-center cursor-pointer"
-            onClick={() => nav("home")}
-          >
-            <img
-              src={logo}
-              alt="App Logo"
-              className={`h-15 w-full object-contain`}
-              style={{
-                filter: isDarkMode ? "invert(1)" : "",
-              }}
-            />
-          </div>
+          <FancySync isDarkMode={isDarkMode} />
         </div>
         {navItems.map((item) => {
           const isActive = location.pathname.includes(item.path);
@@ -118,5 +107,49 @@ export const Sidebar = () => {
         </div>
       </nav>
     </aside>
+  );
+};
+
+const FancySync = ({ isDarkMode }: { isDarkMode: boolean }) => {
+  const { status, syncNow } = useSyncStorage();
+  const nav = useNav();
+
+  const onLogoClick = () => {
+    syncNow();
+    // if (window.location.href.includes("home")) {
+    //   syncNow();
+    // } else {
+    //   nav("home");
+    // }
+  };
+
+  const isSyncing = status === "loading";
+
+  return (
+    <div className="z-10 w-full flex items-center flex-col">
+      <div
+        className={`w-20 h-20 rounded-full cursor-pointer circle_effect ${
+          isSyncing ? "effect_loading" : "effect_idle"
+        }`}
+        onClick={onLogoClick}
+      >
+        <img
+          src={logoSrc}
+          alt="Logo"
+          className="w-full h-full object-cover rounded-full"
+          style={{
+            filter: isDarkMode ? "invert(1)" : "",
+          }}
+          title="Click to sync changes"
+        />
+      </div>
+      <p
+        className={`italic w-full text-center text-xs mt-5 ${
+          isSyncing ? "opacity-50" : "opacity-0"
+        } transition-opacity`}
+      >
+        Syncing changes..
+      </p>
+    </div>
   );
 };

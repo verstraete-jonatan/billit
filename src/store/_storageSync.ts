@@ -72,15 +72,15 @@ const createIndexedDBStorage = <T>(): PersistStorage<T> => ({
 });
 
 // Migration utility to move data from localStorage to IndexedDB
-for (const [key, value] of Object.entries(localStorage)) {
-  if (value) {
-    set(key, value)
-      .then(() => {
-        console.log(`Migrated ${key} from localStorage to IndexedDB`);
-        localStorage.removeItem(key);
-      })
-      .catch((e) => console.error(`Migration error for ${key}:`, e));
-  }
-}
+// for (const [key, value] of Object.entries(localStorage)) {
+//   if (value) {
+//     set(key, value)
+//       .then(() => {
+//         console.log(`Migrated ${key} from localStorage to IndexedDB`);
+//         localStorage.removeItem(key);
+//       })
+//       .catch((e) => console.error(`Migration error for ${key}:`, e));
+//   }
+// }
 
 export const createSyncStorage = createIndexedDBStorage;

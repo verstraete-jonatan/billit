@@ -38,11 +38,13 @@ import {
 
 import { useBillStore, useContacts } from "../../store";
 import { emptyUser, useUserStore } from "../../store/userStore";
-import { formatBtwNumber, formatIban, useBeforeLeave } from "src/helpers";
+import { formatBtwNumber, formatIban, useBeforeLeave } from "../../helpers";
 
 import { Theme } from "src/themes";
 import { export2PDF } from "./helpers";
 import { StyledQrCode } from "src/components/StyledQrCode";
+import { BookmarkSquareIcon } from "@heroicons/react/24/outline";
+import { useImagine } from "src/utils/useImagine";
 
 const now = new Date();
 
@@ -68,6 +70,7 @@ export const CreateBill: React.FC = () => {
   const contacts = useContacts();
   const { user } = useUserStore();
   const { updateBill, bills } = useBillStore();
+  const { images } = useImagine();
 
   const billId = useRef(generateBillId());
   const existingBill = useMemo(
@@ -81,6 +84,7 @@ export const CreateBill: React.FC = () => {
     watch,
     setFocus,
     formState: { errors, isValid, isDirty },
+    reset,
   } = useForm<Bill>({
     mode: "onChange",
     shouldFocusError: true,
@@ -121,7 +125,7 @@ export const CreateBill: React.FC = () => {
           setFocus(name as any, { shouldSelect: true });
         }
       }
-      console.log({ ref });
+      // console.log({ ref });
     } catch (e) {
       console.info(e);
     }
@@ -160,6 +164,7 @@ export const CreateBill: React.FC = () => {
           ...formValues,
           // contact: { ...selectedContact },
         });
+        reset(undefined, { keepValues: true });
       } catch (error: any) {
         addToast({
           color: "danger",
@@ -175,8 +180,8 @@ export const CreateBill: React.FC = () => {
 
   const handleExport = useCallback(async () => {
     setIsEditing(false);
-
     setExporting(true);
+    // required for screenshot/print-pfd
     document.getElementById("bill-content")?.scrollTo({ top: 0 });
 
     setTimeout(async () => {
@@ -388,7 +393,7 @@ export const CreateBill: React.FC = () => {
                 <div className="w-full flex justify-between items-end relative mb-5">
                   {/* <div className="max-w-[200px] overflow-hidden mb-5 h-24 flex items-center justify-center"> */}
                   <Image
-                    src={user.logo}
+                    src={images["logo"] || undefined}
                     alt="Logo"
                     className="w-auto mb-5 h-24"
                     // className="h-full w-auto mb-5 h-24 "
@@ -775,53 +780,56 @@ export const CreateBill: React.FC = () => {
             <h2 className="text-2xl font-bold">
               Bill {formValues.date ? " - " + formatDate(formValues.date) : ""}
             </h2>
-            <Button
-              color="primary"
-              onPress={() => setIsEditing(!isEditing)}
-              isDisabled={isExporting}
-              startContent={
-                isEditing ? (
-                  <EyeIcon className="h-auto w-5" />
-                ) : (
-                  <PencilIcon className="h-auto w-5" />
-                )
-              }
-            >
-              {isEditing ? "Preview" : "Edit"}
-            </Button>
+            <div className="flex flex-col gap-1 *:rounded-md">
+              <Button
+                color="primary"
+                onPress={onSubmit(() => onSave(false))}
+                isDisabled={!isDirty}
+                isLoading={isExporting}
+                startContent={<BookmarkSquareIcon className="h-auto w-5" />}
+                preventFocusOnPress
+              >
+                Save
+              </Button>
 
-            <Button
-              color="success"
-              onPress={onSubmit(handleExport)}
-              startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
-              isLoading={isExporting}
-              preventFocusOnPress
-              isDisabled={!isValid && !isEditing}
-            >
-              Export PDF
-            </Button>
-            {!isEditing && !isValid && (
-              <p className="text-xs italic text-[#f33] py-2">
-                Can't export - some details are missing
-              </p>
-            )}
+              <Button
+                color="primary"
+                variant="bordered"
+                onPress={() => setIsEditing(!isEditing)}
+                isDisabled={isExporting}
+                startContent={
+                  isEditing ? (
+                    <EyeIcon className="h-auto w-5" />
+                  ) : (
+                    <PencilIcon className="h-auto w-5" />
+                  )
+                }
+              >
+                {isEditing ? "Preview" : "Edit"}
+              </Button>
 
-            {/* <Button
-              color="primary"
-              variant="bordered"
-              onPress={onSubmit(() => onSave(false))}
-              isLoading={isExporting}
-              startContent={<ArrowUpIcon className="h-auto w-5" />}
-              preventFocusOnPress
-            >
-              Save
-            </Button> */}
+              <Button
+                color="success"
+                onPress={onSubmit(handleExport)}
+                startContent={<ArrowDownTrayIcon className="h-auto w-5" />}
+                isLoading={isExporting}
+                preventFocusOnPress
+                isDisabled={!isValid && !isEditing}
+              >
+                Export PDF
+              </Button>
+              {!isEditing && !isValid && (
+                <p className="text-xs italic text-[#f33] py-2">
+                  Can't export - some details are missing
+                </p>
+              )}
+            </div>
           </div>
-          <div className="italic text-xs font-mono text-center mt-2">
+          {/* <div className="italic text-xs font-mono text-center mt-2">
             {isEditing
               ? "Changes are saved automatically"
               : " True size display A4 (210mm x 297mm)"}
-          </div>
+          </div> */}
         </div>
       </div>
     </Theme>

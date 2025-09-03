@@ -1,6 +1,7 @@
 import { isValid as isIbanValid, toBBAN, printFormat } from "iban-ts";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { createSyncStorage } from "./store/_storageSync";
 
 // type Fn = {
 //   validate: (i: string)=> boolean | string | void
@@ -122,7 +123,6 @@ export const useBeforeLeave = (isDirty: boolean, onSave: () => void) => {
     return () => {
       // Only save if form is dirty at unmount
       if (isDirtyRef.current) {
-        console.log("saving..");
         onSaveRef.current();
       }
     };
@@ -144,3 +144,14 @@ export function useDebounce<T>(value: T, delay: number = 350) {
 
   return debouncedValue;
 }
+
+export const localUserImage = {
+  key: "user-image",
+  db: createSyncStorage<string>(),
+  get() {
+    return this.db.getItem(this.key);
+  },
+  set(img: string) {
+    return this.db.setItem(this.key, img as any);
+  },
+};

@@ -20,10 +20,10 @@ const App = () => {
     <HashRouter>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <HeroUIProvider locale="en-US">
-          <ToastProvider />
-          <AuthProvider>
-            <SyncStorageProvider>
-              <Theme showGradient>
+          <Theme showGradient>
+            <ToastProvider />
+            <AuthProvider>
+              <SyncStorageProvider>
                 <div
                   className={`flex h-screen w-screen ${
                     // "bg-radial-[at_25%_25%] from-[#010002] to-[#222] to-75%"
@@ -36,9 +36,9 @@ const App = () => {
                     <AppRoutes />
                   </div>
                 </div>
-              </Theme>
-            </SyncStorageProvider>
-          </AuthProvider>
+              </SyncStorageProvider>
+            </AuthProvider>
+          </Theme>
         </HeroUIProvider>
       </LocalizationProvider>
     </HashRouter>
@@ -46,7 +46,7 @@ const App = () => {
 };
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  // <React.StrictMode>
+  <App />
+  // </React.StrictMode>
 );

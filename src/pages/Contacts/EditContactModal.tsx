@@ -135,7 +135,7 @@ export const EditContactModal = ({
             render={({ field }) => (
               <Input
                 {...field}
-                label="Postal code, City name (9000, Gent)"
+                label="City: postal code AND City name 'eg. 9000, Gent'"
                 onChange={field.onChange}
                 onBlur={validationCity.onBlur(field.onChange)}
                 isInvalid={!!errors.city}

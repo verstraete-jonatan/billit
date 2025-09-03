@@ -19,7 +19,6 @@ declare global {
   }
 
   interface User extends Contact {
-    logo: string; // Base64 string for the logo image
     voorwaardedenUrl: string;
     structuredMessage: string;
     darkMode?: boolean;

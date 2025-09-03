@@ -8,9 +8,12 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { app } from "../utils/firebase"; // assumes you have firebase initialized in firebase.ts
-import { Login } from "src/pages/Auth/Login";
-import { addToast } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
+
+import { app } from "../utils/firebase";
+
+import imgGoogle from "../assets/google.png";
+import { Home } from "../pages/Home";
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -79,7 +82,25 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider value={authValue}>
-      <Login>{children}</Login>
+      {user ? (
+        children
+      ) : (
+        <div className="w-screen h-screen">
+          <Home title={loading ? "Loading.." : "Billit"}>
+            <Button
+              color="primary"
+              onPress={signInWithGoogle}
+              disabled={!signInWithGoogle}
+              isLoading={loading}
+              size="lg"
+              className="w-fit"
+            >
+              Login with google
+              <img src={imgGoogle} className="w-8 h-8" />
+            </Button>
+          </Home>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

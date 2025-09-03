@@ -38,7 +38,7 @@ export const BillsOverview: React.FC = memo(() => {
   const [billToDelete, setBillToDelete] = useState<string | null>(null);
 
   const bills = useBills();
-  const navigate = useNav();
+  const nav = useNav();
   const deleteBill = useDeleteBill();
   const updateBillStatus = useUpdateBillStatus();
 
@@ -120,7 +120,7 @@ export const BillsOverview: React.FC = memo(() => {
             variant="solid"
             color="primary"
             startContent={<PlusIcon className="h-5 w-5" />}
-            onPress={() => navigate("create")}
+            onPress={() => nav("/create")}
           >
             Create Bill
           </Button>
@@ -184,7 +184,7 @@ export const BillsOverview: React.FC = memo(() => {
                     variant="ghost"
                     color="primary"
                     isDisabled={bill.status !== "DRAFT"}
-                    onPress={() => navigate(`/create/${bill.id}`)}
+                    onPress={() => nav(`/create/${bill.id}`)}
                   >
                     Edit
                   </Button>

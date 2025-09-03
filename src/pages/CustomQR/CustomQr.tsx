@@ -6,6 +6,7 @@ import { Input, Select, SelectItem, Switch } from "@heroui/react";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useQrStore } from "src/store/qrCode";
 import { StyledQrCode } from "src/components/StyledQrCode";
+import { useImagine } from "src/utils/useImagine";
 
 const qrStyles: Array<QrCodeSettings["qrStyle"]> = ["dots", "fluid", "squares"];
 const colors = ["black", "white", "grey", "transparent"];
@@ -13,16 +14,13 @@ const colors = ["black", "white", "grey", "transparent"];
 export const CustomQr = () => {
   const { user, setUser } = useUserStore();
   const { settings, updateSettings } = useQrStore();
+  const { images, uploadImg } = useImagine();
 
   const handleLogoChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setUser({ ...(user ?? {}), logo: reader.result as string });
-        };
-        reader.readAsDataURL(file);
+        uploadImg(file, "logo");
       }
     },
     [user]
@@ -108,7 +106,7 @@ export const CustomQr = () => {
                 onChange={handleLogoChange}
               />
               <img
-                src={user?.logo}
+                src={images["logo"] || undefined}
                 alt="Logo Preview"
                 className="h-16 w-16 object-contain mt-2 rounded-lg border border-gray-600"
               />
