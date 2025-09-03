@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "deploy-gh": "yarn build --mode production && gh-pages -d dist",
     "deploy": "firebase deploy --only hosting",
-    "pre-deploy": "yarn build"
+    "pre-deploy2": "yarn build",
+    "pre-deploy": "echo 'ok'"
   },
   "types": "./src/*",
   "dependencies": {
